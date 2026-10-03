@@ -173,29 +173,29 @@ const UnderstandMode = ({ cards, topic, onExit, onOpenImport }) => {
     const currentBlindspot = mythBusters[currentBlindspotIdx];
 
     return (
-        <div className="w-full max-w-5xl h-full flex flex-col p-4 overflow-y-auto custom-scrollbar">
+        <div className="w-full max-w-5xl h-full flex flex-col p-2.5 sm:p-4 md:p-6 overflow-y-auto custom-scrollbar">
             {/* 頂部心智推演標題列 */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 bg-gray-900/70 p-4 rounded-2xl border border-gray-800 backdrop-blur">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4 mb-4 sm:mb-6 bg-gray-900/70 p-3.5 sm:p-4 rounded-2xl border border-gray-800 backdrop-blur">
                 <div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                         <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-purple-500/20 text-purple-300 border border-purple-500/30">
                             心智模型推演工作台
                         </span>
-                        <h2 className="text-xl font-bold text-white tracking-wide">
+                        <h2 className="text-lg sm:text-xl font-bold text-white tracking-wide">
                             {topic === "All" ? "全庫綜合心智推演" : topic}
                         </h2>
                     </div>
-                    <p className="text-xs text-gray-400 mt-1">
+                    <p className="text-xs text-gray-400 mt-1 hidden sm:block">
                         徹底拒絕無腦刷題，專注於「因果骨牌連鎖」、「干擾模擬」與「蘇格拉底探究」
                     </p>
                 </div>
 
-                {/* 模式切換按鈕 */}
-                <div className="flex items-center bg-gray-800/90 p-1 rounded-xl border border-gray-700/60 flex-wrap">
+                {/* 模式切換按鈕 (行動端支援順暢橫向滑動) */}
+                <div className="flex items-center bg-gray-800/90 p-1 rounded-xl border border-gray-700/60 overflow-x-auto no-scrollbar flex-nowrap w-full md:w-auto shrink-0">
                     {mechanismChains.length > 0 && (
                         <button
                             onClick={() => { setSubMode('chain'); setIsPerturbationApplied(false); }}
-                            className={`px-3.5 py-2 rounded-lg text-xs md:text-sm font-bold transition-all flex items-center gap-1.5 ${
+                            className={`px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 whitespace-nowrap ${
                                 subMode === 'chain' ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md' : 'text-gray-400 hover:text-white'
                             }`}
                         >
@@ -206,7 +206,7 @@ const UnderstandMode = ({ cards, topic, onExit, onOpenImport }) => {
                     {socraticQuestions.length > 0 && (
                         <button
                             onClick={() => { setSubMode('socratic'); setRevealedHintCount(0); setShowSocraticInsight(false); }}
-                            className={`px-3.5 py-2 rounded-lg text-xs md:text-sm font-bold transition-all flex items-center gap-1.5 ${
+                            className={`px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 whitespace-nowrap ${
                                 subMode === 'socratic' ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md' : 'text-gray-400 hover:text-white'
                             }`}
                         >
@@ -217,18 +217,18 @@ const UnderstandMode = ({ cards, topic, onExit, onOpenImport }) => {
                     {mythBusters.length > 0 && (
                         <button
                             onClick={() => setSubMode('blindspot')}
-                            className={`px-3.5 py-2 rounded-lg text-xs md:text-sm font-bold transition-all flex items-center gap-1.5 ${
+                            className={`px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 whitespace-nowrap ${
                                 subMode === 'blindspot' ? 'bg-purple-600 text-white shadow-md' : 'text-gray-400 hover:text-white'
                             }`}
                         >
                             <AlertTriangle className="w-4 h-4 text-yellow-300" />
-                            <span>思維盲點校準 ({mythBusters.length})</span>
+                            <span>思維盲點 ({mythBusters.length})</span>
                         </button>
                     )}
                     {logicPairs.length > 0 && (
                         <button
                             onClick={() => setSubMode('match')}
-                            className={`px-3.5 py-2 rounded-lg text-xs md:text-sm font-bold transition-all flex items-center gap-1.5 ${
+                            className={`px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 whitespace-nowrap ${
                                 subMode === 'match' ? 'bg-indigo-600 text-white shadow-md' : 'text-gray-400 hover:text-white'
                             }`}
                         >

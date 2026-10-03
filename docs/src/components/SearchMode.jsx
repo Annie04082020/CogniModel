@@ -491,10 +491,10 @@ const SearchMode = () => {
                                 )}
                             </div>
 
-                            <div className="flex items-center gap-2 flex-wrap">
+                            <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar flex-nowrap w-full md:w-auto shrink-0 py-0.5">
                                 <button
                                     onClick={() => setIsGlanceMode(!isGlanceMode)}
-                                    className={`px-3 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
+                                    className={`px-3 py-2 sm:py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border shrink-0 whitespace-nowrap ${
                                         isGlanceMode
                                             ? 'bg-amber-500 text-gray-950 border-amber-400 shadow-md'
                                             : 'bg-gray-800 hover:bg-gray-750 text-gray-300 border-gray-700'
@@ -507,7 +507,7 @@ const SearchMode = () => {
 
                                 <button
                                     onClick={handleCopyMarkdown}
-                                    className="px-3 py-2.5 rounded-xl bg-gray-800 hover:bg-gray-750 border border-gray-700 text-xs text-gray-200 font-bold transition-colors flex items-center gap-1.5"
+                                    className="px-3 py-2 sm:py-2.5 rounded-xl bg-gray-800 hover:bg-gray-750 border border-gray-700 text-xs text-gray-200 font-bold transition-colors flex items-center gap-1.5 shrink-0 whitespace-nowrap"
                                     title="複製為 Markdown 表格貼至 Notion 或個人筆記"
                                 >
                                     {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-indigo-400" />}
@@ -516,7 +516,7 @@ const SearchMode = () => {
 
                                 <button
                                     onClick={handleDownloadCSV}
-                                    className="px-3 py-2.5 rounded-xl bg-gray-800 hover:bg-gray-750 border border-gray-700 text-xs text-gray-200 font-bold transition-colors flex items-center gap-1.5"
+                                    className="px-3 py-2 sm:py-2.5 rounded-xl bg-gray-800 hover:bg-gray-750 border border-gray-700 text-xs text-gray-200 font-bold transition-colors flex items-center gap-1.5 shrink-0 whitespace-nowrap"
                                     title="匯出為 CSV 試算表"
                                 >
                                     <Download className="w-3.5 h-3.5 text-cyan-400" />
@@ -525,7 +525,7 @@ const SearchMode = () => {
 
                                 <button
                                     onClick={handlePrintWindow}
-                                    className="px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-md shadow-emerald-500/20 transition-all flex items-center gap-1.5"
+                                    className="px-3.5 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-md shadow-emerald-500/20 transition-all flex items-center gap-1.5 shrink-0 whitespace-nowrap"
                                     title="開啟 A4 列印或存成 PDF 速查 Cheatsheet"
                                 >
                                     <Printer className="w-3.5 h-3.5" />

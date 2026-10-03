@@ -8,8 +8,19 @@ import SearchMode from './components/SearchMode'
 import ImportMode from './components/ImportMode'
 import UnderstandMode from './components/UnderstandMode'
 import ReaderMode from './components/ReaderMode'
+import { Menu, Layers } from 'lucide-react'
 import './index.css'
 import cardsData from './data/cards.json'
+
+const MODE_LABELS = {
+    understand: '🧠 心智模型推演',
+    reader: '📖 分段精讀複習',
+    search: '🔍 雙語術語工作台',
+    review: '🎴 概念翻卡速覽',
+    quiz: '🎯 邏輯推演校準',
+    stats: '📊 認知分析儀表',
+    import: '📥 知識匯入中心'
+};
 
 function App() {
     const [cards, setCards] = useState([])
@@ -189,7 +200,39 @@ function App() {
 
             {/* Main Content Area */}
             <div className="flex-1 flex flex-col relative overflow-hidden bg-gray-900">
-                {renderContent()}
+                {/* 行動裝置專屬優雅頂部導航列 (Mobile Header) */}
+                <header className="md:hidden sticky top-0 z-30 h-14 bg-gray-900/95 backdrop-blur-md border-b border-gray-800 px-3 flex items-center justify-between shrink-0 shadow-lg">
+                    <div className="flex items-center gap-2.5">
+                        <button
+                            onClick={() => setIsSidebarOpen(true)}
+                            className="p-2 rounded-xl bg-gray-800 hover:bg-gray-750 text-gray-200 hover:text-white transition-colors border border-gray-750 active:scale-95"
+                            aria-label="打開選單"
+                        >
+                            <Menu size={18} />
+                        </button>
+                        <div className="flex flex-col">
+                            <span className="text-sm font-black bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 tracking-tight">
+                                CogniModel
+                            </span>
+                            <span className="text-[10px] text-gray-400 font-medium">
+                                {MODE_LABELS[currentMode] || '深度學習'}
+                            </span>
+                        </div>
+                    </div>
+
+                    <button
+                        onClick={() => setIsSidebarOpen(true)}
+                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-gray-800/90 border border-gray-750 text-xs text-gray-300 hover:text-white max-w-[140px] truncate shadow-sm active:scale-95"
+                        title="切換牌組或主題"
+                    >
+                        <Layers className="w-3 h-3 text-indigo-400 shrink-0" />
+                        <span className="truncate font-semibold">{currentTopic === "All" ? "全庫總覽" : currentTopic}</span>
+                    </button>
+                </header>
+
+                <div className="flex-1 relative overflow-hidden flex flex-col">
+                    {renderContent()}
+                </div>
             </div>
         </div>
     )

@@ -15,18 +15,10 @@ const Sidebar = ({ topics, currentTopic, onSelectTopic, currentMode, onSelectMod
 
     return (
         <>
-            {/* Mobile Toggle Button */}
-            <button
-                onClick={() => setIsOpen(!isOpen)}
-                className="md:hidden fixed top-4 left-4 z-50 p-2 bg-gray-800 rounded-lg shadow-lg text-white"
-            >
-                {isOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-
             {/* Overlay for mobile */}
             {isOpen && (
                 <div
-                    className="md:hidden fixed inset-0 bg-black/50 z-40 backdrop-blur-sm"
+                    className="md:hidden fixed inset-0 bg-black/60 z-40 backdrop-blur-sm"
                     onClick={() => setIsOpen(false)}
                 />
             )}
@@ -42,7 +34,7 @@ const Sidebar = ({ topics, currentTopic, onSelectTopic, currentMode, onSelectMod
                 flex flex-col h-full
             `}>
                 {/* Logo / Header */}
-                <div className={`p-6 border-b border-gray-800 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
+                <div className={`p-5 md:p-6 border-b border-gray-800 flex items-center justify-between`}>
                     {!isCollapsed && (
                         <div>
                             <h1 className="text-xl font-black bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 whitespace-nowrap">
@@ -56,10 +48,18 @@ const Sidebar = ({ topics, currentTopic, onSelectTopic, currentMode, onSelectMod
                     {/* Desktop Collapse Toggle */}
                     <button
                         onClick={() => setIsCollapsed(!isCollapsed)}
-                        className="hidden md:block text-gray-400 hover:text-white transition-colors"
+                        className="hidden md:block text-gray-400 hover:text-white transition-colors p-1"
                         title={isCollapsed ? "展開側邊欄" : "收合側邊欄"}
                     >
                         {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+                    </button>
+                    {/* Mobile Close Button */}
+                    <button
+                        onClick={() => setIsOpen(false)}
+                        className="md:hidden text-gray-400 hover:text-white p-1.5 rounded-xl bg-gray-800 hover:bg-gray-750 transition-colors"
+                        title="關閉選單"
+                    >
+                        <X size={18} />
                     </button>
                 </div>
 
