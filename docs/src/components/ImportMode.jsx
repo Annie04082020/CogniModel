@@ -4,7 +4,7 @@ import { set as setIDB, get as getIDB } from 'idb-keyval';
 import {
     Upload, FileText, CheckCircle, AlertCircle, Loader, Trash2, Database,
     Sparkles, Mic, Key, Edit3, Plus, ArrowRight, HelpCircle, FileAudio, Layers,
-    Youtube, Video, ExternalLink
+    Youtube, Video, ExternalLink, FolderPlus, FolderCheck, Tag
 } from 'lucide-react';
 import {
     getGeminiApiKey, setGeminiApiKey, analyzeTextWithGemini, analyzeAudioWithGemini,
@@ -30,9 +30,13 @@ const ImportMode = ({ onDeckUpdate }) => {
     const [apiKey, setApiKey] = useState('');
     const [showKeyInput, setShowKeyInput] = useState(false);
 
+    // ================= 分類與牌組歸屬狀態 =================
+    const [categoryMode, setCategoryMode] = useState('new'); // 'existing' | 'new'
+    const [selectedExistingDeck, setSelectedExistingDeck] = useState('');
+    const [newDeckName, setNewDeckName] = useState('');
+
     // Text Tab States
     const [inputText, setInputText] = useState('');
-    const [customDeckName, setCustomDeckName] = useState('');
 
     // Audio Tab States
     const [audioFile, setAudioFile] = useState(null);
@@ -60,9 +64,17 @@ const ImportMode = ({ onDeckUpdate }) => {
             customCards.forEach(card => {
                 deckMap[card.source] = (deckMap[card.source] || 0) + 1;
             });
-            setStoredDecks(Object.entries(deckMap).map(([name, count]) => ({ name, count })));
+            const decks = Object.entries(deckMap).map(([name, count]) => ({ name, count }));
+            setStoredDecks(decks);
+            if (decks.length > 0) {
+                setCategoryMode('existing');
+                setSelectedExistingDeck(decks[0].name);
+            } else {
+                setCategoryMode('new');
+            }
         } else {
             setStoredDecks([]);
+            setCategoryMode('new');
         }
     };
 
@@ -92,6 +104,17 @@ const ImportMode = ({ onDeckUpdate }) => {
         }
     };
 
+    // 取得當前設定的牌組分類名稱
+    const resolveTargetDeckName = (defaultAiName = '') => {
+        if (categoryMode === 'existing' && selectedExistingDeck) {
+            return selectedExistingDeck;
+        }
+        if (categoryMode === 'new' && newDeckName.trim()) {
+            return newDeckName.trim();
+        }
+        return defaultAiName || `自訂牌組_${new Date().toLocaleDateString()}`;
+    };
+
     // 處理 YouTube 影片分析
     const handleAnalyzeYouTube = async () => {
         if (!youtubeUrl.trim() || !detectedVideoId) {
@@ -113,9 +136,7 @@ const ImportMode = ({ onDeckUpdate }) => {
 
         try {
             const result = await analyzeYouTubeWithGemini(youtubeUrl, apiKey);
-            if (customDeckName.trim()) {
-                result.deckName = customDeckName.trim();
-            }
+            result.deckName = resolveTargetDeckName(result.deckName);
             setExtractedData(result);
             setStatus("success");
             setStatusMsg("🎉 YouTube 影片分析完成！已為您提煉出核心考點與理解遊戲。");
@@ -152,10 +173,7 @@ const ImportMode = ({ onDeckUpdate }) => {
                 result = parseOfflineText(inputText);
             }
 
-            if (customDeckName.trim()) {
-                result.deckName = customDeckName.trim();
-            }
-
+            result.deckName = resolveTargetDeckName(result.deckName);
             setExtractedData(result);
             setStatus("success");
             setStatusMsg("知識解構完成！請在下方預覽與微調後保存。");
@@ -168,7 +186,7 @@ const ImportMode = ({ onDeckUpdate }) => {
         }
     };
 
-    // 處理音訊分析 (支援接收降噪處理後的檔案)
+    // 處理音訊分析
     const handleAnalyzeAudio = async (cleanAudioFile = null) => {
         const targetFile = cleanAudioFile || audioFile;
         if (!targetFile) {
@@ -190,9 +208,7 @@ const ImportMode = ({ onDeckUpdate }) => {
 
         try {
             const result = await analyzeAudioWithGemini(targetFile, apiKey);
-            if (customDeckName.trim()) {
-                result.deckName = customDeckName.trim();
-            }
+            result.deckName = resolveTargetDeckName(result.deckName);
             setExtractedData(result);
             setStatus("success");
             setStatusMsg("錄音分析完成！已為您整理出核心概念與理解遊戲。");
@@ -215,9 +231,8 @@ const ImportMode = ({ onDeckUpdate }) => {
 
         try {
             const timestamp = Date.now();
-            const deckName = extractedData.deckName || `自訂牌組_${new Date().toLocaleDateString()}`;
+            const deckName = extractedData.deckName || resolveTargetDeckName();
 
-            // 若來自 YouTube，使用其縮圖做為可選展示
             const youtubeThumb = extractedData.videoId
                 ? `https://img.youtube.com/vi/${extractedData.videoId}/hqdefault.jpg`
                 : '';
@@ -227,27 +242,33 @@ const ImportMode = ({ onDeckUpdate }) => {
                 title: card.title,
                 description: card.description,
                 analogy: card.analogy || '',
-                imagePath: youtubeThumb, // YouTube 縮圖或空字串
+                imagePath: youtubeThumb,
                 videoUrl: extractedData.videoUrl || '',
                 source: deckName,
                 isCustom: true,
-                // 第一張卡片攜帶全部附屬理解題目，確保各模式都能調用
                 logicPairs: idx === 0 ? (extractedData.logicPairs || []) : [],
                 mythBusters: idx === 0 ? (extractedData.mythBusters || []) : [],
                 scenarios: idx === 0 ? (extractedData.scenarios || []) : []
             }));
 
             const existingCustomCards = (await getIDB('custom_cards')) || [];
+            const previousCount = existingCustomCards.filter(c => c.source === deckName).length;
             const mergedCards = [...existingCustomCards, ...newCards];
             await setIDB('custom_cards', mergedCards);
 
+            const isAppended = previousCount > 0;
             setStatus("success");
-            setStatusMsg(`🎉 成功匯入「${deckName}」，共建立 ${newCards.length} 張概念卡片與配套理解題！`);
+            setStatusMsg(
+                isAppended
+                    ? `🎉 成功追加 ${newCards.length} 張卡片至「${deckName}」！（目前該分類累計 ${previousCount + newCards.length} 張）`
+                    : `🎉 成功建立新牌組「${deckName}」，共匯入 ${newCards.length} 張概念卡片與配套理解題！`
+            );
+
             setExtractedData(null);
             setInputText('');
             setAudioFile(null);
             setYoutubeUrl('');
-            setCustomDeckName('');
+            setNewDeckName('');
 
             fetchStoredDecks();
             if (onDeckUpdate) onDeckUpdate();
@@ -258,7 +279,7 @@ const ImportMode = ({ onDeckUpdate }) => {
         }
     };
 
-    // 原有的 PDF 處理邏輯
+    // PDF 處理邏輯 (支援自選分類)
     const processPdfFile = async (file) => {
         if (file.type !== 'application/pdf') {
             setStatus("error");
@@ -277,7 +298,8 @@ const ImportMode = ({ onDeckUpdate }) => {
             const totalPages = pdf.numPages;
             const newCards = [];
             const timestamp = Date.now();
-            const sourceName = file.name.replace('.pdf', '');
+            const defaultSource = file.name.replace('.pdf', '');
+            const deckName = resolveTargetDeckName(defaultSource);
 
             for (let i = 1; i <= totalPages; i++) {
                 const page = await pdf.getPage(i);
@@ -302,7 +324,7 @@ const ImportMode = ({ onDeckUpdate }) => {
                     title: title,
                     description: description,
                     imagePath: imagePath,
-                    source: sourceName,
+                    source: deckName,
                     page: i,
                     isCustom: true
                 });
@@ -311,11 +333,16 @@ const ImportMode = ({ onDeckUpdate }) => {
             }
 
             const existingCustomCards = (await getIDB('custom_cards')) || [];
+            const previousCount = existingCustomCards.filter(c => c.source === deckName).length;
             const mergedCards = [...existingCustomCards, ...newCards];
             await setIDB('custom_cards', mergedCards);
 
             setStatus("success");
-            setStatusMsg(`🎉 成功從 PDF 匯入 ${newCards.length} 張簡報卡片！`);
+            setStatusMsg(
+                previousCount > 0
+                    ? `🎉 成功追加 ${newCards.length} 張 PDF 卡片至「${deckName}」！（累計 ${previousCount + newCards.length} 張）`
+                    : `🎉 成功從 PDF 建立「${deckName}」，共匯入 ${newCards.length} 張簡報卡片！`
+            );
             fetchStoredDecks();
             if (onDeckUpdate) onDeckUpdate();
         } catch (err) {
@@ -331,13 +358,13 @@ const ImportMode = ({ onDeckUpdate }) => {
     return (
         <div className="w-full max-w-5xl h-full flex flex-col p-4 overflow-y-auto custom-scrollbar">
             {/* 頂部標題與 API Key 設定 */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5">
                 <div>
                     <h1 className="text-2xl md:text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-red-400 via-purple-300 to-indigo-400">
                         知識卡片與理解遊戲生成中心
                     </h1>
                     <p className="text-gray-400 text-xs md:text-sm mt-1">
-                        支援 YouTube 教學影片、抽象課文筆記、錄音檔音訊與投影片 PDF 匯入
+                        可按課程分類上傳 YouTube 影片、課堂錄音、文字筆記或投影片簡報，累積屬於您的考科題庫
                     </p>
                 </div>
 
@@ -352,7 +379,7 @@ const ImportMode = ({ onDeckUpdate }) => {
 
             {/* API Key 輸入彈窗/展開條 */}
             {showKeyInput && (
-                <div className="mb-6 p-4 bg-gray-850 rounded-2xl border border-yellow-500/30 flex flex-col gap-3 animate-fade-in">
+                <div className="mb-5 p-4 bg-gray-850 rounded-2xl border border-yellow-500/30 flex flex-col gap-3 animate-fade-in">
                     <div className="flex justify-between items-center">
                         <span className="text-xs font-bold text-yellow-300 flex items-center gap-1.5">
                             <Key className="w-4 h-4" /> Google Gemini API Key
@@ -387,8 +414,81 @@ const ImportMode = ({ onDeckUpdate }) => {
                 </div>
             )}
 
+            {/* ================= 智慧分類選擇面板 (Deck Category Selector) ================= */}
+            <div className="mb-5 p-4 bg-gradient-to-r from-gray-850 via-gray-900 to-gray-850 rounded-2xl border border-indigo-500/30 shadow-lg">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-3">
+                    <div className="flex items-center gap-2">
+                        <Tag className="w-4 h-4 text-indigo-400" />
+                        <span className="text-xs uppercase font-extrabold tracking-wider text-indigo-300">
+                            目標牌組分類 (指定本次內容存入哪個科目/單元)
+                        </span>
+                    </div>
+
+                    {storedDecks.length > 0 && (
+                        <div className="flex items-center bg-gray-800 p-0.5 rounded-xl border border-gray-700 text-xs">
+                            <button
+                                onClick={() => setCategoryMode('existing')}
+                                className={`px-3 py-1 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
+                                    categoryMode === 'existing'
+                                        ? 'bg-indigo-600 text-white shadow'
+                                        : 'text-gray-400 hover:text-white'
+                                }`}
+                            >
+                                <FolderCheck className="w-3.5 h-3.5" />
+                                <span>追加至現有牌組</span>
+                            </button>
+                            <button
+                                onClick={() => setCategoryMode('new')}
+                                className={`px-3 py-1 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
+                                    categoryMode === 'new'
+                                        ? 'bg-purple-600 text-white shadow'
+                                        : 'text-gray-400 hover:text-white'
+                                }`}
+                            >
+                                <FolderPlus className="w-3.5 h-3.5" />
+                                <span>＋ 建立新牌組</span>
+                            </button>
+                        </div>
+                    )}
+                </div>
+
+                {/* 模式 A：追加至現有分類 */}
+                {categoryMode === 'existing' && storedDecks.length > 0 ? (
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                        <select
+                            value={selectedExistingDeck}
+                            onChange={(e) => setSelectedExistingDeck(e.target.value)}
+                            className="bg-gray-800 border border-indigo-500/50 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-400 flex-1 font-bold"
+                        >
+                            {storedDecks.map((deck) => (
+                                <option key={deck.name} value={deck.name}>
+                                    📂 {deck.name}（目前已有 {deck.count} 張卡片與題目）
+                                </option>
+                            ))}
+                        </select>
+                        <span className="text-xs text-indigo-300/80 bg-indigo-950/40 px-3 py-2 rounded-xl border border-indigo-500/20 whitespace-nowrap">
+                            ⚡ 上傳後將自動與該牌組既有題庫合併
+                        </span>
+                    </div>
+                ) : (
+                    /* 模式 B：新建分類 */
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                        <input
+                            type="text"
+                            placeholder="輸入新的牌組或課程名稱（例如：神經生理學期中考、生物化學第二章...）"
+                            value={newDeckName}
+                            onChange={(e) => setNewDeckName(e.target.value)}
+                            className="flex-1 bg-gray-800 border border-purple-500/50 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-purple-400 placeholder-gray-500"
+                        />
+                        <span className="text-xs text-purple-300/80 bg-purple-950/40 px-3 py-2 rounded-xl border border-purple-500/20 whitespace-nowrap">
+                            ✨ 若留空將由 AI 自動根據內容命名
+                        </span>
+                    </div>
+                )}
+            </div>
+
             {/* 匯入來源 Tab 選單 */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 bg-gray-900/80 p-1.5 rounded-2xl border border-gray-800 mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 bg-gray-900/80 p-1.5 rounded-2xl border border-gray-800 mb-5">
                 <button
                     onClick={() => { setActiveTab('youtube'); setExtractedData(null); }}
                     className={`py-2.5 px-3 rounded-xl font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-2 ${
@@ -433,7 +533,7 @@ const ImportMode = ({ onDeckUpdate }) => {
 
             {/* 狀態訊息提示 */}
             {status !== 'ideal' && (
-                <div className={`mb-6 p-4 rounded-xl border flex items-center gap-3 text-sm ${
+                <div className={`mb-5 p-4 rounded-xl border flex items-center gap-3 text-sm ${
                     status === 'success'
                         ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-300'
                         : 'bg-rose-950/40 border-rose-500/40 text-rose-300'
@@ -446,38 +546,26 @@ const ImportMode = ({ onDeckUpdate }) => {
             {/* ================= Tab 1: YouTube 影片提煉 ================= */}
             {activeTab === 'youtube' && !extractedData && (
                 <div className="flex flex-col gap-4 bg-gray-850 p-6 rounded-3xl border border-gray-800">
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
-                        <div>
-                            <h3 className="font-bold text-white text-base flex items-center gap-2">
-                                <Youtube className="w-5 h-5 text-red-500" /> 貼上 YouTube 影片網址
-                            </h3>
-                            <p className="text-xs text-gray-400 mt-0.5">
-                                專為「老師指定 YouTube 影片考試內容」打造！Gemini 2.5 直接觀看影片、聽取講解並提煉核心考點。
-                            </p>
-                        </div>
-                        <input
-                            type="text"
-                            placeholder="自訂牌組名稱 (選填)"
-                            value={customDeckName}
-                            onChange={(e) => setCustomDeckName(e.target.value)}
-                            className="bg-gray-900 border border-gray-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-red-500 w-full md:w-56"
-                        />
+                    <div>
+                        <h3 className="font-bold text-white text-base flex items-center gap-2">
+                            <Youtube className="w-5 h-5 text-red-500" /> 貼上 YouTube 影片網址
+                        </h3>
+                        <p className="text-xs text-gray-400 mt-0.5">
+                            專為「老師指定 YouTube 影片考試內容」打造！Gemini 直接觀看影片、聽取講解並提煉考點。
+                        </p>
                     </div>
 
                     <div className="flex flex-col gap-3">
-                        <div className="flex gap-2">
-                            <input
-                                type="text"
-                                value={youtubeUrl}
-                                onChange={(e) => setYoutubeUrl(e.target.value)}
-                                placeholder="貼上 YouTube 連結，例如: https://www.youtube.com/watch?v=... 或 https://youtu.be/..."
-                                className="flex-1 p-3.5 bg-gray-900 border border-gray-700/80 rounded-2xl text-gray-100 text-sm focus:outline-none focus:border-red-500 font-mono"
-                            />
-                        </div>
+                        <input
+                            type="text"
+                            value={youtubeUrl}
+                            onChange={(e) => setYoutubeUrl(e.target.value)}
+                            placeholder="貼上 YouTube 連結，例如: https://www.youtube.com/watch?v=... 或 https://youtu.be/..."
+                            className="p-3.5 bg-gray-900 border border-gray-700/80 rounded-2xl text-gray-100 text-sm focus:outline-none focus:border-red-500 font-mono"
+                        />
 
-                        {/* 即時影片預覽 */}
                         {detectedVideoId && (
-                            <div className="mt-2 p-4 bg-gray-900/90 rounded-2xl border border-gray-750 flex flex-col sm:flex-row items-center gap-4 animate-fade-in">
+                            <div className="p-4 bg-gray-900/90 rounded-2xl border border-gray-750 flex flex-col sm:flex-row items-center gap-4 animate-fade-in">
                                 <div className="relative w-full sm:w-48 aspect-video rounded-xl overflow-hidden bg-black shrink-0 border border-gray-700">
                                     <img
                                         src={`https://img.youtube.com/vi/${detectedVideoId}/hqdefault.jpg`}
@@ -495,7 +583,7 @@ const ImportMode = ({ onDeckUpdate }) => {
                                         已識別 YouTube 影片 ID: {detectedVideoId}
                                     </span>
                                     <p className="text-sm font-semibold text-white">
-                                        準備好解析本影片中的關鍵概念、因果機制與易混淆考點
+                                        目標牌組：【{resolveTargetDeckName("AI 建議名稱")}】
                                     </p>
                                     <a
                                         href={youtubeUrl}
@@ -539,22 +627,13 @@ const ImportMode = ({ onDeckUpdate }) => {
             {/* ================= Tab 2: 文字段落提取 ================= */}
             {activeTab === 'text' && !extractedData && (
                 <div className="flex flex-col gap-4 bg-gray-850 p-6 rounded-3xl border border-gray-800">
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
-                        <div>
-                            <h3 className="font-bold text-white text-base flex items-center gap-2">
-                                <FileText className="w-4 h-4 text-indigo-400" /> 貼上抽象筆記或課文長文
-                            </h3>
-                            <p className="text-xs text-gray-400 mt-0.5">
-                                系統將進行認知解構，提煉出核心機制、生活比喻、因果鏈、迷思是非題與情境推導。
-                            </p>
-                        </div>
-                        <input
-                            type="text"
-                            placeholder="自訂牌組名稱 (選填)"
-                            value={customDeckName}
-                            onChange={(e) => setCustomDeckName(e.target.value)}
-                            className="bg-gray-900 border border-gray-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500 w-full md:w-56"
-                        />
+                    <div>
+                        <h3 className="font-bold text-white text-base flex items-center gap-2">
+                            <FileText className="w-4 h-4 text-indigo-400" /> 貼上抽象筆記或課文長文
+                        </h3>
+                        <p className="text-xs text-gray-400 mt-0.5">
+                            目標牌組：【{resolveTargetDeckName("AI 建議名稱")}】。系統將進行認知解構並提煉因果鏈與迷思題。
+                        </p>
                     </div>
 
                     <textarea
@@ -597,22 +676,13 @@ const ImportMode = ({ onDeckUpdate }) => {
             {/* ================= Tab 3: 錄音檔上傳 ================= */}
             {activeTab === 'audio' && !extractedData && (
                 <div className="flex flex-col gap-4 bg-gray-850 p-6 rounded-3xl border border-gray-800">
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
-                        <div>
-                            <h3 className="font-bold text-white text-base flex items-center gap-2">
-                                <FileAudio className="w-4 h-4 text-purple-400" /> 上傳手機 / 錄音筆音訊檔案
-                            </h3>
-                            <p className="text-xs text-gray-400 mt-0.5">
-                                支援 mp3, m4a, wav, aac 檔案。Gemini 多模態直接聆聽課堂錄音並提煉理解遊戲。
-                            </p>
-                        </div>
-                        <input
-                            type="text"
-                            placeholder="自訂牌組名稱 (選填)"
-                            value={customDeckName}
-                            onChange={(e) => setCustomDeckName(e.target.value)}
-                            className="bg-gray-900 border border-gray-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-purple-500 w-full md:w-56"
-                        />
+                    <div>
+                        <h3 className="font-bold text-white text-base flex items-center gap-2">
+                            <FileAudio className="w-4 h-4 text-purple-400" /> 上傳手機 / 錄音筆音訊檔案
+                        </h3>
+                        <p className="text-xs text-gray-400 mt-0.5">
+                            目標牌組：【{resolveTargetDeckName("AI 建議名稱")}】。內建降噪播放器，先試聽更清晰再送出提煉。
+                        </p>
                     </div>
 
                     {!audioFile ? (
@@ -666,7 +736,6 @@ const ImportMode = ({ onDeckUpdate }) => {
                                 </button>
                             </div>
 
-                            {/* 降噪播放監聽室 */}
                             <AudioDenoisePlayer
                                 file={audioFile}
                                 onConfirmDenoised={handleAnalyzeAudio}
@@ -711,7 +780,10 @@ const ImportMode = ({ onDeckUpdate }) => {
                             <Upload className="w-8 h-8" />
                         </div>
                         <h3 className="text-lg font-bold text-white mb-1">上傳講義 / 簡報 PDF</h3>
-                        <p className="text-gray-400 text-xs mb-4">拖曳或點選以解析投影片截圖與大綱</p>
+                        <p className="text-gray-400 text-xs mb-2">
+                            目標牌組：【{resolveTargetDeckName("預設以 PDF 檔名為準")}】
+                        </p>
+                        <p className="text-gray-500 text-[11px] mb-4">拖曳或點選以解析投影片截圖與大綱</p>
                         <span className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl shadow-md transition-all">
                             選擇 PDF 檔案
                         </span>
@@ -735,16 +807,28 @@ const ImportMode = ({ onDeckUpdate }) => {
             {extractedData && (
                 <div className="mt-6 flex flex-col gap-6 bg-gray-850 p-6 md:p-8 rounded-3xl border border-indigo-500/40 shadow-2xl animate-fade-in">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-gray-700">
-                        <div>
+                        <div className="flex-1">
                             <span className="text-xs uppercase font-extrabold tracking-widest text-indigo-400 flex items-center gap-1.5">
                                 {extractedData.videoId && <Youtube className="w-4 h-4 text-red-400" />}
                                 提煉預覽與微調
                             </span>
-                            <h2 className="text-xl md:text-2xl font-bold text-white mt-1">
-                                {extractedData.deckName}
-                            </h2>
+                            <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+                                <span className="text-xs text-gray-400 font-bold">歸屬牌組：</span>
+                                <input
+                                    type="text"
+                                    value={extractedData.deckName}
+                                    onChange={(e) => setExtractedData({ ...extractedData, deckName: e.target.value })}
+                                    className="bg-gray-900 border border-indigo-500/60 rounded-xl px-3 py-1 text-sm font-bold text-white focus:outline-none focus:border-indigo-400"
+                                    title="點擊可直接修改存入的牌組名稱"
+                                />
+                                {storedDecks.some(d => d.name === extractedData.deckName) && (
+                                    <span className="text-[11px] font-bold text-emerald-400 bg-emerald-950/40 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
+                                        ⚡ 將追加至現有分類中
+                                    </span>
+                                )}
+                            </div>
                             {extractedData.summary && (
-                                <p className="text-xs text-indigo-200 mt-1 italic">
+                                <p className="text-xs text-indigo-200 mt-2 italic">
                                     「{extractedData.summary}」
                                 </p>
                             )}
