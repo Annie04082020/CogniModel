@@ -4,11 +4,12 @@ import { set as setIDB, get as getIDB } from 'idb-keyval';
 import {
     Upload, FileText, CheckCircle, AlertCircle, Loader, Trash2, Database,
     Sparkles, Mic, Key, Edit3, Plus, ArrowRight, HelpCircle, FileAudio, Layers,
-    Youtube, Video, ExternalLink, FolderPlus, FolderCheck, Tag
+    Youtube, Video, ExternalLink, FolderPlus, FolderCheck, Tag,
+    Camera, Image as ImageIcon, Clipboard
 } from 'lucide-react';
 import {
     getGeminiApiKey, setGeminiApiKey, analyzeTextWithGemini, analyzeAudioWithGemini,
-    analyzeYouTubeWithGemini, extractYouTubeVideoId, parseOfflineText
+    analyzeYouTubeWithGemini, analyzeImageWithGemini, extractYouTubeVideoId, parseOfflineText
 } from '../services/geminiService';
 import AudioDenoisePlayer from './AudioDenoisePlayer';
 
@@ -46,15 +47,43 @@ const ImportMode = ({ onDeckUpdate }) => {
     const [youtubeUrl, setYoutubeUrl] = useState('');
     const detectedVideoId = extractYouTubeVideoId(youtubeUrl);
 
+    // Image / Screenshot Tab States
+    const [imageFile, setImageFile] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
+    const [imagePromptContext, setImagePromptContext] = useState('');
+    const imageInputRef = useRef(null);
+
     // PDF Drag State
     const [isDragging, setIsDragging] = useState(false);
 
     // AI 提煉後的預覽與編輯資料
-    const [extractedData, setExtractedData] = useState(null); // { deckName, summary, cards, logicPairs, mythBusters, scenarios, videoId, videoUrl }
+    const [extractedData, setExtractedData] = useState(null); // { deckName, summary, cards, logicPairs, mythBusters, scenarios, mechanismChains, socraticQuestions, videoId, videoUrl }
 
     useEffect(() => {
         setApiKey(getGeminiApiKey());
         fetchStoredDecks();
+
+        // 監聽 Ctrl+V 剪貼簿截圖直接貼上
+        const handleGlobalPaste = (e) => {
+            const items = e.clipboardData?.items;
+            if (!items) return;
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].type && items[i].type.startsWith('image/')) {
+                    const blob = items[i].getAsFile();
+                    if (blob) {
+                        setImageFile(blob);
+                        setImagePreview(URL.createObjectURL(blob));
+                        setActiveTab('image');
+                        setStatus("ideal");
+                        setStatusMsg("📸 已成功從剪貼簿捕捉截圖！可輸入補充說明後點擊「開始認知解構」。");
+                        break;
+                    }
+                }
+            }
+        };
+
+        window.addEventListener('paste', handleGlobalPaste);
+        return () => window.removeEventListener('paste', handleGlobalPaste);
     }, []);
 
     const fetchStoredDecks = async () => {
@@ -221,6 +250,40 @@ const ImportMode = ({ onDeckUpdate }) => {
         }
     };
 
+    // 處理圖片/黑板圖表認知解構
+    const handleAnalyzeImage = async () => {
+        if (!imageFile) {
+            setStatus("error");
+            setStatusMsg("請先選取圖片檔案或直接按下 Ctrl+V 貼上截圖。");
+            return;
+        }
+
+        if (!apiKey) {
+            setShowKeyInput(true);
+            setStatus("error");
+            setStatusMsg("圖片多模態認知解構需要使用 Gemini API，請先輸入 API Key。");
+            return;
+        }
+
+        setProcessing(true);
+        setStatus("ideal");
+        setStatusMsg("Gemini 多模態視覺神經正在深度解析圖表中的機制箭頭、迴路與因果關係，請稍候...");
+
+        try {
+            const result = await analyzeImageWithGemini(imageFile, imagePromptContext, apiKey);
+            result.deckName = resolveTargetDeckName(result.deckName);
+            setExtractedData(result);
+            setStatus("success");
+            setStatusMsg("🎉 圖表認知解構完成！已提煉出因果鏈條與心智模型推演題。");
+        } catch (err) {
+            console.error("Image Analysis Error:", err);
+            setStatus("error");
+            setStatusMsg(err.message || "圖片解析失敗，請確認圖檔格式或重試。");
+        } finally {
+            setProcessing(false);
+        }
+    };
+
     // 儲存提取出的資料至 IndexedDB
     const handleCommitToLibrary = async () => {
         if (!extractedData || !extractedData.cards || extractedData.cards.length === 0) {
@@ -239,16 +302,21 @@ const ImportMode = ({ onDeckUpdate }) => {
 
             const newCards = extractedData.cards.map((card, idx) => ({
                 id: `custom_${timestamp}_${idx}`,
+                term_en: card.term_en || '',
                 title: card.title,
                 description: card.description,
-                analogy: card.analogy || '',
-                imagePath: youtubeThumb,
+                analogy: card.engineeringAnalogy || card.analogy || '',
+                engineeringAnalogy: card.engineeringAnalogy || '',
+                imagePath: (idx === 0 && imagePreview) ? imagePreview : youtubeThumb,
                 videoUrl: extractedData.videoUrl || '',
                 source: deckName,
                 isCustom: true,
+                glossary: idx === 0 ? (extractedData.glossary || []) : [],
                 logicPairs: idx === 0 ? (extractedData.logicPairs || []) : [],
                 mythBusters: idx === 0 ? (extractedData.mythBusters || []) : [],
-                scenarios: idx === 0 ? (extractedData.scenarios || []) : []
+                scenarios: idx === 0 ? (extractedData.scenarios || []) : [],
+                mechanismChains: idx === 0 ? (extractedData.mechanismChains || []) : [],
+                socraticQuestions: idx === 0 ? (extractedData.socraticQuestions || []) : []
             }));
 
             const existingCustomCards = (await getIDB('custom_cards')) || [];
@@ -268,6 +336,9 @@ const ImportMode = ({ onDeckUpdate }) => {
             setInputText('');
             setAudioFile(null);
             setYoutubeUrl('');
+            setImageFile(null);
+            setImagePreview(null);
+            setImagePromptContext('');
             setNewDeckName('');
 
             fetchStoredDecks();
@@ -488,40 +559,50 @@ const ImportMode = ({ onDeckUpdate }) => {
             </div>
 
             {/* 匯入來源 Tab 選單 */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 bg-gray-900/80 p-1.5 rounded-2xl border border-gray-800 mb-5">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2 bg-gray-900/80 p-1.5 rounded-2xl border border-gray-800 mb-5">
                 <button
                     onClick={() => { setActiveTab('youtube'); setExtractedData(null); }}
-                    className={`py-2.5 px-3 rounded-xl font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-2 ${
+                    className={`py-2.5 px-2 rounded-xl font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-1.5 ${
                         activeTab === 'youtube'
                             ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-lg'
                             : 'text-gray-400 hover:text-white'
                     }`}
                 >
-                    <Youtube className="w-4 h-4 text-red-300" /> YouTube 影片
+                    <Youtube className="w-4 h-4 text-red-300" /> YouTube
+                </button>
+                <button
+                    onClick={() => { setActiveTab('image'); setExtractedData(null); }}
+                    className={`py-2.5 px-2 rounded-xl font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-1.5 ${
+                        activeTab === 'image'
+                            ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg'
+                            : 'text-gray-400 hover:text-white'
+                    }`}
+                >
+                    <Camera className="w-4 h-4 text-emerald-300" /> 📸 截圖/圖表
                 </button>
                 <button
                     onClick={() => { setActiveTab('text'); setExtractedData(null); }}
-                    className={`py-2.5 px-3 rounded-xl font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-2 ${
+                    className={`py-2.5 px-2 rounded-xl font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-1.5 ${
                         activeTab === 'text'
                             ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
                             : 'text-gray-400 hover:text-white'
                     }`}
                 >
-                    <FileText className="w-4 h-4 text-indigo-300" /> 文字筆記段落
+                    <FileText className="w-4 h-4 text-indigo-300" /> 文字筆記
                 </button>
                 <button
                     onClick={() => { setActiveTab('audio'); setExtractedData(null); }}
-                    className={`py-2.5 px-3 rounded-xl font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-2 ${
+                    className={`py-2.5 px-2 rounded-xl font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-1.5 ${
                         activeTab === 'audio'
                             ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
                             : 'text-gray-400 hover:text-white'
                     }`}
                 >
-                    <FileAudio className="w-4 h-4 text-purple-300" /> 錄音筆記音訊
+                    <FileAudio className="w-4 h-4 text-purple-300" /> 錄音降噪
                 </button>
                 <button
                     onClick={() => { setActiveTab('pdf'); setExtractedData(null); }}
-                    className={`py-2.5 px-3 rounded-xl font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-2 ${
+                    className={`py-2.5 px-2 rounded-xl font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-1.5 ${
                         activeTab === 'pdf'
                             ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg'
                             : 'text-gray-400 hover:text-white'
@@ -803,6 +884,105 @@ const ImportMode = ({ onDeckUpdate }) => {
                 </div>
             )}
 
+            {/* ================= Tab 5: 截圖/黑板圖表認知解構 (支援 Ctrl+V) ================= */}
+            {activeTab === 'image' && !extractedData && (
+                <div className="flex flex-col gap-4 bg-gray-850 p-6 rounded-3xl border border-gray-800">
+                    <div>
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                            <h3 className="font-bold text-white text-base flex items-center gap-2">
+                                <Camera className="w-4 h-4 text-emerald-400" /> 📸 課堂黑板圖表 / 講義截圖認知解構
+                            </h3>
+                            <span className="text-xs text-emerald-400 bg-emerald-950/40 px-2.5 py-1 rounded-xl border border-emerald-500/30 flex items-center gap-1 font-mono">
+                                <Clipboard className="w-3.5 h-3.5" /> 支援 Ctrl + V 剪貼簿直接貼上
+                            </span>
+                        </div>
+                        <p className="text-xs text-gray-400 mt-1">
+                            目標牌組：【{resolveTargetDeckName("AI 視覺解構圖表")}】。Gemini 多模態神經網路將自動逆向解析圖中箭頭、受體迴路與因果關係，轉譯為理工心智模型。
+                        </p>
+                    </div>
+
+                    {imagePreview ? (
+                        <div className="flex flex-col md:flex-row gap-4 p-4 bg-gray-900 rounded-2xl border border-emerald-500/30">
+                            <div className="md:w-1/2 flex flex-col items-center justify-center bg-gray-950 rounded-xl p-2 border border-gray-800">
+                                <img
+                                    src={imagePreview}
+                                    alt="Pasted/Uploaded"
+                                    className="max-h-64 object-contain rounded-lg shadow-md"
+                                />
+                                <button
+                                    onClick={() => { setImageFile(null); setImagePreview(null); }}
+                                    className="mt-2 text-xs text-rose-400 hover:text-rose-300 font-bold flex items-center gap-1"
+                                >
+                                    <Trash2 className="w-3.5 h-3.5" /> 移除重新選取
+                                </button>
+                            </div>
+
+                            <div className="md:w-1/2 flex flex-col justify-between gap-3">
+                                <div>
+                                    <label className="text-xs font-bold text-gray-300 block mb-1">
+                                        補充提示說明（選填，加強特定焦點）：
+                                    </label>
+                                    <textarea
+                                        rows={4}
+                                        value={imagePromptContext}
+                                        onChange={(e) => setImagePromptContext(e.target.value)}
+                                        placeholder="例如：這是動作電位傳導與離子通道開閉的機制圖，請著重解構電位敏感型鈉/鉀通道與 RC 充放電類比..."
+                                        className="w-full p-3 bg-gray-850 border border-gray-700 rounded-xl text-white text-xs focus:outline-none focus:border-emerald-500 placeholder-gray-500 custom-scrollbar"
+                                    />
+                                </div>
+
+                                <button
+                                    disabled={processing}
+                                    onClick={handleAnalyzeImage}
+                                    className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-bold text-sm shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2"
+                                >
+                                    {processing ? (
+                                        <>
+                                            <Loader className="w-4 h-4 animate-spin" />
+                                            <span>AI 多模態視覺神經深度解構中...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Sparkles className="w-4 h-4 text-yellow-300" />
+                                            <span>開始認知解構與推演提煉</span>
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        <div
+                            onClick={() => imageInputRef.current?.click()}
+                            className="border-2 border-dashed border-gray-700 hover:border-emerald-500/60 bg-gray-900/60 hover:bg-emerald-950/10 rounded-2xl p-10 flex flex-col items-center justify-center cursor-pointer transition-all"
+                        >
+                            <input
+                                ref={imageInputRef}
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => {
+                                    if (e.target.files && e.target.files[0]) {
+                                        const file = e.target.files[0];
+                                        setImageFile(file);
+                                        setImagePreview(URL.createObjectURL(file));
+                                    }
+                                }}
+                            />
+                            <div className="w-14 h-14 rounded-2xl bg-emerald-950/60 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-3">
+                                <Camera className="w-7 h-7" />
+                            </div>
+                            <h4 className="text-white font-bold text-sm mb-1">點擊上傳圖片，或在任何位置直接按下 Ctrl + V 貼上螢幕截圖</h4>
+                            <p className="text-gray-400 text-xs text-center max-w-md">
+                                適用於老師黑板上的手繪機制圖、教材架構圖、投影片流程圖或醫學文獻示意圖
+                            </p>
+                            <span className="mt-4 px-4 py-1.5 bg-gray-800 hover:bg-gray-750 text-emerald-400 border border-emerald-500/30 text-xs font-bold rounded-xl transition-all">
+                                選擇圖片檔案
+                            </span>
+                        </div>
+                    )}
+                </div>
+            )}
+
             {/* ================= 預覽與編輯區塊 (Extracted Preview) ================= */}
             {extractedData && (
                 <div className="mt-6 flex flex-col gap-6 bg-gray-850 p-6 md:p-8 rounded-3xl border border-indigo-500/40 shadow-2xl animate-fade-in">
@@ -850,17 +1030,59 @@ const ImportMode = ({ onDeckUpdate }) => {
                         </div>
                     </div>
 
+                    {/* NTU Smart MHI 全英專有名詞庫預覽 */}
+                    {extractedData.glossary && extractedData.glossary.length > 0 && (
+                        <div>
+                            <h3 className="text-sm font-bold text-emerald-300 mb-3 flex items-center gap-2">
+                                <span>🔤 NTU Smart MHI 全英專有名詞高頻錨定 ({extractedData.glossary.length})</span>
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                {extractedData.glossary.map((term, gIdx) => (
+                                    <div key={gIdx} className="bg-gray-900/90 p-4 rounded-2xl border border-emerald-500/20 flex flex-col justify-between">
+                                        <div>
+                                            <div className="flex justify-between items-start gap-2">
+                                                <h4 className="font-extrabold text-white text-base font-mono text-emerald-300">
+                                                    {term.term_en}
+                                                </h4>
+                                                <span className="text-xs px-2 py-0.5 rounded-md bg-emerald-950/60 border border-emerald-500/30 text-emerald-200 font-bold whitespace-nowrap">
+                                                    {term.term_zh}
+                                                </span>
+                                            </div>
+                                            {term.engineeringAnchor && (
+                                                <div className="mt-2 text-xs text-cyan-300 bg-cyan-950/30 p-2 rounded-xl border border-cyan-500/20 font-mono">
+                                                    ⚡ 理工對等：{term.engineeringAnchor}
+                                                </div>
+                                            )}
+                                            {term.etymology && (
+                                                <p className="text-[11px] text-amber-300/80 mt-1.5 italic">
+                                                    🌱 詞根拆解：{term.etymology}
+                                                </p>
+                                            )}
+                                            {term.definition_en && (
+                                                <p className="text-xs text-gray-300 mt-2 leading-relaxed">
+                                                    {term.definition_en}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
                     {/* 卡片清單預覽 */}
                     <div>
                         <h3 className="text-sm font-bold text-gray-300 mb-3 flex items-center gap-2">
-                            <span>🗂️ 核心概念卡片 ({extractedData.cards?.length || 0})</span>
+                            <span>🗂️ 理工心智模型推演卡 ({extractedData.cards?.length || 0})</span>
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {extractedData.cards?.map((card, idx) => (
                                 <div key={idx} className="bg-gray-900/90 p-4 rounded-2xl border border-gray-750 flex flex-col justify-between">
                                     <div>
                                         <div className="flex justify-between items-start">
-                                            <span className="text-xs font-bold text-indigo-400">#{idx + 1} 概念</span>
+                                            <span className="text-xs font-bold text-indigo-400">
+                                                {card.term_en ? `${card.term_en} · ` : ''}#{idx + 1} 機制
+                                            </span>
                                             <button
                                                 onClick={() => {
                                                     const updated = extractedData.cards.filter((_, i) => i !== idx);
@@ -873,9 +1095,9 @@ const ImportMode = ({ onDeckUpdate }) => {
                                             </button>
                                         </div>
                                         <h4 className="font-bold text-white text-base mt-1">{card.title}</h4>
-                                        {card.analogy && (
-                                            <p className="text-xs text-amber-300/90 mt-1 bg-amber-950/20 p-2 rounded-lg border border-amber-500/20">
-                                                💡 {card.analogy}
+                                        {(card.engineeringAnalogy || card.analogy) && (
+                                            <p className="text-xs text-cyan-300 mt-1 bg-cyan-950/20 p-2 rounded-lg border border-cyan-500/20 font-mono">
+                                                ⚡ 理工工程類比：{card.engineeringAnalogy || card.analogy}
                                             </p>
                                         )}
                                         <p className="text-xs text-gray-300 mt-2 leading-relaxed whitespace-pre-wrap">
@@ -887,22 +1109,32 @@ const ImportMode = ({ onDeckUpdate }) => {
                         </div>
                     </div>
 
-                    {/* 配套練習題摘要 */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-                        <div className="bg-indigo-950/30 p-4 rounded-2xl border border-indigo-500/20">
-                            <span className="text-xs font-bold text-indigo-400 block mb-1">🧩 因果連連看題目</span>
-                            <span className="text-2xl font-black text-white">{extractedData.logicPairs?.length || 0}</span>
-                            <p className="text-[11px] text-gray-400 mt-1">用於打通機制因果關係</p>
+                    {/* 配套深層推演指標摘要 */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 pt-2">
+                        <div className="bg-emerald-950/30 p-3.5 rounded-2xl border border-emerald-500/20">
+                            <span className="text-xs font-bold text-emerald-400 block mb-1">🔤 英文專有名詞</span>
+                            <span className="text-xl font-black text-white">{extractedData.glossary?.length || 0}</span>
+                            <p className="text-[10px] text-gray-400 mt-0.5">全英考試眼熟度</p>
                         </div>
-                        <div className="bg-purple-950/30 p-4 rounded-2xl border border-purple-500/20">
-                            <span className="text-xs font-bold text-purple-400 block mb-1">🛡️ 迷思辨析是非題</span>
-                            <span className="text-2xl font-black text-white">{extractedData.mythBusters?.length || 0}</span>
-                            <p className="text-[11px] text-gray-400 mt-1">破解易混淆盲點概念</p>
+                        <div className="bg-indigo-950/30 p-3.5 rounded-2xl border border-indigo-500/20">
+                            <span className="text-xs font-bold text-indigo-400 block mb-1">⛓️ 因果骨牌鏈</span>
+                            <span className="text-xl font-black text-white">{extractedData.mechanismChains?.length || 0}</span>
+                            <p className="text-[10px] text-gray-400 mt-0.5">步進干擾模擬</p>
                         </div>
-                        <div className="bg-pink-950/30 p-4 rounded-2xl border border-pink-500/20">
-                            <span className="text-xs font-bold text-pink-400 block mb-1">🎯 情境應用推導題</span>
-                            <span className="text-2xl font-black text-white">{extractedData.scenarios?.length || 0}</span>
-                            <p className="text-[11px] text-gray-400 mt-1">測試原理在具體案例中的遷移</p>
+                        <div className="bg-purple-950/30 p-3.5 rounded-2xl border border-purple-500/20">
+                            <span className="text-xs font-bold text-purple-400 block mb-1">🏛️ 蘇格拉底探究</span>
+                            <span className="text-xl font-black text-white">{extractedData.socraticQuestions?.length || 0}</span>
+                            <p className="text-[10px] text-gray-400 mt-0.5">思維鷹架指引</p>
+                        </div>
+                        <div className="bg-pink-950/30 p-3.5 rounded-2xl border border-pink-500/20">
+                            <span className="text-xs font-bold text-pink-400 block mb-1">🛡️ 思維盲點校準</span>
+                            <span className="text-xl font-black text-white">{extractedData.mythBusters?.length || 0}</span>
+                            <p className="text-[10px] text-gray-400 mt-0.5">直覺誤區剖析</p>
+                        </div>
+                        <div className="bg-cyan-950/30 p-3.5 rounded-2xl border border-cyan-500/20">
+                            <span className="text-xs font-bold text-cyan-400 block mb-1">🧩 因果邏輯連鎖</span>
+                            <span className="text-xl font-black text-white">{extractedData.logicPairs?.length || 0}</span>
+                            <p className="text-[10px] text-gray-400 mt-0.5">條件配對推導</p>
                         </div>
                     </div>
                 </div>

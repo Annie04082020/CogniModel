@@ -1,4 +1,4 @@
-// geminiService.js - 處理抽象筆記長文、音訊檔案與 YouTube 影片的 AI 認知解構
+// geminiService.js - 處理抽象筆記長文、音訊檔案、YouTube 影片與截圖的 AI 認知解構與心智模型推演
 
 const API_KEY_STORAGE_KEY = 'gemini_api_key';
 
@@ -14,53 +14,95 @@ export const setGeminiApiKey = (key) => {
     }
 };
 
-const SYSTEM_INSTRUCTION = `你是一位認知學習科學與深度教學專家。
-用戶正在學習難度較高、抽象且不容易一眼看懂的課程內容。
-你的任務是將用戶提供的【抽象筆記/課文長文/課堂錄音/教學 YouTube 影片】進行深度解構，幫助用戶建立真正的理解，而不是死記硬背名詞。
+const SYSTEM_INSTRUCTION = `你是一位認知學習科學與第一性原理教學專家，專門輔導理工背景（電機、資工、機械工程）跨入智慧醫療生醫領域的頂尖研究生。
+【學生背景畫像】：
+- 學生目前就讀國立臺灣大學智慧健康創新碩士學程（NTU Smart MHI），全英語授課環境。
+- 大學具備扎實的理工根基（熟悉電路學、訊號與系統、狀態機、演算法、自動控制 PID、機械結構）。
+- 學生並非生物生化純科班出身，對海量冗長、無規律感的全英語生醫醫學名詞感到陌生。
+- 學生非常反感「機械化無腦刷題」，核心目標是：
+  1. 用【理工工程直覺（電路/狀態機/訊號處理/閉迴路控制）】來理解生醫底層運作機轉。
+  2. 強化【全英生醫專有名詞的存在感與辨識度】，必須看懂英文術語、掌握詞根與工程對等概念，從容應對全英考試與文獻。
 
-請務必返回嚴格符合以下 JSON 格式的數據（不要加入額外的 markdown 程式碼區塊標記外文字）：
+請務必返回嚴格符合以下 JSON 格式的數據（不要加入額外的 markdown 標記外文字）：
 {
-  "deckName": "建議的牌組主題名稱（簡短精準，例如：神經元動作電位機制）",
-  "summary": "一句話白話總結這段知識的核心本質",
+  "deckName": "建議的心智模型主題名稱（簡短精準，例如：神經動作電位與離子動力學）",
+  "summary": "一句話第一性原理總結：這個生醫系統在解決什麼問題？",
+  "glossary": [
+    {
+      "term_en": "英文標準學術專有名詞（例如：Depolarization）",
+      "term_zh": "繁體中文學術譯名（例如：去極化）",
+      "engineeringAnchor": "理工工程直覺對等概念（例如：電容急速充電 / 上升沿觸發 Rising Edge）",
+      "etymology": "希臘/拉丁詞根詞綴拆解助記（例如：de- [去除/反轉] + polar [極性] + -ization [名詞化過程]）",
+      "definition_en": "全英一語中的學術定義（幫助習慣全英考題與原文書閱讀）",
+      "visualCue": "適合視覺圖解或檢索的架構關鍵詞（例如：RC charging curve, Na+ voltage-gated influx）"
+    }
+  ],
   "cards": [
     {
-      "title": "概念名稱或核心機制",
-      "analogy": "生活化直觀比喻（幫助快速聯想與理解本質）",
-      "description": "深入淺出的機制解釋、為什麼會這樣、核心要點（請條理分明）"
+      "term_en": "核心英文專有名詞（例如：Action Potential）",
+      "title": "核心機制 / 中文名稱（例如：動作電位）",
+      "engineeringAnalogy": "精準理工工程類比（以電路、狀態機、中斷、PID反饋或機械閥門類比生醫機制）",
+      "description": "深入淺出的機制推演、臨界條件與運作原理"
+    }
+  ],
+  "mechanismChains": [
+    {
+      "chainTitle": "動態因果骨牌流程名稱（例如：去極化觸發動作電位鏈）",
+      "steps": [
+        "步驟 1: 觸發輸入或初期刺激 (Input / Trigger)",
+        "步驟 2: 關鍵開關啟動與信號放大 (Gating & Amplification)",
+        "步驟 3: 臨界閾值突破與現象爆發 (Threshold Breach)",
+        "步驟 4: 系統反饋、死區保護或復原 (Feedback & Reset)"
+      ],
+      "perturbation": {
+        "condition": "植入一個外在干擾或極端工程假設（例如：若使用河豚毒素阻斷電位敏感型鈉通道）",
+        "impactStep": 2,
+        "outcome": "系統會在第 2 步斷裂，無法達成後續連鎖",
+        "analysis": "機制深層解析：為什麼會在這個環節受阻？下游會產生什麼連帶效應？以電路/系統觀點分析代償或崩潰。"
+      }
+    }
+  ],
+  "socraticQuestions": [
+    {
+      "paradox": "一個深層為什麼或反直覺現象（例如：既然鈉離子順濃度差內流會去極化，為何電位不會無限上升到 +100mV 甚至更高？）",
+      "hints": [
+        "思考線索 1（工程/物理層面）：通道本身的構型是否有時間依賴性的開關限制？（類似單穩態觸發超時自鎖）",
+        "思考線索 2（電磁/熱力學層面）：當電位由負轉正時，電化學驅動力（Driving Force）與能斯特電位會發生什麼變化？"
+      ],
+      "deepInsight": "專家思維解析：深度闡述背後的物理/生理阻抗與失活門限制，對齊頂層心智模型。"
     }
   ],
   "logicPairs": [
     {
-      "cause": "觸發條件 / 前提 / 原因（例如：細胞膜去極化達閾值）",
-      "effect": "結果 / 後續反應 / 現象（例如：電位敏感型鈉離子通道瞬間大量開啟）",
-      "explanation": "因果邏輯解說（為何 A 會導致 B）"
+      "cause": "因果起點 / 觸發條件（例如：膜電位跨過閾值 -55mV）",
+      "effect": "後續必然反應 / 系統現象（例如：電位敏感型鈉通道快速導通）",
+      "explanation": "因果推導邏輯解說（結合理工直覺）"
     }
   ],
   "mythBusters": [
     {
-      "statement": "一個針對此抽象知識的論述（請設計常見易混淆盲點或直覺陷阱）",
+      "statement": "一個針對此抽象知識的論述（設計常見直覺盲點或易混淆推論）",
       "isCorrect": true,
-      "explanation": "深度解析：為什麼對或為什麼錯？關鍵分界點是什麼？",
+      "explanation": "深度剖析：為什麼符合或違背原理？思考關鍵分界點是什麼？",
       "concept": "涉及的核心概念"
     }
   ],
   "scenarios": [
     {
-      "scenario": "一個具體的應用情境或假設狀況（例如：若使用河豚毒素阻斷電位敏感型鈉離子通道...）",
-      "question": "根據原理，會發生下列哪種現象？",
+      "scenario": "具體臨床或極端邊界測試情境",
+      "question": "根據底層原理推演，系統會發生什麼狀態變化？",
       "options": ["選項 A", "選項 B", "選項 C", "選項 D"],
       "correctIndex": 0,
-      "explanation": "答案解析與推導過程"
+      "explanation": "推導鏈條與原理驗證"
     }
   ]
 }
 
 注意事項：
-1. 數量建議：cards 生成 4~10 張，logicPairs 生成 3~6 組，mythBusters 生成 3~6 題，scenarios 生成 2~4 題。
-2. 題目與解釋請務必注重「因果關聯」、「運作機制」與「概念辨析」，避免純背誦瑣碎定義。
-3. 若為 YouTube 影片，請特別注意影片主講者特別強調的考點、推導步驟與實驗觀察。
-4. 語言請以繁體中文（台灣習慣用詞）輸出。
-`;
+1. 數量建議：glossary 4~8 個核心生醫英文術語，cards 4~8 張，mechanismChains 2~4 組，socraticQuestions 2~4 組，logicPairs 3~5 組，mythBusters 3~5 題，scenarios 2~3 題。
+2. 類比必須「精確對齊理工（EE/CS/ME）」，切忌空泛；英文術語務必提供標準英文學術單字。
+3. 絕不產生死背名詞的記憶題，所有內容務必圍繞「動態因果」、「干擾推演」與「專有名詞實質理解」。
+4. 語言以繁體中文為主，生醫專有名詞保持中英雙語對照。`;
 
 // 支援的備選模型清單（優先使用最新的 gemini-3.8-flash，具備自動容錯回退）
 const CANDIDATE_MODELS = ['gemini-3.8-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
@@ -95,7 +137,6 @@ const sendGeminiRequest = async (parts, apiKey) => {
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
                 const errMsg = errorData.error?.message || `狀態碼: ${response.status}`;
-                // 若為模型不可用，嘗試下一個模型
                 if (errMsg.includes('not available') || errMsg.includes('not found') || response.status === 404) {
                     console.warn(`Model ${model} 不可用，嘗試下一個模型...`, errMsg);
                     lastError = new Error(errMsg);
@@ -128,16 +169,18 @@ const sendGeminiRequest = async (parts, apiKey) => {
     throw lastError || new Error("呼叫 Gemini 模型失敗，請確認 API Key 是否正確。");
 };
 
+// 1. 分析長篇文字
 export const analyzeTextWithGemini = async (text, apiKey = null) => {
     const key = apiKey || getGeminiApiKey();
     if (!key) {
         throw new Error("請先填入 Gemini API Key 才能進行 AI 深度理解提煉。");
     }
 
-    const prompt = `請分析以下抽象學習內容，並按照指令輸出結構化的深度學習遊戲資料：\n\n${text}`;
+    const prompt = `請深度分析以下抽象學習內容，並按照指令輸出結構化的心智模型推演資料：\n\n${text}`;
     return await sendGeminiRequest([{ text: prompt }], key);
 };
 
+// 2. 分析錄音檔
 export const analyzeAudioWithGemini = async (audioFile, apiKey = null) => {
     const key = apiKey || getGeminiApiKey();
     if (!key) {
@@ -156,7 +199,7 @@ export const analyzeAudioWithGemini = async (audioFile, apiKey = null) => {
     });
 
     const mimeType = audioFile.type || 'audio/mp3';
-    const prompt = "這是課堂或學習錄音，請聽取內容並進行深度理解解構，整理出核心概念卡片、因果配對、迷思破解與情境應用題。";
+    const prompt = "這是課堂或學習錄音，請聽取內容並進行深度心智模型解構，整理出因果骨牌流程鏈、蘇格拉底深度探究與機制解析。";
 
     return await sendGeminiRequest([
         {
@@ -169,7 +212,39 @@ export const analyzeAudioWithGemini = async (audioFile, apiKey = null) => {
     ], key);
 };
 
-// YouTube 網址工具函式
+// 3. 分析圖片 / 截圖 (Ctrl+V 拍照支援)
+export const analyzeImageWithGemini = async (imageFile, apiKey = null) => {
+    const key = apiKey || getGeminiApiKey();
+    if (!key) {
+        throw new Error("請先填入 Gemini API Key 才能進行圖片/截圖 AI 認知解構。");
+    }
+
+    const base64Data = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            const result = reader.result;
+            const base64 = result.split(',')[1];
+            resolve(base64);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(imageFile);
+    });
+
+    const mimeType = imageFile.type || 'image/jpeg';
+    const prompt = "這是學習圖表/黑板筆記/機制示意圖，請深入辨識圖中的動態箭頭、因果關係與核心原理，輸出結構化的心智模型推演資料。";
+
+    return await sendGeminiRequest([
+        {
+            inlineData: {
+                mimeType: mimeType,
+                data: base64Data
+            }
+        },
+        { text: prompt }
+    ], key);
+};
+
+// 4. 分析 YouTube 影片
 export const extractYouTubeVideoId = (url) => {
     if (!url) return null;
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
@@ -185,7 +260,6 @@ export const normalizeYouTubeUrl = (url) => {
     return url;
 };
 
-// YouTube 影片 AI 認知解構
 export const analyzeYouTubeWithGemini = async (youtubeUrl, apiKey = null) => {
     const key = apiKey || getGeminiApiKey();
     if (!key) {
@@ -198,7 +272,7 @@ export const analyzeYouTubeWithGemini = async (youtubeUrl, apiKey = null) => {
         throw new Error("請輸入有效的 YouTube 影片網址 (例如: https://www.youtube.com/watch?v=... 或 https://youtu.be/...)");
     }
 
-    const prompt = `這是老師指定的考試範圍 YouTube 影片。請深入觀看與聆聽此影片內容，掌握影片中講解的核心概念、原理機制、重點公式或因果邏輯，並按照指令輸出結構化的深度學習與理解遊戲資料。`;
+    const prompt = `這是老師指定的考試範圍 YouTube 影片。請深入觀看與聆聽此影片內容，掌握影片中講解的核心概念、原理機制、重點公式或因果邏輯，並按照指令輸出結構化的深度學習與心智模型推演資料。`;
 
     const parsed = await sendGeminiRequest([
         {
@@ -215,7 +289,7 @@ export const analyzeYouTubeWithGemini = async (youtubeUrl, apiKey = null) => {
     return parsed;
 };
 
-// 免 API 的離線降級解析規則（當用戶沒填 API key 時）
+// 5. 免 API 離線降級解析規則
 export const parseOfflineText = (rawText) => {
     const lines = rawText.split('\n').map(l => l.trim()).filter(Boolean);
     const cards = [];
@@ -278,6 +352,8 @@ export const parseOfflineText = (rawText) => {
         deckName: "抽象筆記提取",
         summary: "基於規則解析的筆記內容",
         cards: cards.length > 0 ? cards : [{ title: "重點整理", analogy: "", description: rawText }],
+        mechanismChains: [],
+        socraticQuestions: [],
         logicPairs: logicPairs,
         mythBusters: [],
         scenarios: []

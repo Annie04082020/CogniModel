@@ -5,11 +5,11 @@ const Sidebar = ({ topics, currentTopic, onSelectTopic, currentMode, onSelectMod
     const [isCollapsed, setIsCollapsed] = useState(false);
 
     const modes = [
-        { id: 'understand', label: '深度理解遊戲', icon: Brain, badge: 'NEW' },
-        { id: 'review', label: '翻卡複習', icon: BookOpen },
-        { id: 'quiz', label: '測驗挑戰', icon: Gamepad2 },
-        { id: 'stats', label: '學習統計', icon: BarChart2 },
-        { id: 'search', label: '詞典檢索', icon: Search },
+        { id: 'understand', label: '心智模型推演', icon: Brain, badge: 'PRO' },
+        { id: 'review', label: '概念翻卡速覽', icon: BookOpen },
+        { id: 'quiz', label: '邏輯推演校準', icon: Gamepad2 },
+        { id: 'stats', label: '認知分析儀表', icon: BarChart2 },
+        { id: 'search', label: '雙語術語工作台', icon: Search, badge: 'MHI' },
     ];
 
     return (
@@ -138,10 +138,10 @@ const Sidebar = ({ topics, currentTopic, onSelectTopic, currentMode, onSelectMod
                                             ? 'bg-red-600/20 text-red-400 font-bold'
                                             : 'text-gray-400 hover:bg-gray-800 hover:text-white'}
                                     `}
-                                    title="錯題本"
+                                    title="思維盲點庫"
                                 >
                                     <AlertCircle size={18} className="shrink-0 text-red-400" />
-                                    {!isCollapsed && <span className="truncate text-sm">錯題本</span>}
+                                    {!isCollapsed && <span className="truncate text-sm">思維盲點庫</span>}
                                 </button>
 
                                 {!isCollapsed && (
