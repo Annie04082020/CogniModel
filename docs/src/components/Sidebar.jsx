@@ -44,9 +44,14 @@ const Sidebar = ({ topics, currentTopic, onSelectTopic, currentMode, onSelectMod
                 {/* Logo / Header */}
                 <div className={`p-6 border-b border-gray-800 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
                     {!isCollapsed && (
-                        <h1 className="text-xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 whitespace-nowrap">
-                            Review & Learn
-                        </h1>
+                        <div>
+                            <h1 className="text-xl font-black bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 whitespace-nowrap">
+                                CogniModel
+                            </h1>
+                            <span className="text-[10px] text-gray-500 font-mono tracking-wider font-bold block">
+                                NTU SMART MHI
+                            </span>
+                        </div>
                     )}
                     {/* Desktop Collapse Toggle */}
                     <button

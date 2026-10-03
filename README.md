@@ -1,74 +1,56 @@
-# Review Card & Deep Understanding Maker
+# CogniModel (NTU Smart MHI 理工跨界生醫心智模型推演工作台)
 
-一個結合**深度概念理解**與**互動遊戲**的現代化學習工具。不再只是死記硬背名詞，而是能從抽象課文長文、筆記、手機錄音或簡報投影片中，深度解構知識因果脈絡，透過多元遊戲進行深度練習！
-
-## ✨ 核心特色與遊戲模式
-
-### 1. 深度理解遊戲模式 (Understand Mode) 【NEW! 🚀】
-專為高難度、抽象、需理解原理與機制的課程設計：
-- 🧩 **因果/機制連連看 (Logic Match)**：左側「觸發條件/機制原因」，右側「現象/生理結果」，點選匹配，打通因果鏈並即時獲得深層邏輯解析。
-- 🛡️ **迷思破解是非辨析 (Myth Buster)**：針對易混淆盲點進行判斷，答題後展開 AI 深度解剖，理清核心分界點。
-- 🎯 **情境應用推導 (Scenario Quest)**：在具體案例或假設條件下推導結果，訓練知識遷移與應用。
-
-### 2. 多元資料來源匯入中心 (Import & Extract Center) 【NEW! 🚀】
-- ✍️ **長篇抽象文字段落提取**：直接貼上課文段落、講義文字或個人筆記，一鍵由 Gemini AI 進行認知解構。
-- 🎙️ **錄音筆記 / 音訊檔案上傳**：支援上傳手機錄音筆錄音檔（`.mp3`, `.m4a`, `.wav`, `.aac` 等），AI 直接聆聽並提煉知識點與理解題目。
-- 📄 **投影片 PDF 簡報解析**：保留原有 PDF.js 投影片自動抓圖與排版功能。
-- 🗂️ **即時預覽與微調**：提取完成後可先微調卡片、自訂牌組名稱，確認後一鍵加入本機牌組庫。
-
-### 3. 純文字概念卡片美化 (Enhanced Cards) 【NEW! 🚀】
-- 無圖片時自動適配高質感全寬版面，支援「生活化直觀比喻 (Analogy)」、「機制特徵剖析」與流暢翻卡互動。
-
-### 4. 經典複習與測驗模式
-- **Review Mode (翻卡複習)**：支援洗牌、隨機翻轉、記憶進度追蹤。
-- **Quiz Mode (測驗挑戰)**：四選一測驗、拼字填空模式、速度分析與錯題本追蹤。
-- **Stats Dashboard**：視覺化學習曲線與弱點牌組分析。
-- **Dictionary Mode**：專業詞彙字典與每日推薦。
+> **專為工程跨界生醫（NTU Smart MHI 全英學程）打造的認知解構與推演工作台。**  
+> 堅決摒棄機械化「無腦刷題」，專注於**「抽象機制的底層因果推導」**、**「全英專有名詞高頻曝光與詞根拆解」**以及**「電機/資工/機械第一性原理直覺映射」**！
 
 ---
 
-## 🚀 快速開始
+## 🌟 核心特色功能
 
-### 1. 啟動網頁應用
+### 1. 🧠 心智模型推演工作台 (Mental Model Workbench)
+- ⛓️ **因果骨牌流程鏈 (Mechanism Domino Chains)**：視覺化步進拆解動態反應（刺激輸入 ➔ 離子流 ➔ 臨界閾值 ➔ 通道開啟）。
+- ⚡ **干擾變數模擬 (Perturbation Stress Simulation)**：植入破壞性條件（如阻斷劑、基因突變、低溫），推導骨牌鏈斷裂點與系統代償反應。
+- 🏛️ **蘇格拉底階梯探究 (Socratic Inquiry)**：反直覺矛盾現象 + 漸進式思維鷹架線索，不直接給答案，引導大腦自主完成邏輯閉環。
+- 🛡️ **思維盲點校準 (Blindspot Buster)**：直擊直覺常見誤區，深度對比底層真理。
+
+### 2. 📖 全英分段精讀複習工作台 (Guided Chunked Reader)
+- 🔤 **純英文學術課文沉浸精讀**：正文嚴格保留高質量全英教材段落，拒絕全文機翻破壞語感。
+- 🏷️ **專有名詞即時標註**：內文中出現的生醫核心術語自動以綠色徽章標註，點擊即彈出中文譯名、⚡理工工程類比、🌱拉丁/希臘詞根拆解與全英定義。
+- 📖 **可折疊繁中對照翻譯**：提供折疊式安全網，卡關時隨時點開對照。
+- 🔊 **全英發音朗讀**：調用原生 Web Speech API 朗讀段落與單字。
+
+### 3. 🔤 雙語術語工作台 & 熟悉單字小遊戲 (Bilingual Anchor & Mini-Games)
+- ⚡ **理工生醫連連看**：將全英醫學單字（*Action Potential, Depolarization, Refractory Period, GPCR*）與理工直覺（*單穩態脈衝, 電容充電上升沿, 防抖死區, 訊息佇列代理*）進行點選配對，建立瞬間神經反射！
+- 🌱 **詞根解構拼圖**：解構拉丁/希臘積木公式（如 `de- + polar + -ization` 或 `Hyper- + kal- + -emia`），拼出全英專有名詞。
+- 📄 **一鍵匯出雙語 Cheatsheet**：支援一鍵產生 A4 列印 / PDF 友善排版、複製 Markdown 表格或匯出 CSV 試算表。
+
+### 4. 📸 課堂黑板截圖 / 講義即時逆向解構 (Ctrl+V Paste)
+- 支援直接按 `Ctrl + V` 貼上螢幕截圖或照片，Gemini 多模態神經網路自動逆向解析圖中箭頭與迴路，轉譯為因果骨牌鏈。
+
+### 5. 🎙️ 課堂錄音 Web Audio DSP 即時降噪試聽台
+- 內建高通濾波（消除冷氣嗡嗡低頻）、低通濾波（濾除高頻嘯叫）、2.2kHz 人聲共振峰增益與動態壓縮器，支援 A/B 盲聽試聽，匯出純淨人聲音訊後再送轉譯。
+
+---
+
+## 🚀 線上即時體驗
+
+🔗 **[https://annie04082020.github.io/CogniModel/](https://annie04082020.github.io/CogniModel/)**  
+*(亦可透過舊網址 `https://annie04082020.github.io/ReviewCardMaker/` 自動重定向訪問)*
+
+---
+
+## 💻 本機開發與建置
+
 ```bash
+# 進入前端目錄
 cd docs
+
+# 安裝相依套件
 npm install
+
+# 啟動本機開發伺服器
 npm run dev
-```
-打開瀏覽器（預設為 `http://localhost:5173`）即可開始使用！
 
-### 2. 設定 Google Gemini API Key（選填，強力推薦）
-1. 在應用程式側邊欄點選 **「知識匯入與提煉」**。
-2. 點擊右上角 **「設定 Gemini API Key」**（可免費於 [Google AI Studio](https://aistudio.google.com/app/apikey) 取得）。
-3. 貼上後即安全保存在本機瀏覽器中，隨即可一鍵對長篇抽象文字或錄音檔進行深度提煉！
-
----
-
-## 🛠️ 命令列工具 (CLI Method)
-
-除了直接在網頁介面操作外，也提供本機 Python 批次腳本：
-
-### 1. 深度提煉抽象筆記或錄音檔
-```bash
-# 提煉文字檔 (.txt, .md) 或錄音檔 (.mp3, .wav, .m4a)
-python extract_knowledge.py 筆記.txt "神經生物學" YOUR_API_KEY
-```
-
-### 2. 傳統 PDF 投影片簡報截圖提取
-```bash
-python pdf_to_data.py pdfs
-```
-
----
-
-## 📦 部署到 GitHub Pages
-
-```bash
-cd docs
+# 建置生產環境版本
 npm run build
-cd dist
-git init
-git add .
-git commit -m "Deploy update"
-git push -f https://github.com/Annie04082020/ReviewCardMaker.git gh-pages
 ```
