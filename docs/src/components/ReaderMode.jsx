@@ -1,9 +1,11 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { get as getIDB } from 'idb-keyval';
+import { get as getIDB, set as setIDB } from 'idb-keyval';
 import {
     BookOpenCheck, Highlighter, Volume2, VolumeX, Sparkles, ChevronLeft,
     ChevronRight, Zap, Bookmark, Layers, Search, Cpu, Check, HelpCircle,
-    FileText, ArrowRight, X, Play, Pause, Languages, ChevronDown, ChevronUp
+    FileText, ArrowRight, X, Play, Pause, Languages, ChevronDown, ChevronUp,
+    Maximize2, Minimize2, ZoomIn, ZoomOut, Image as ImageIcon,
+    Columns, UploadCloud, Copy, Sliders, Type, AlignJustify
 } from 'lucide-react';
 
 // NTU Smart MHI 基礎名詞對照庫
@@ -68,55 +70,69 @@ const DEFAULT_GLOSSARY_MAP = {
         term_en: "Ligand-Gated Ion Channel",
         term_zh: "配體門控離子通道",
         engineeringAnchor: "API 端點密鑰校驗導通 / 外部硬體中斷接腳 (External Interrupt Pin)",
-        etymology: "Ligand [拉丁語ligare綁紮/結合分子] + Gated [門控] + Channel",
-        definition_en: "Ion channel that opens or closes in response to chemical messenger binding."
+        etymology: "Ligand [配體/化學密鑰] + Gated [門控]",
+        definition_en: "Ionotropic channel that opens in direct response to chemical messenger binding."
     },
     "g-protein coupled receptor": {
         term_en: "G-Protein Coupled Receptor (GPCR)",
         term_zh: "G蛋白偶聯受體",
-        engineeringAnchor: "非同步中繼代理 / 訊息佇列轉發器 (Message Broker & Relay)",
-        etymology: "Guanine nucleotide-binding + Coupled [偶聯] + Receptor",
-        definition_en: "Large family of 7-transmembrane receptors that transduce signals via G proteins."
-    },
-    "g-protein coupled receptors": {
-        term_en: "G-Protein Coupled Receptors (GPCRs)",
-        term_zh: "G蛋白偶聯受體",
-        engineeringAnchor: "非同步中繼代理 / 訊息佇列轉發器 (Message Broker & Relay)",
-        etymology: "Guanine nucleotide-binding + Coupled [偶聯] + Receptor",
-        definition_en: "Large family of 7-transmembrane receptors that transduce signals via G proteins."
+        engineeringAnchor: "非同步訊息佇列代理器 (Message Broker) 與發布-訂閱中繼 (Pub-Sub Relay)",
+        etymology: "GTP-binding Protein + Coupled + Receptor",
+        definition_en: "Transmembrane receptor that senses extracellular molecules and activates internal signal transduction pathways."
     },
     "gpcr": {
         term_en: "GPCR",
         term_zh: "G蛋白偶聯受體",
-        engineeringAnchor: "非同步中繼代理 / 訊息佇列轉發器 (Message Broker)",
-        etymology: "G-Protein Coupled Receptor 縮寫",
-        definition_en: "7-transmembrane cell-surface receptor mediating cellular responses to hormones and neurotransmitters."
+        engineeringAnchor: "非同步訊息佇列代理器 (Message Broker) 與發布-訂閱中繼 (Pub-Sub Relay)",
+        etymology: "G-Protein Coupled Receptor",
+        definition_en: "7-transmembrane receptor family orchestrating cellular responses to external stimuli."
     },
-    "gpcrs": {
-        term_en: "GPCRs",
-        term_zh: "G蛋白偶聯受體",
-        engineeringAnchor: "非同步中繼代理 / 訊息佇列轉發器 (Message Broker)",
-        etymology: "G-Protein Coupled Receptor 縮寫",
-        definition_en: "7-transmembrane cell-surface receptors mediating cellular responses to hormones and neurotransmitters."
+    "dna demethylation": {
+        term_en: "DNA Demethylation",
+        term_zh: "DNA 去甲基化",
+        engineeringAnchor: "快閃記憶體清除旗標 / 位元鎖定解封 (Flash Memory Bit Clear / Register Unlock)",
+        etymology: "de- [去除] + methyl [甲基] + -ation [過程]",
+        definition_en: "The enzymatic removal of methyl groups from DNA bases, often reactivating repressed transcriptional programs."
     },
-    "negative feedback": {
-        term_en: "Negative Feedback Loop",
-        term_zh: "負回饋調節迴路",
-        engineeringAnchor: "運算放大器負反饋 (Op-Amp Feedback) / PID 閉迴路穩態",
-        etymology: "Negative [反向] + Feedback [反饋] + Loop [迴路]",
-        definition_en: "Control mechanism where output counteracts initial perturbation to maintain homeostasis."
+    "tet1": {
+        term_en: "TET1",
+        term_zh: "易位蛋白 1 雙加氧酶",
+        engineeringAnchor: "表觀遺傳覆寫驅動器 (Catalytic Overwrite Driver / Oxidation Engine)",
+        etymology: "Ten-Eleven Translocation 1",
+        definition_en: "A catalytic enzyme mediating the sequential oxidation of 5-methylcytosine to initiate active DNA demethylation."
     },
-    "saltatory conduction": {
-        term_en: "Saltatory Conduction",
-        term_zh: "跳躍傳導",
-        engineeringAnchor: "低電容同軸電纜中繼放大 / RC 時間常數最佳化",
-        etymology: "Saltatory [跳躍的, 來自拉丁語saltare跳] + Conduction [傳導]",
-        definition_en: "Propagation of action potentials jumping from node to node along myelinated axons."
+    "ten-eleven translocation": {
+        term_en: "Ten-Eleven Translocation (TET)",
+        term_zh: "10-11 易位家族雙加氧酶",
+        engineeringAnchor: "表觀狀態步進轉換器 (Stepwise Epigenetic State Converter)",
+        etymology: "Ten-Eleven Translocation",
+        definition_en: "Family of Fe(II)/alpha-ketoglutarate-dependent dioxygenases that catalyze sequential oxidation of 5mC."
+    },
+    "5-methylcytosine": {
+        term_en: "5-Methylcytosine (5mC)",
+        term_zh: "5-甲基胞嘧啶",
+        engineeringAnchor: "唯讀遮罩暫存器 (Read-Only Mask Flag)",
+        etymology: "5th carbon + Methyl + Cytosine",
+        definition_en: "A methylated form of DNA cytosine typically associated with gene silencing."
+    },
+    "5-hydroxymethylcytosine": {
+        term_en: "5-Hydroxymethylcytosine (5hmC)",
+        term_zh: "5-羥甲基胞嘧啶",
+        engineeringAnchor: "中間暫存狀態暫留 (Intermediate Staging Buffer)",
+        etymology: "Hydroxyl + Methyl + Cytosine",
+        definition_en: "The first oxidation product of 5mC produced by TET dioxygenases."
+    },
+    "base excision repair": {
+        term_en: "Base Excision Repair (BER)",
+        term_zh: "鹼基切除修復",
+        engineeringAnchor: "ECC 記憶體錯誤校驗與同位元覆寫機制 (Error Correction & Replacement)",
+        etymology: "Base + Excision [切除] + Repair [修復]",
+        definition_en: "Cellular mechanism that repairs damaged DNA bases through cleavage, gap filling, and ligation."
     },
     "threshold potential": {
         term_en: "Threshold Potential",
-        term_zh: "閾電位 (門檻電位)",
-        engineeringAnchor: "邏輯閘切換閾值 (Logic Gate High-Level Trigger, ~ -55mV)",
+        term_zh: "閾電位",
+        engineeringAnchor: "邏輯閘導通電壓 / 比較器切換臨界點 (Vth, ~ -55mV)",
         etymology: "Threshold [門檻/臨界點]",
         definition_en: "The critical membrane potential required to trigger a regenerative action potential."
     },
@@ -179,6 +195,14 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
     const [highlightTerms, setHighlightTerms] = useState(true);
     const [showTranslation, setShowTranslation] = useState(false);
 
+    // ================= 閱讀舒適度設定 (Typography & Spacing Controls) =================
+    const [lineSpacing, setLineSpacing] = useState('relaxed'); // 'comfortable' (2.0) | 'relaxed' (2.35) | 'spacious' (2.7)
+    const [fontSize, setFontSize] = useState('lg'); // 'md' (16px) | 'lg' (18px) | 'xl' (20px)
+    const [layoutMode, setLayoutMode] = useState('split'); // 'split' (圖文對照) | 'focus' (單欄沉浸)
+    const [lightboxImage, setLightboxImage] = useState(null);
+    const [lightboxZoom, setLightboxZoom] = useState(1);
+    const fileInputRef = useRef(null);
+
     // 載入自訂 glossary
     useEffect(() => {
         const fetchCustomGlossary = async () => {
@@ -224,7 +248,6 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
     // 構建精讀段落清單 (Chunks)
     const chunks = useMemo(() => {
         if (isCustomMode && customText.trim()) {
-            // 分割自訂文本為段落
             const rawParagraphs = customText
                 .split(/\n\s*\n/)
                 .map(p => p.trim())
@@ -237,18 +260,18 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                 text: p,
                 translation_zh: '',
                 analogy: '',
-                source: '自訂全英課文'
+                source: '自訂全英課文',
+                imagePath: '',
+                page: null
             }));
         }
 
-        // 若無自訂卡片，或選取 All 且卡片全為植物藥用時，自動提供 NTU Smart MHI 專業全英範例
         const isPlantDeck = cards.some(c => c.source && c.source.includes('藥用植物'));
         if (!cards || cards.length === 0 || (isPlantDeck && topic === 'All')) {
             return DEFAULT_MHI_CHUNKS;
         }
 
         return cards.map((card, idx) => {
-            // 判斷是否有儲存純英文段落 text_en
             const hasEnglishText = Boolean(card.text_en && card.text_en.length > 10);
             const englishPassage = hasEnglishText
                 ? card.text_en
@@ -263,13 +286,112 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                 translation_zh: card.translation_zh || (!englishPassage ? '' : card.description),
                 analogy: card.engineeringAnalogy || card.analogy || '',
                 source: card.source || '課程講義',
-                imagePath: card.imagePath || ''
+                imagePath: card.imagePath || '',
+                page: card.page || null,
+                rawCard: card
             };
         });
     }, [cards, isCustomMode, customText, topic]);
 
+    // 當前牌組內包含的所有投影片/圖片資源
+    const deckSlides = useMemo(() => {
+        const list = [];
+        if (cards && Array.isArray(cards)) {
+            cards.forEach((c, idx) => {
+                if (c.imagePath) {
+                    list.push({
+                        id: c.id || `slide_${idx}`,
+                        title: c.title || `Page ${c.page || idx + 1}`,
+                        imagePath: c.imagePath,
+                        page: c.page || (idx + 1),
+                        cardIndex: idx,
+                        term_en: c.term_en || ''
+                    });
+                }
+            });
+        }
+        return list;
+    }, [cards]);
+
+    const [selectedSlideIdx, setSelectedSlideIdx] = useState(0);
+
     // 取得當前段落
     const currentChunk = chunks[currentChunkIdx] || chunks[0];
+
+    // 切換段落時自動對齊投影片
+    useEffect(() => {
+        if (currentChunk && currentChunk.imagePath) {
+            const found = deckSlides.findIndex(s => s.imagePath === currentChunk.imagePath);
+            if (found !== -1) {
+                setSelectedSlideIdx(found);
+            }
+        } else if (deckSlides.length > 0) {
+            const target = Math.min(currentChunkIdx, deckSlides.length - 1);
+            setSelectedSlideIdx(target);
+        }
+    }, [currentChunkIdx, currentChunk, deckSlides]);
+
+    // 當前檢視之投影片
+    const activeSlide = useMemo(() => {
+        if (currentChunk?.imagePath) {
+            return {
+                imagePath: currentChunk.imagePath,
+                title: currentChunk.title,
+                page: currentChunk.page || currentChunkIdx + 1,
+                isDirectMatch: true
+            };
+        }
+        if (deckSlides.length > 0 && deckSlides[selectedSlideIdx]) {
+            return {
+                ...deckSlides[selectedSlideIdx],
+                isDirectMatch: false
+            };
+        }
+        return null;
+    }, [currentChunk, deckSlides, selectedSlideIdx, currentChunkIdx]);
+
+    // 監聽 Ctrl+V 貼上投影片截圖至當前卡片
+    useEffect(() => {
+        const handlePasteImage = async (e) => {
+            const items = e.clipboardData?.items;
+            if (!items) return;
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].type && items[i].type.startsWith('image/')) {
+                    const blob = items[i].getAsFile();
+                    if (blob) {
+                        const reader = new FileReader();
+                        reader.onload = async (evt) => {
+                            const base64 = evt.target.result;
+                            await attachImageToCurrentChunk(base64);
+                        };
+                        reader.readAsDataURL(blob);
+                        break;
+                    }
+                }
+            }
+        };
+
+        window.addEventListener('paste', handlePasteImage);
+        return () => window.removeEventListener('paste', handlePasteImage);
+    }, [currentChunk]);
+
+    const attachImageToCurrentChunk = async (base64) => {
+        if (!currentChunk) return;
+        try {
+            const customCards = (await getIDB('custom_cards')) || [];
+            const updated = customCards.map(c => {
+                if (c.id === currentChunk.id) {
+                    return { ...c, imagePath: base64 };
+                }
+                return c;
+            });
+            await setIDB('custom_cards', updated);
+            currentChunk.imagePath = base64;
+            setSelectedSlideIdx(0);
+        } catch (err) {
+            console.error("Failed to attach image to card", err);
+        }
+    };
 
     // 全英專有名詞高亮解析引擎
     const renderAnnotatedText = (text) => {
@@ -278,7 +400,6 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
         const termKeys = Object.keys(glossaryDict).sort((a, b) => b.length - a.length);
         if (termKeys.length === 0) return text;
 
-        // 轉義正則特殊字符
         const escapedTerms = termKeys.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
         const regex = new RegExp(`\\b(${escapedTerms.join('|')})\\b`, 'gi');
 
@@ -293,21 +414,19 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
             const lowerWord = matchedWord.toLowerCase();
             const termInfo = glossaryDict[lowerWord];
 
-            // 推進普通文本
             if (start > lastIndex) {
                 parts.push(text.slice(lastIndex, start));
             }
 
-            // 推進高亮單字元素
             parts.push(
                 <span
                     key={`${start}-${end}`}
                     onClick={() => setActiveTermModal(termInfo || { term_en: matchedWord })}
-                    className="inline-flex items-center gap-0.5 px-1.5 py-0.5 mx-0.5 rounded-lg bg-emerald-950/70 border border-emerald-500/40 text-emerald-300 font-bold font-mono text-sm cursor-pointer hover:bg-emerald-600 hover:text-white hover:border-emerald-400 transition-all shadow-sm"
+                    className="inline-flex items-center gap-1 px-2.5 py-0.5 mx-1.5 rounded-lg bg-emerald-950/80 border border-emerald-500/50 text-emerald-300 font-bold font-mono text-[0.92em] cursor-pointer hover:bg-emerald-600 hover:text-white hover:border-emerald-300 transition-all shadow-sm align-baseline group"
                     title="點擊查看中文翻譯與理工工程類比"
                 >
                     <span>{matchedWord}</span>
-                    <Sparkles className="w-2.5 h-2.5 text-yellow-300 shrink-0" />
+                    <Sparkles className="w-2.5 h-2.5 text-yellow-300 opacity-80 group-hover:scale-125 transition-transform shrink-0" />
                 </span>
             );
 
@@ -336,7 +455,7 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
 
         const utterance = new SpeechSynthesisUtterance(textToSpeak);
         utterance.lang = 'en-US';
-        utterance.rate = 0.95; // 稍微放慢，便於聽清全英醫學名詞
+        utterance.rate = 0.95;
 
         utterance.onend = () => setIsSpeaking(false);
         utterance.onerror = () => setIsSpeaking(false);
@@ -357,6 +476,26 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
         return () => stopSpeech();
     }, [currentChunkIdx]);
 
+    const getFontSizeClass = () => {
+        switch (fontSize) {
+            case 'md': return 'text-base md:text-lg';
+            case 'xl': return 'text-xl md:text-2xl';
+            case 'lg':
+            default:
+                return 'text-lg md:text-xl';
+        }
+    };
+
+    const getLineSpacingClass = () => {
+        switch (lineSpacing) {
+            case 'comfortable': return 'leading-[2.0] tracking-[0.015em]';
+            case 'spacious': return 'leading-[2.7] tracking-[0.035em]';
+            case 'relaxed':
+            default:
+                return 'leading-[2.35] tracking-[0.025em]';
+        }
+    };
+
     if (!chunks || chunks.length === 0) {
         return (
             <div className="h-full w-full flex flex-col items-center justify-center p-6 text-center text-gray-400">
@@ -376,29 +515,113 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
     }
 
     return (
-        <div className="h-full w-full flex flex-col items-center p-4 md:p-8 overflow-y-auto custom-scrollbar">
-            <div className="w-full max-w-4xl space-y-6 animate-fade-in pb-20">
+        <div className="h-full w-full flex flex-col items-center p-3 md:p-6 lg:p-8 overflow-y-auto custom-scrollbar">
+            <div className={`w-full ${layoutMode === 'split' ? 'max-w-7xl' : 'max-w-4xl'} space-y-6 animate-fade-in pb-20 transition-all duration-300`}>
 
-                {/* 頂部標題與工具列 */}
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-800 pb-4">
+                {/* 頂部標題與閱讀控制條 */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-gray-800 pb-5">
                     <div>
-                        <div className="flex items-center gap-2 mb-1">
-                            <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-indigo-950/80 text-indigo-300 border border-indigo-500/30 font-mono">
+                        <div className="flex items-center gap-2 mb-1.5">
+                            <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-indigo-950/80 text-indigo-300 border border-indigo-500/40 font-mono tracking-wider">
                                 NTU Smart MHI All-English Guided Study
                             </span>
-                            <span className="text-xs text-gray-500">
-                                來源：{currentChunk.source}
+                            <span className="text-xs text-gray-400">
+                                來源：<strong className="text-gray-200">{currentChunk.source}</strong>
                             </span>
                         </div>
                         <h1 className="text-2xl md:text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400">
                             全英文分段精讀複習工作台
                         </h1>
                         <p className="text-xs text-gray-400 mt-1">
-                            正文嚴格保持純英文教材段落！專業生醫術語直接在文中標記，點擊即可對齊理工直覺，拒絕全文機翻破壞語感。
+                            純英文段落寬鬆排版，搭配 PDF 投影片並排對照與理工工程類比，大幅提升全英專有名詞熟練度。
                         </p>
                     </div>
 
-                    <div className="flex items-center gap-2 flex-wrap">
+                    {/* 工具列控制按鈕組 */}
+                    <div className="flex items-center gap-2 flex-wrap w-full md:w-auto">
+                        {/* 雙欄 / 單欄對照切換 */}
+                        <button
+                            onClick={() => setLayoutMode(layoutMode === 'split' ? 'focus' : 'split')}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
+                                layoutMode === 'split'
+                                    ? 'bg-cyan-950/70 text-cyan-300 border-cyan-500/40 shadow-sm'
+                                    : 'bg-gray-800 hover:bg-gray-750 text-gray-300 border-gray-700'
+                            }`}
+                            title="切換雙欄投影片圖文對照或單欄專注沉浸閱讀"
+                        >
+                            <Columns className="w-3.5 h-3.5" />
+                            <span>{layoutMode === 'split' ? '🖼️ 圖文對照模式' : '📄 單欄專注模式'}</span>
+                        </button>
+
+                        {/* 行距設定選單 */}
+                        <div className="flex items-center bg-gray-800/90 rounded-xl border border-gray-700 p-0.5 text-xs">
+                            <span className="text-[11px] text-gray-400 px-2 flex items-center gap-1 font-bold">
+                                <AlignJustify className="w-3 h-3 text-indigo-400" /> 行距
+                            </span>
+                            <button
+                                onClick={() => setLineSpacing('comfortable')}
+                                className={`px-2 py-1 rounded-lg text-xs font-bold transition-colors ${
+                                    lineSpacing === 'comfortable' ? 'bg-indigo-600 text-white shadow' : 'text-gray-400 hover:text-white'
+                                }`}
+                                title="行距 2.0x"
+                            >
+                                舒適
+                            </button>
+                            <button
+                                onClick={() => setLineSpacing('relaxed')}
+                                className={`px-2 py-1 rounded-lg text-xs font-bold transition-colors ${
+                                    lineSpacing === 'relaxed' ? 'bg-indigo-600 text-white shadow' : 'text-gray-400 hover:text-white'
+                                }`}
+                                title="行距 2.35x（推薦）"
+                            >
+                                寬敞
+                            </button>
+                            <button
+                                onClick={() => setLineSpacing('spacious')}
+                                className={`px-2 py-1 rounded-lg text-xs font-bold transition-colors ${
+                                    lineSpacing === 'spacious' ? 'bg-indigo-600 text-white shadow' : 'text-gray-400 hover:text-white'
+                                }`}
+                                title="行距 2.7x"
+                            >
+                                奢華
+                            </button>
+                        </div>
+
+                        {/* 字級大小切換 */}
+                        <div className="flex items-center bg-gray-800/90 rounded-xl border border-gray-700 p-0.5 text-xs">
+                            <span className="text-[11px] text-gray-400 px-2 flex items-center gap-1 font-bold">
+                                <Type className="w-3 h-3 text-indigo-400" /> 字級
+                            </span>
+                            <button
+                                onClick={() => setFontSize('md')}
+                                className={`px-2 py-1 rounded-lg text-xs font-bold transition-colors ${
+                                    fontSize === 'md' ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:text-white'
+                                }`}
+                                title="標準字級 16px"
+                            >
+                                中
+                            </button>
+                            <button
+                                onClick={() => setFontSize('lg')}
+                                className={`px-2 py-1 rounded-lg text-xs font-bold transition-colors ${
+                                    fontSize === 'lg' ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:text-white'
+                                }`}
+                                title="放大字級 18px（推薦）"
+                            >
+                                大
+                            </button>
+                            <button
+                                onClick={() => setFontSize('xl')}
+                                className={`px-2 py-1 rounded-lg text-xs font-bold transition-colors ${
+                                    fontSize === 'xl' ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:text-white'
+                                }`}
+                                title="特大字級 20px"
+                            >
+                                特大
+                            </button>
+                        </div>
+
+                        {/* 高亮開關 */}
                         <button
                             onClick={() => setHighlightTerms(!highlightTerms)}
                             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
@@ -409,7 +632,7 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                             title="切換是否高亮標註專業生醫詞彙"
                         >
                             <Highlighter className="w-3.5 h-3.5" />
-                            <span>{highlightTerms ? "專有名詞標註：開" : "標註：關"}</span>
+                            <span>{highlightTerms ? "名詞標註：開" : "標註：關"}</span>
                         </button>
 
                         <button
@@ -424,7 +647,7 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                             }`}
                         >
                             <FileText className="w-3.5 h-3.5" />
-                            <span>{isCustomMode ? "返回牌組精讀" : "貼上自訂英文課文"}</span>
+                            <span>{isCustomMode ? "返回牌組精讀" : "貼上自訂課文"}</span>
                         </button>
                     </div>
                 </div>
@@ -454,7 +677,7 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                 )}
 
                 {/* 段落導航進度條 */}
-                <div className="flex items-center justify-between bg-gray-850/80 px-4 py-2.5 rounded-2xl border border-gray-800">
+                <div className="flex items-center justify-between bg-gray-850/90 px-4 py-3 rounded-2xl border border-gray-800 shadow-md">
                     <button
                         disabled={currentChunkIdx === 0}
                         onClick={() => setCurrentChunkIdx(prev => Math.max(0, prev - 1))}
@@ -467,13 +690,13 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                         <ChevronLeft className="w-4 h-4" /> 上一段
                     </button>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                         <span className="text-xs font-mono font-bold text-indigo-300">
                             段落 {currentChunkIdx + 1} / {chunks.length}
                         </span>
-                        <div className="w-24 sm:w-40 bg-gray-800 h-1.5 rounded-full overflow-hidden">
+                        <div className="w-24 sm:w-48 bg-gray-800 h-2 rounded-full overflow-hidden">
                             <div
-                                className="bg-gradient-to-r from-blue-500 to-indigo-500 h-full transition-all duration-300"
+                                className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 h-full transition-all duration-300 rounded-full"
                                 style={{ width: `${((currentChunkIdx + 1) / chunks.length) * 100}%` }}
                             />
                         </div>
@@ -492,116 +715,296 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                     </button>
                 </div>
 
-                {/* 核心分段閱讀卡片 */}
-                <div className="bg-gradient-to-b from-gray-850 to-gray-900 rounded-3xl border border-indigo-500/20 shadow-2xl p-6 md:p-8 flex flex-col gap-6">
+                {/* ================= 核心工作區：圖文對照並排佈局 (Split Layout Grid) ================= */}
+                <div className={`grid grid-cols-1 ${layoutMode === 'split' ? 'lg:grid-cols-12 gap-8' : 'gap-6'} items-start`}>
 
-                    {/* 段落標題與發音朗讀 */}
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-gray-800 pb-4">
-                        <div>
-                            {currentChunk.term_en && (
-                                <span className="text-xs font-mono font-bold text-indigo-400 block mb-0.5">
-                                    {currentChunk.term_en}
-                                </span>
+                    {/* ===== 左側主欄：純英文學術正文與心智模型 ===== */}
+                    <div className={`${layoutMode === 'split' ? 'lg:col-span-7' : 'w-full'} flex flex-col gap-6`}>
+                        <div className="bg-gradient-to-b from-gray-850 to-gray-900 rounded-3xl border border-indigo-500/25 shadow-2xl p-6 md:p-8 flex flex-col gap-6">
+
+                            {/* 段落標題與發音朗讀 */}
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-gray-800 pb-5">
+                                <div>
+                                    {currentChunk.term_en && (
+                                        <span className="text-xs font-mono font-bold text-indigo-400 block mb-1">
+                                            {currentChunk.term_en}
+                                        </span>
+                                    )}
+                                    <h2 className="text-xl md:text-2xl font-black text-white font-mono leading-snug">
+                                        {currentChunk.title}
+                                    </h2>
+                                </div>
+
+                                <button
+                                    onClick={() => speakText(`${currentChunk.title}. ${currentChunk.text}`)}
+                                    className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border shrink-0 ${
+                                        isSpeaking
+                                            ? 'bg-rose-950/60 text-rose-300 border-rose-500/40 animate-pulse'
+                                            : 'bg-gray-800 hover:bg-gray-750 text-indigo-300 border-gray-700'
+                                    }`}
+                                    title="點擊聆聽全英發音朗讀"
+                                >
+                                    {isSpeaking ? <Pause className="w-3.5 h-3.5 text-rose-400" /> : <Play className="w-3.5 h-3.5 text-indigo-400" />}
+                                    <span>{isSpeaking ? "停止朗讀" : "全英文朗讀本段"}</span>
+                                </button>
+                            </div>
+
+                            {/* 純英文學術正文（間距放大、寬敞舒適可讀性） */}
+                            <div className={`text-gray-100 ${getFontSizeClass()} ${getLineSpacingClass()} whitespace-pre-wrap font-sans bg-gray-900/85 p-6 md:p-8 rounded-3xl border border-gray-800 shadow-2xl shadow-black/40`}>
+                                {renderAnnotatedText(currentChunk.text)}
+                            </div>
+
+                            {/* 理工心智錨點註解框 (Engineering Analogy Callout) */}
+                            {currentChunk.analogy && (
+                                <div className="p-4 md:p-5 rounded-2xl bg-cyan-950/30 border border-cyan-500/30 flex items-start gap-3.5 shadow-inner">
+                                    <Zap className="w-5 h-5 text-cyan-400 shrink-0 mt-0.5" />
+                                    <div>
+                                        <h4 className="text-xs font-extrabold uppercase tracking-wider text-cyan-300 font-mono mb-1">
+                                            ⚡ 理工工程直覺心智模型 (Engineering Analogy)
+                                        </h4>
+                                        <p className="text-xs md:text-sm text-gray-200 leading-relaxed font-mono">
+                                            {currentChunk.analogy}
+                                        </p>
+                                    </div>
+                                </div>
                             )}
-                            <h2 className="text-xl md:text-2xl font-black text-white font-mono">
-                                {currentChunk.title}
-                            </h2>
-                        </div>
 
-                        <button
-                            onClick={() => speakText(`${currentChunk.title}. ${currentChunk.text}`)}
-                            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border ${
-                                isSpeaking
-                                    ? 'bg-rose-950/60 text-rose-300 border-rose-500/40 animate-pulse'
-                                    : 'bg-gray-800 hover:bg-gray-750 text-indigo-300 border-gray-700'
-                            }`}
-                            title="點擊聆聽全英發音朗讀"
-                        >
-                            {isSpeaking ? <Pause className="w-3.5 h-3.5 text-rose-400" /> : <Play className="w-3.5 h-3.5 text-indigo-400" />}
-                            <span>{isSpeaking ? "停止朗讀" : "全英文朗讀本段"}</span>
-                        </button>
+                            {/* 可折疊之繁體中文對照翻譯 (輔助理解，不覆蓋原文) */}
+                            {currentChunk.translation_zh && (
+                                <div className="border border-gray-800 rounded-2xl overflow-hidden bg-gray-900/50">
+                                    <button
+                                        onClick={() => setShowTranslation(!showTranslation)}
+                                        className="w-full px-4 py-3 flex items-center justify-between text-xs font-bold text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+                                    >
+                                        <span className="flex items-center gap-1.5">
+                                            <Languages className="w-3.5 h-3.5 text-indigo-400" />
+                                            <span>{showTranslation ? "隱藏中文對照翻譯" : "📖 看不懂？點擊展開繁體中文對照翻譯"}</span>
+                                        </span>
+                                        {showTranslation ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                                    </button>
+                                    {showTranslation && (
+                                        <div className="p-5 pt-2 text-xs md:text-sm text-gray-300 leading-relaxed border-t border-gray-800 bg-gray-950/40 font-sans">
+                                            {currentChunk.translation_zh}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* 底部段落切換快捷列 */}
+                            <div className="flex justify-between items-center pt-3 border-t border-gray-800">
+                                <span className="text-[11px] text-gray-400">
+                                    💡 提示：點擊綠色標籤即可查看理工工程類比與詞根拆解
+                                </span>
+
+                                <button
+                                    onClick={() => {
+                                        if (currentChunkIdx < chunks.length - 1) {
+                                            setCurrentChunkIdx(prev => prev + 1);
+                                        }
+                                    }}
+                                    disabled={currentChunkIdx === chunks.length - 1}
+                                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                                        currentChunkIdx === chunks.length - 1
+                                            ? 'opacity-30 cursor-not-allowed text-gray-500'
+                                            : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/20 hover:scale-[1.02]'
+                                    }`}
+                                >
+                                    <span>讀完進入下一段</span>
+                                    <ArrowRight className="w-3.5 h-3.5" />
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
-                    {/* 附帶圖解（若有講義截圖或架構圖） */}
-                    {currentChunk.imagePath && (
-                        <div className="w-full max-h-72 rounded-2xl overflow-hidden bg-black/60 border border-gray-800 flex items-center justify-center p-2">
-                            <img
-                                src={currentChunk.imagePath}
-                                alt={currentChunk.title}
-                                className="max-h-68 object-contain rounded-xl"
-                            />
-                        </div>
-                    )}
+                    {/* ===== 右側邊欄：相關 PDF 講義 / 投影片與圖解觀測區 ===== */}
+                    {layoutMode === 'split' && (
+                        <div className="lg:col-span-5 flex flex-col gap-4 lg:sticky lg:top-4">
+                            <div className="bg-gray-850/95 rounded-3xl border border-indigo-500/30 p-5 shadow-2xl flex flex-col gap-4 backdrop-blur-md">
+                                <div className="flex items-center justify-between pb-3 border-b border-gray-750">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-8 h-8 rounded-xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400">
+                                            <ImageIcon className="w-4 h-4" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-sm font-extrabold text-white flex items-center gap-1.5">
+                                                <span>相關講義 / PDF 投影片對照</span>
+                                            </h3>
+                                            <span className="text-[11px] text-gray-400">
+                                                {activeSlide?.page ? `投影片第 ${activeSlide.page} 頁` : '講義示意圖'} {activeSlide?.isDirectMatch ? '· 本章直屬' : '· 牌組投影片'}
+                                            </span>
+                                        </div>
+                                    </div>
 
-                    {/* 純英文學術正文（標註專有名詞） */}
-                    <div className="text-gray-100 text-sm md:text-base leading-relaxed tracking-wide whitespace-pre-wrap font-sans bg-gray-900/60 p-5 rounded-2xl border border-gray-800/80 shadow-inner">
-                        {renderAnnotatedText(currentChunk.text)}
-                    </div>
+                                    {activeSlide?.imagePath && (
+                                        <button
+                                            onClick={() => setLightboxImage(activeSlide)}
+                                            className="px-2.5 py-1 rounded-xl bg-gray-800 hover:bg-gray-750 text-gray-300 hover:text-white border border-gray-700 text-xs font-bold flex items-center gap-1 transition-all"
+                                            title="全螢幕放大查看高畫質投影片"
+                                        >
+                                            <Maximize2 className="w-3.5 h-3.5 text-cyan-400" />
+                                            <span>放大</span>
+                                        </button>
+                                    )}
+                                </div>
 
-                    {/* 理工心智錨點註解框 (Engineering Analogy Callout) */}
-                    {currentChunk.analogy && (
-                        <div className="p-4 rounded-2xl bg-cyan-950/30 border border-cyan-500/30 flex items-start gap-3 shadow-inner">
-                            <Zap className="w-5 h-5 text-cyan-400 shrink-0 mt-0.5" />
-                            <div>
-                                <h4 className="text-xs font-extrabold uppercase tracking-wider text-cyan-300 font-mono mb-1">
-                                    ⚡ 理工工程直覺心智模型 (Engineering Analogy)
-                                </h4>
-                                <p className="text-xs text-gray-200 leading-relaxed font-mono">
-                                    {currentChunk.analogy}
-                                </p>
+                                {/* 投影片主畫面 */}
+                                {activeSlide?.imagePath ? (
+                                    <div
+                                        onClick={() => setLightboxImage(activeSlide)}
+                                        className="w-full relative rounded-2xl overflow-hidden bg-black/90 border border-gray-750 flex items-center justify-center cursor-zoom-in group shadow-inner min-h-[220px] max-h-[380px]"
+                                    >
+                                        <img
+                                            src={activeSlide.imagePath}
+                                            alt={activeSlide.title || "PDF Slide"}
+                                            className="w-full h-full object-contain max-h-[380px] group-hover:scale-105 transition-transform duration-300"
+                                        />
+                                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 text-white font-bold text-xs backdrop-blur-[2px]">
+                                            <ZoomIn className="w-5 h-5 text-cyan-400" />
+                                            <span>點擊全螢幕放大檢視細節</span>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    /* 若此段落暫無對應圖片，提供即時貼上/上傳插槽 */
+                                    <div
+                                        onClick={() => fileInputRef.current?.click()}
+                                        className="border-2 border-dashed border-gray-750 hover:border-indigo-500/50 bg-gray-900/60 hover:bg-indigo-950/20 rounded-2xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-all min-h-[200px]"
+                                    >
+                                        <input
+                                            ref={fileInputRef}
+                                            type="file"
+                                            accept="image/*"
+                                            className="hidden"
+                                            onChange={(e) => {
+                                                if (e.target.files && e.target.files[0]) {
+                                                    const reader = new FileReader();
+                                                    reader.onload = (evt) => attachImageToCurrentChunk(evt.target.result);
+                                                    reader.readAsDataURL(e.target.files[0]);
+                                                }
+                                            }}
+                                        />
+                                        <UploadCloud className="w-8 h-8 text-indigo-400 mb-2 opacity-70" />
+                                        <h4 className="text-xs font-bold text-gray-300 mb-1">
+                                            點擊上傳或按 Ctrl + V 貼上對應投影片
+                                        </h4>
+                                        <p className="text-[11px] text-gray-500 max-w-xs">
+                                            可截圖 PDF 講義中的機制流程圖或投影片頁面，同步並排精讀
+                                        </p>
+                                    </div>
+                                )}
+
+                                {/* 投影片切換與縮圖列（若牌組有多張投影片） */}
+                                {deckSlides.length > 1 && (
+                                    <div className="pt-2 border-t border-gray-750">
+                                        <div className="flex items-center justify-between text-xs text-gray-400 mb-2 font-bold">
+                                            <span>切換講義頁面 ({selectedSlideIdx + 1} / {deckSlides.length})</span>
+                                            <div className="flex items-center gap-1">
+                                                <button
+                                                    disabled={selectedSlideIdx === 0}
+                                                    onClick={() => setSelectedSlideIdx(prev => Math.max(0, prev - 1))}
+                                                    className="p-1 rounded-lg bg-gray-800 hover:bg-gray-750 disabled:opacity-30 disabled:cursor-not-allowed text-gray-300"
+                                                    title="上一張投影片"
+                                                >
+                                                    <ChevronLeft className="w-3.5 h-3.5" />
+                                                </button>
+                                                <button
+                                                    disabled={selectedSlideIdx === deckSlides.length - 1}
+                                                    onClick={() => setSelectedSlideIdx(prev => Math.min(deckSlides.length - 1, prev + 1))}
+                                                    className="p-1 rounded-lg bg-gray-800 hover:bg-gray-750 disabled:opacity-30 disabled:cursor-not-allowed text-gray-300"
+                                                    title="下一張投影片"
+                                                >
+                                                    <ChevronRight className="w-3.5 h-3.5" />
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* 投影片縮圖條 */}
+                                        <div className="flex gap-2 overflow-x-auto custom-scrollbar pb-1">
+                                            {deckSlides.map((slide, sIdx) => (
+                                                <div
+                                                    key={slide.id || sIdx}
+                                                    onClick={() => setSelectedSlideIdx(sIdx)}
+                                                    className={`shrink-0 w-16 h-12 rounded-lg overflow-hidden border cursor-pointer transition-all ${
+                                                        sIdx === selectedSlideIdx
+                                                            ? 'border-cyan-400 ring-2 ring-cyan-500/30 scale-105'
+                                                            : 'border-gray-800 hover:border-gray-600 opacity-60 hover:opacity-100'
+                                                    }`}
+                                                    title={`第 ${slide.page || sIdx + 1} 頁: ${slide.title}`}
+                                                >
+                                                    <img src={slide.imagePath} alt="thumbnail" className="w-full h-full object-cover" />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     )}
-
-                    {/* 可折疊之繁體中文對照翻譯 (輔助理解，不覆蓋原文) */}
-                    {currentChunk.translation_zh && (
-                        <div className="border border-gray-800 rounded-2xl overflow-hidden bg-gray-900/40">
-                            <button
-                                onClick={() => setShowTranslation(!showTranslation)}
-                                className="w-full px-4 py-2.5 flex items-center justify-between text-xs font-bold text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
-                            >
-                                <span className="flex items-center gap-1.5">
-                                    <Languages className="w-3.5 h-3.5 text-indigo-400" />
-                                    <span>{showTranslation ? "隱藏中文對照翻譯" : "📖 看不懂？點擊展開繁體中文對照翻譯"}</span>
-                                </span>
-                                {showTranslation ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-                            </button>
-                            {showTranslation && (
-                                <div className="p-4 pt-2 text-xs md:text-sm text-gray-300 leading-relaxed border-t border-gray-800 bg-gray-950/30 font-sans">
-                                    {currentChunk.translation_zh}
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {/* 底部段落切換快捷列 */}
-                    <div className="flex justify-between items-center pt-2 border-t border-gray-800">
-                        <span className="text-[11px] text-gray-500">
-                            提示：滑鼠點擊內文中的綠色單字即可彈出詳細中英對照
-                        </span>
-
-                        <button
-                            onClick={() => {
-                                if (currentChunkIdx < chunks.length - 1) {
-                                    setCurrentChunkIdx(prev => prev + 1);
-                                }
-                            }}
-                            disabled={currentChunkIdx === chunks.length - 1}
-                            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-                                currentChunkIdx === chunks.length - 1
-                                    ? 'opacity-30 cursor-not-allowed text-gray-500'
-                                    : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-md'
-                            }`}
-                        >
-                            <span>讀完進入下一段</span>
-                            <ArrowRight className="w-3.5 h-3.5" />
-                        </button>
-                    </div>
                 </div>
+
+                {/* ================= 全螢幕投影片放大檢視視窗 (Slide Lightbox Modal) ================= */}
+                {lightboxImage && (
+                    <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex flex-col p-4 animate-fade-in">
+                        <div className="flex justify-between items-center text-white pb-3 border-b border-gray-800">
+                            <div className="flex items-center gap-3">
+                                <span className="text-xs font-bold px-2.5 py-1 rounded-lg bg-indigo-950 border border-indigo-500/40 text-indigo-300">
+                                    {lightboxImage.page ? `投影片第 ${lightboxImage.page} 頁` : '講義高畫質檢視'}
+                                </span>
+                                <h3 className="text-sm font-bold text-gray-200 truncate max-w-md">
+                                    {lightboxImage.title}
+                                </h3>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setLightboxZoom(prev => Math.max(0.75, prev - 0.25))}
+                                    className="p-2 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300"
+                                    title="縮小"
+                                >
+                                    <ZoomOut className="w-4 h-4" />
+                                </button>
+                                <span className="text-xs font-mono text-gray-400 min-w-[45px] text-center">
+                                    {Math.round(lightboxZoom * 100)}%
+                                </span>
+                                <button
+                                    onClick={() => setLightboxZoom(prev => Math.min(3, prev + 0.25))}
+                                    className="p-2 rounded-xl bg-gray-800 hover:bg-gray-750 text-gray-300"
+                                    title="放大"
+                                >
+                                    <ZoomIn className="w-4 h-4" />
+                                </button>
+                                <button
+                                    onClick={() => setLightboxZoom(1)}
+                                    className="px-2.5 py-1.5 rounded-xl bg-gray-800 hover:bg-gray-750 text-xs text-gray-400 font-bold"
+                                >
+                                    重設
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setLightboxImage(null);
+                                        setLightboxZoom(1);
+                                    }}
+                                    className="p-2 rounded-xl bg-gray-800 hover:bg-red-900/60 text-gray-400 hover:text-white transition-colors ml-2"
+                                    title="關閉"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="flex-1 overflow-auto flex items-center justify-center p-4">
+                            <img
+                                src={lightboxImage.imagePath}
+                                alt="Full Slide"
+                                style={{ transform: `scale(${lightboxZoom})`, transformOrigin: 'center center' }}
+                                className="max-h-[85vh] max-w-[90vw] object-contain transition-transform duration-200 select-none shadow-2xl rounded-xl"
+                            />
+                        </div>
+                    </div>
+                )}
 
                 {/* 彈出式生醫專有名詞解析卡 (Active Term Modal) */}
                 {activeTermModal && (
-                    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+                    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
                         <div className="bg-gray-900 border border-emerald-500/40 rounded-3xl p-6 md:p-8 max-w-lg w-full shadow-2xl relative space-y-4">
                             <button
                                 onClick={() => setActiveTermModal(null)}
@@ -628,10 +1031,10 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
 
                             {/* 理工直覺對等概念 */}
                             {activeTermModal.engineeringAnchor && (
-                                <div className="p-3 bg-cyan-950/40 rounded-xl border border-cyan-500/30 text-xs text-cyan-200 font-mono flex items-start gap-2 shadow-inner">
+                                <div className="p-3.5 bg-cyan-950/40 rounded-xl border border-cyan-500/30 text-xs text-cyan-200 font-mono flex items-start gap-2.5 shadow-inner">
                                     <Zap className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
                                     <div>
-                                        <strong className="text-cyan-300">⚡ 理工直覺：</strong>
+                                        <strong className="text-cyan-300 block mb-0.5">⚡ 理工直覺對齊：</strong>
                                         <span>{activeTermModal.engineeringAnchor}</span>
                                     </div>
                                 </div>
@@ -655,7 +1058,7 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                             <div className="flex justify-between items-center pt-2">
                                 <button
                                     onClick={() => speakText(activeTermModal.term_en)}
-                                    className="px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-750 text-indigo-300 text-xs font-bold flex items-center gap-1.5 transition-colors"
+                                    className="px-3.5 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-750 text-indigo-300 text-xs font-bold flex items-center gap-1.5 transition-colors"
                                 >
                                     <Volume2 className="w-3.5 h-3.5" />
                                     <span>聽發音</span>
