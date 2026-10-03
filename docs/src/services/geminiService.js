@@ -362,3 +362,237 @@ export const parseOfflineText = (rawText) => {
         scenarios: []
     };
 };
+
+// ================= 開源論文提取服務 (arXiv / Europe PMC / PubMed / DOI / OpenAlex) =================
+
+function reconstructAbstract(invertedIndex) {
+    if (!invertedIndex || typeof invertedIndex !== 'object') return '';
+    const wordList = [];
+    for (const [word, positions] of Object.entries(invertedIndex)) {
+        for (const pos of positions) {
+            wordList[pos] = word;
+        }
+    }
+    return wordList.filter(Boolean).join(' ');
+}
+
+export const fetchOpenAccessPaper = async (queryOrUrl) => {
+    const raw = (queryOrUrl || '').trim();
+    if (!raw) throw new Error("請輸入論文網址、DOI、PubMed ID、arXiv ID 或關鍵字。");
+
+    // 1. Detect arXiv ID (e.g. 1706.03762 or https://arxiv.org/abs/1706.03762)
+    const arxivMatch = raw.match(/(\d{4}\.\d{4,5}(v\d+)?)/i);
+    const isArxiv = raw.toLowerCase().includes('arxiv') || (arxivMatch && (raw.includes('/') || raw.startsWith('arxiv:')));
+
+    // 2. Detect PMID (e.g. 28285215 or https://pubmed.ncbi.nlm.nih.gov/28285215/)
+    const pmidMatch = raw.match(/pubmed\.ncbi\.nlm\.nih\.gov\/(\d+)/i) || raw.match(/pmid:?\s*(\d+)/i) || (/^\d{7,9}$/.test(raw) ? [null, raw] : null);
+
+    // 3. Detect PMCID (e.g. PMC8323875 or ncbi.nlm.nih.gov/pmc/articles/PMC8323875)
+    const pmcMatch = raw.match(/(PMC\d+)/i);
+
+    // 4. Detect DOI (e.g. 10.1038/s41586-024-07487-w or https://doi.org/...)
+    const doiMatch = raw.match(/(10\.\d{4,9}\/[-._;()/:A-Za-z0-9]+)/i);
+
+    // Flow A: arXiv
+    if (isArxiv && arxivMatch) {
+        const arxivId = arxivMatch[1];
+        // Try OpenAlex search
+        try {
+            const oaRes = await fetch(`https://api.openalex.org/works?filter=default.search:${encodeURIComponent(arxivId)}`);
+            if (oaRes.ok) {
+                const oaData = await oaRes.json();
+                if (oaData.results && oaData.results.length > 0) {
+                    const paper = oaData.results[0];
+                    const abstract = reconstructAbstract(paper.abstract_inverted_index) || '';
+                    const authors = (paper.authorships || []).map(a => a.author?.display_name).filter(Boolean).join(', ');
+                    return {
+                        title: paper.title || `arXiv Paper ${arxivId}`,
+                        authors: authors || 'Unknown Authors',
+                        journal: paper.primary_location?.source?.display_name || 'arXiv',
+                        year: paper.publication_year || '',
+                        doi: paper.doi || `https://doi.org/10.48550/arXiv.${arxivId}`,
+                        arxivId: arxivId,
+                        abstract: abstract,
+                        rawUrl: raw,
+                        source: 'arXiv / OpenAlex',
+                        fullContentText: `Academic Paper: ${paper.title}\nAuthors: ${authors}\nPublished in: ${paper.primary_location?.source?.display_name || 'arXiv'} (${paper.publication_year || ''})\narXiv ID: ${arxivId}\nDOI: ${paper.doi || ''}\n\n[Abstract / Academic Summary]:\n${abstract}`
+                    };
+                }
+            }
+        } catch (e) {
+            console.warn("OpenAlex arXiv search failed:", e);
+        }
+    }
+
+    // Flow B: PMID
+    if (pmidMatch) {
+        const pmid = pmidMatch[1];
+        try {
+            const res = await fetch(`https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=ext_id:${pmid}&format=json&resultType=core`);
+            if (res.ok) {
+                const data = await res.json();
+                if (data.resultList?.result?.length > 0) {
+                    const p = data.resultList.result[0];
+                    const cleanTitle = (p.title || '').replace(/<[^>]+>/g, '').trim();
+                    const cleanAbstract = (p.abstractText || '').replace(/<[^>]+>/g, '').trim();
+                    return {
+                        title: cleanTitle || `PubMed Paper ${pmid}`,
+                        authors: p.authorString || '',
+                        journal: p.journalTitle || '',
+                        year: p.pubYear || '',
+                        doi: p.doi || '',
+                        pmid: pmid,
+                        pmcid: p.pmcid || '',
+                        abstract: cleanAbstract,
+                        rawUrl: raw,
+                        source: 'Europe PMC (PubMed)',
+                        fullContentText: `Academic Paper: ${cleanTitle}\nAuthors: ${p.authorString || ''}\nJournal: ${p.journalTitle || ''} (${p.pubYear || ''})\nPMID: ${pmid} | DOI: ${p.doi || ''}\n\n[Abstract / Academic Summary]:\n${cleanAbstract}`
+                    };
+                }
+            }
+        } catch (e) {
+            console.warn("Europe PMC PMID search failed:", e);
+        }
+    }
+
+    // Flow C: PMCID
+    if (pmcMatch) {
+        const pmcid = pmcMatch[1].toUpperCase();
+        try {
+            const res = await fetch(`https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=pmcid:${pmcid}&format=json&resultType=core`);
+            if (res.ok) {
+                const data = await res.json();
+                if (data.resultList?.result?.length > 0) {
+                    const p = data.resultList.result[0];
+                    const cleanTitle = (p.title || '').replace(/<[^>]+>/g, '').trim();
+                    const cleanAbstract = (p.abstractText || '').replace(/<[^>]+>/g, '').trim();
+                    return {
+                        title: cleanTitle || `PMC Paper ${pmcid}`,
+                        authors: p.authorString || '',
+                        journal: p.journalTitle || '',
+                        year: p.pubYear || '',
+                        doi: p.doi || '',
+                        pmcid: pmcid,
+                        abstract: cleanAbstract,
+                        rawUrl: raw,
+                        source: 'Europe PMC',
+                        fullContentText: `Academic Paper: ${cleanTitle}\nAuthors: ${p.authorString || ''}\nJournal: ${p.journalTitle || ''} (${p.pubYear || ''})\nPMCID: ${pmcid}\n\n[Abstract / Academic Summary]:\n${cleanAbstract}`
+                    };
+                }
+            }
+        } catch (e) {
+            console.warn("Europe PMC PMCID search failed:", e);
+        }
+    }
+
+    // Flow D: DOI
+    if (doiMatch) {
+        const cleanDoi = doiMatch[1].replace(/[.,;)]+$/, '');
+        // 1. Try OpenAlex first
+        try {
+            const oaRes = await fetch(`https://api.openalex.org/works/https://doi.org/${encodeURIComponent(cleanDoi)}`);
+            if (oaRes.ok) {
+                const paper = await oaRes.json();
+                const abstract = reconstructAbstract(paper.abstract_inverted_index) || '';
+                const authors = (paper.authorships || []).map(a => a.author?.display_name).filter(Boolean).join(', ');
+                if (paper.title) {
+                    return {
+                        title: paper.title,
+                        authors: authors || '',
+                        journal: paper.primary_location?.source?.display_name || '',
+                        year: paper.publication_year || '',
+                        doi: cleanDoi,
+                        abstract: abstract,
+                        rawUrl: raw,
+                        source: 'OpenAlex',
+                        fullContentText: `Academic Paper: ${paper.title}\nAuthors: ${authors}\nPublished in: ${paper.primary_location?.source?.display_name || ''} (${paper.publication_year || ''})\nDOI: ${cleanDoi}\n\n[Abstract / Academic Summary]:\n${abstract}`
+                    };
+                }
+            }
+        } catch (e) {
+            console.warn("OpenAlex DOI lookup failed:", e);
+        }
+
+        // 2. Try Europe PMC for DOI
+        try {
+            const res = await fetch(`https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=DOI:"${encodeURIComponent(cleanDoi)}"&format=json&resultType=core`);
+            if (res.ok) {
+                const data = await res.json();
+                if (data.resultList?.result?.length > 0) {
+                    const p = data.resultList.result[0];
+                    const cleanTitle = (p.title || '').replace(/<[^>]+>/g, '').trim();
+                    const cleanAbstract = (p.abstractText || '').replace(/<[^>]+>/g, '').trim();
+                    return {
+                        title: cleanTitle || `Paper DOI: ${cleanDoi}`,
+                        authors: p.authorString || '',
+                        journal: p.journalTitle || '',
+                        year: p.pubYear || '',
+                        doi: cleanDoi,
+                        abstract: cleanAbstract,
+                        rawUrl: raw,
+                        source: 'Europe PMC',
+                        fullContentText: `Academic Paper: ${cleanTitle}\nAuthors: ${p.authorString || ''}\nJournal: ${p.journalTitle || ''} (${p.pubYear || ''})\nDOI: ${cleanDoi}\n\n[Abstract / Academic Summary]:\n${cleanAbstract}`
+                    };
+                }
+            }
+        } catch (e) {
+            console.warn("Europe PMC DOI lookup failed:", e);
+        }
+    }
+
+    // Flow E: General query (e.g. title or topic search)
+    // 1. Try Europe PMC
+    try {
+        const res = await fetch(`https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=${encodeURIComponent(raw)}&format=json&resultType=core`);
+        if (res.ok) {
+            const data = await res.json();
+            if (data.resultList?.result?.length > 0) {
+                const p = data.resultList.result[0];
+                const cleanTitle = (p.title || '').replace(/<[^>]+>/g, '').trim();
+                const cleanAbstract = (p.abstractText || '').replace(/<[^>]+>/g, '').trim();
+                return {
+                    title: cleanTitle || raw,
+                    authors: p.authorString || '',
+                    journal: p.journalTitle || '',
+                    year: p.pubYear || '',
+                    doi: p.doi || '',
+                    pmid: p.pmid || '',
+                    abstract: cleanAbstract,
+                    rawUrl: raw,
+                    source: 'Europe PMC Search',
+                    fullContentText: `Academic Paper: ${cleanTitle}\nAuthors: ${p.authorString || ''}\nJournal: ${p.journalTitle || ''} (${p.pubYear || ''})\n\n[Abstract / Academic Summary]:\n${cleanAbstract}`
+                };
+            }
+        }
+    } catch (e) {
+        console.warn("Europe PMC general search failed:", e);
+    }
+
+    // 2. Try OpenAlex search
+    try {
+        const oaRes = await fetch(`https://api.openalex.org/works?filter=default.search:${encodeURIComponent(raw)}`);
+        if (oaRes.ok) {
+            const oaData = await oaRes.json();
+            if (oaData.results && oaData.results.length > 0) {
+                const paper = oaData.results[0];
+                const abstract = reconstructAbstract(paper.abstract_inverted_index) || '';
+                const authors = (paper.authorships || []).map(a => a.author?.display_name).filter(Boolean).join(', ');
+                return {
+                    title: paper.title,
+                    authors: authors,
+                    journal: paper.primary_location?.source?.display_name || '',
+                    year: paper.publication_year || '',
+                    doi: paper.doi || '',
+                    abstract: abstract,
+                    rawUrl: raw,
+                    source: 'OpenAlex Search',
+                    fullContentText: `Academic Paper: ${paper.title}\nAuthors: ${authors}\nPublished in: ${paper.primary_location?.source?.display_name || ''} (${paper.publication_year || ''})\n\n[Abstract / Academic Summary]:\n${abstract}`
+                };
+            }
+        }
+    } catch (e) {
+        console.warn("OpenAlex general search failed:", e);
+    }
+
+    throw new Error(`找不到與「${raw}」相關的開源論文資料。請確認網址、DOI、PMID 是否正確，或嘗試輸入更完整的論文英文名稱。`);
+};

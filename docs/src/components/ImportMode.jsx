@@ -5,11 +5,13 @@ import {
     Upload, FileText, CheckCircle, AlertCircle, Loader, Trash2, Database,
     Sparkles, Mic, Key, Edit3, Plus, ArrowRight, HelpCircle, FileAudio, Layers,
     Youtube, Video, ExternalLink, FolderPlus, FolderCheck, Tag,
-    Camera, Image as ImageIcon, Clipboard, GitMerge, RefreshCw, X, CheckSquare, Square
+    Camera, Image as ImageIcon, Clipboard, GitMerge, RefreshCw, X, CheckSquare, Square,
+    Globe, BookOpenCheck
 } from 'lucide-react';
 import {
     getGeminiApiKey, setGeminiApiKey, analyzeTextWithGemini, analyzeAudioWithGemini,
-    analyzeYouTubeWithGemini, analyzeImageWithGemini, extractYouTubeVideoId, parseOfflineText
+    analyzeYouTubeWithGemini, analyzeImageWithGemini, extractYouTubeVideoId, parseOfflineText,
+    fetchOpenAccessPaper
 } from '../services/geminiService';
 import AudioDenoisePlayer from './AudioDenoisePlayer';
 import cardsData from '../data/cards.json';
@@ -19,7 +21,7 @@ import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 
 const ImportMode = ({ onDeckUpdate }) => {
-    const [activeTab, setActiveTab] = useState('youtube'); // 'youtube', 'text', 'audio', 'pdf'
+    const [activeTab, setActiveTab] = useState('youtube'); // 'youtube', 'text', 'audio', 'pdf', 'image', 'paper'
 
     // Status & Common States
     const [processing, setProcessing] = useState(false);
@@ -61,6 +63,12 @@ const ImportMode = ({ onDeckUpdate }) => {
     const [imagePreview, setImagePreview] = useState(null);
     const [imagePromptContext, setImagePromptContext] = useState('');
     const imageInputRef = useRef(null);
+
+    // Paper Tab States (arXiv / PubMed / DOI / Europe PMC)
+    const [paperInput, setPaperInput] = useState('');
+    const [fetchingPaper, setFetchingPaper] = useState(false);
+    const [fetchedPaper, setFetchedPaper] = useState(null);
+    const [paperNotes, setPaperNotes] = useState('');
 
     // PDF Drag State
     const [isDragging, setIsDragging] = useState(false);
@@ -499,6 +507,77 @@ const ImportMode = ({ onDeckUpdate }) => {
         }
     };
 
+    // 處理開源論文擷取 (arXiv / PubMed / Europe PMC / DOI)
+    const handleFetchPaper = async (customQuery = null) => {
+        const query = (customQuery || paperInput || '').trim();
+        if (!query) {
+            setStatus("error");
+            setStatusMsg("請輸入開源論文網址、DOI、PubMed ID、arXiv ID 或主題關鍵字。");
+            return;
+        }
+
+        setFetchingPaper(true);
+        setStatus("ideal");
+        setStatusMsg("");
+
+        try {
+            const paper = await fetchOpenAccessPaper(query);
+            setFetchedPaper(paper);
+            if (customQuery) {
+                setPaperInput(customQuery);
+            }
+            setStatus("success");
+            setStatusMsg(`📄 已成功擷取論文：「${paper.title}」！`);
+        } catch (err) {
+            console.error("Paper Fetch Error:", err);
+            setStatus("error");
+            setStatusMsg(err.message || "論文擷取失敗，請確認輸入格式或網路狀態。");
+        } finally {
+            setFetchingPaper(false);
+        }
+    };
+
+    // 處理開源論文認知解構與題庫生成
+    const handleAnalyzePaper = async (useAI = true) => {
+        if (!fetchedPaper) {
+            setStatus("error");
+            setStatusMsg("請先抓取論文內容。");
+            return;
+        }
+
+        setProcessing(true);
+        setStatus("ideal");
+        setStatusMsg("正在以 NTU Smart MHI 理工心智模型進行全英文論文機制解構...");
+
+        try {
+            const paperContent = `${fetchedPaper.fullContentText}${paperNotes.trim() ? `\n\n[學生補充筆記 / 研討重點]:\n${paperNotes}` : ''}`;
+            let result;
+            if (useAI) {
+                if (!apiKey) {
+                    setShowKeyInput(true);
+                    throw new Error("請先設定 Gemini API Key 才能進行深度 AI 理工直覺認知解構。");
+                }
+                result = await analyzeTextWithGemini(paperContent, apiKey);
+            } else {
+                result = parseOfflineText(paperContent);
+            }
+
+            // Suggest clean deck name based on paper
+            const cleanTitle = fetchedPaper.title.replace(/^[^a-zA-Z0-9\u4e00-\u9fa5]+/, '').slice(0, 32);
+            result.deckName = resolveTargetDeckName(cleanTitle);
+
+            setExtractedData(result);
+            setStatus("success");
+            setStatusMsg("🎉 論文認知解構完成！已生成全英精讀段落、理工工程類比與機制題庫。");
+        } catch (err) {
+            console.error("Paper Analysis Error:", err);
+            setStatus("error");
+            setStatusMsg(err.message || "論文解構過程中發生錯誤。");
+        } finally {
+            setProcessing(false);
+        }
+    };
+
     // 儲存提取出的資料至 IndexedDB
     const handleCommitToLibrary = async () => {
         if (!extractedData || !extractedData.cards || extractedData.cards.length === 0) {
@@ -776,7 +855,7 @@ const ImportMode = ({ onDeckUpdate }) => {
             </div>
 
             {/* 匯入來源 Tab 選單 */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-2 bg-gray-900/80 p-1.5 rounded-2xl border border-gray-800 mb-5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 bg-gray-900/80 p-1.5 rounded-2xl border border-gray-800 mb-5">
                 <button
                     onClick={() => { setActiveTab('youtube'); setExtractedData(null); }}
                     className={`py-2.5 px-2 rounded-xl font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-1.5 ${
@@ -786,6 +865,16 @@ const ImportMode = ({ onDeckUpdate }) => {
                     }`}
                 >
                     <Youtube className="w-4 h-4 text-red-300" /> YouTube
+                </button>
+                <button
+                    onClick={() => { setActiveTab('paper'); setExtractedData(null); }}
+                    className={`py-2.5 px-2 rounded-xl font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-1.5 ${
+                        activeTab === 'paper'
+                            ? 'bg-gradient-to-r from-amber-600 via-orange-600 to-rose-600 text-white shadow-lg'
+                            : 'text-gray-400 hover:text-white'
+                    }`}
+                >
+                    <BookOpenCheck className="w-4 h-4 text-amber-300" /> 📜 開源論文
                 </button>
                 <button
                     onClick={() => { setActiveTab('image'); setExtractedData(null); }}
@@ -1195,6 +1284,172 @@ const ImportMode = ({ onDeckUpdate }) => {
                             <span className="mt-4 px-4 py-1.5 bg-gray-800 hover:bg-gray-750 text-emerald-400 border border-emerald-500/30 text-xs font-bold rounded-xl transition-all">
                                 選擇圖片檔案
                             </span>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* ================= Tab 6: 開源論文與文獻自動抓取 (arXiv / Europe PMC / PubMed / DOI) ================= */}
+            {activeTab === 'paper' && !extractedData && (
+                <div className="flex flex-col gap-4 bg-gray-850 p-6 rounded-3xl border border-gray-800">
+                    <div>
+                        <h3 className="font-bold text-white text-base flex items-center gap-2">
+                            <BookOpenCheck className="w-5 h-5 text-amber-400" /> 貼上開源論文連結、DOI 或 PubMed ID
+                        </h3>
+                        <p className="text-xs text-gray-400 mt-0.5">
+                            支援 arXiv、PubMed (PMID)、Europe PMC (PMCID)、DOI、bioRxiv 等開源論文。系統自動抓取純英文學術摘要與機轉，並轉化為全英精讀段落與理工工程直覺題庫！
+                        </p>
+                    </div>
+
+                    {/* 快速示範選鈕 (Quick Example Pills) */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-[11px] font-bold text-gray-500">快速試用經典範例：</span>
+                        <button
+                            type="button"
+                            onClick={() => handleFetchPaper("28285215")}
+                            className="px-2.5 py-1 rounded-lg bg-gray-800 hover:bg-gray-750 text-amber-300 border border-amber-500/30 text-xs font-mono transition-colors"
+                            title="PubMed ID: 28285215"
+                        >
+                            🧬 TET1 去甲基化機制 (PubMed)
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => handleFetchPaper("10.1038/s41586-024-07487-w")}
+                            className="px-2.5 py-1 rounded-lg bg-gray-800 hover:bg-gray-750 text-cyan-300 border border-cyan-500/30 text-xs font-mono transition-colors"
+                            title="DOI: 10.1038/s41586-024-07487-w"
+                        >
+                            ⚡ AlphaFold 3 全分子對接 (DOI)
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => handleFetchPaper("1706.03762")}
+                            className="px-2.5 py-1 rounded-lg bg-gray-800 hover:bg-gray-750 text-purple-300 border border-purple-500/30 text-xs font-mono transition-colors"
+                            title="arXiv ID: 1706.03762"
+                        >
+                            🤖 Attention Is All You Need (arXiv)
+                        </button>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row gap-2">
+                        <input
+                            type="text"
+                            value={paperInput}
+                            onChange={(e) => setPaperInput(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    handleFetchPaper();
+                                }
+                            }}
+                            placeholder="貼上論文網址、DOI (例如 10.1038/...)、PMID、arXiv ID 或主題關鍵字..."
+                            className="flex-1 p-3.5 bg-gray-900 border border-gray-700/80 rounded-2xl text-gray-100 text-sm focus:outline-none focus:border-amber-500 font-mono"
+                        />
+                        <button
+                            disabled={fetchingPaper || !paperInput.trim()}
+                            onClick={() => handleFetchPaper()}
+                            className="px-5 py-3 rounded-2xl bg-amber-600 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs md:text-sm shadow-md transition-all flex items-center justify-center gap-2 shrink-0"
+                        >
+                            {fetchingPaper ? (
+                                <>
+                                    <Loader className="w-4 h-4 animate-spin" />
+                                    <span>抓取開源論文中...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <Globe className="w-4 h-4" />
+                                    <span>抓取論文資料</span>
+                                </>
+                            )}
+                        </button>
+                    </div>
+
+                    {/* 論文擷取成果卡片 (Fetched Paper Card) */}
+                    {fetchedPaper && (
+                        <div className="p-5 bg-gray-900/90 rounded-2xl border border-amber-500/40 flex flex-col gap-4 animate-fade-in shadow-xl">
+                            <div className="flex flex-col sm:flex-row justify-between items-start gap-2 border-b border-gray-800 pb-3">
+                                <div className="flex-1">
+                                    <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-amber-950/80 border border-amber-500/50 text-amber-300">
+                                            來源：{fetchedPaper.source}
+                                        </span>
+                                        {fetchedPaper.doi && (
+                                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-gray-800 text-gray-300">
+                                                DOI: {fetchedPaper.doi}
+                                            </span>
+                                        )}
+                                        {fetchedPaper.pmid && (
+                                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-gray-800 text-gray-300">
+                                                PMID: {fetchedPaper.pmid}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <h4 className="text-base md:text-lg font-black text-white font-mono leading-snug">
+                                        {fetchedPaper.title}
+                                    </h4>
+                                    <p className="text-xs text-gray-400 mt-1">
+                                        {fetchedPaper.authors} {fetchedPaper.journal ? `· ${fetchedPaper.journal}` : ''} {fetchedPaper.year ? `(${fetchedPaper.year})` : ''}
+                                    </p>
+                                </div>
+
+                                <button
+                                    onClick={() => setFetchedPaper(null)}
+                                    className="p-1 rounded-lg text-gray-500 hover:text-white hover:bg-gray-800 transition-colors"
+                                    title="清除重新輸入"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
+
+                            {/* 論文純英文學術摘要 (Abstract) */}
+                            <div>
+                                <span className="text-xs font-bold text-amber-300 block mb-1">
+                                    全英文學術摘要 (Academic Abstract)：
+                                </span>
+                                <div className="p-3.5 bg-gray-950/60 rounded-xl border border-gray-800 text-xs md:text-sm text-gray-200 leading-relaxed font-sans max-h-56 overflow-y-auto custom-scrollbar select-text">
+                                    {fetchedPaper.abstract || "已取得論文元資料，未含獨立摘要文字。"}
+                                </div>
+                            </div>
+
+                            {/* 學生補充筆記 / 研討會提問 (可選) */}
+                            <div>
+                                <label className="text-xs font-bold text-gray-400 block mb-1">
+                                    課堂補充筆記 / 指定研討重點（可選，將一併納入心智模型分析）：
+                                </label>
+                                <textarea
+                                    rows={2}
+                                    value={paperNotes}
+                                    onChange={(e) => setPaperNotes(e.target.value)}
+                                    placeholder="例如：請著重以電機反饋迴路類比酵素活性調控；特別標註 TET1 與 TDG 的因果關係..."
+                                    className="w-full p-2.5 bg-gray-950/80 border border-gray-800 rounded-xl text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500 font-mono"
+                                />
+                            </div>
+
+                            <div className="flex flex-col sm:flex-row gap-3 justify-end pt-2 border-t border-gray-800">
+                                <button
+                                    disabled={processing}
+                                    onClick={() => handleAnalyzePaper(false)}
+                                    className="px-4 py-2.5 rounded-xl border border-gray-700 hover:bg-gray-800 text-gray-300 font-bold text-xs transition-colors flex items-center justify-center gap-1.5"
+                                >
+                                    <span>離線基礎提取 (免 API)</span>
+                                </button>
+                                <button
+                                    disabled={processing}
+                                    onClick={() => handleAnalyzePaper(true)}
+                                    className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 via-orange-600 to-rose-600 hover:from-amber-500 hover:to-rose-500 text-white font-bold text-sm shadow-lg shadow-orange-500/20 transition-all flex items-center justify-center gap-2"
+                                >
+                                    {processing ? (
+                                        <>
+                                            <Loader className="w-4 h-4 animate-spin" />
+                                            <span>AI 理工直覺深度解構論文中...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Sparkles className="w-4 h-4 text-yellow-300" />
+                                            <span>開始理工直覺認知解構 (含純英文精讀段落)</span>
+                                        </>
+                                    )}
+                                </button>
+                            </div>
                         </div>
                     )}
                 </div>

@@ -515,24 +515,24 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
     }
 
     return (
-        <div className="h-full w-full flex flex-col items-center p-3 md:p-6 lg:p-8 overflow-y-auto custom-scrollbar">
-            <div className={`w-full ${layoutMode === 'split' ? 'max-w-7xl' : 'max-w-4xl'} space-y-6 animate-fade-in pb-20 transition-all duration-300`}>
+        <div className="h-full w-full flex flex-col items-center p-3 md:p-5 lg:p-6 overflow-y-auto custom-scrollbar">
+            <div className={`w-full ${layoutMode === 'split' ? 'max-w-7xl' : 'max-w-4xl'} space-y-4 animate-fade-in pb-16 transition-all duration-300`}>
 
                 {/* 頂部標題與閱讀控制條 */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-gray-800 pb-5">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-gray-800/80 pb-4">
                     <div>
-                        <div className="flex items-center gap-2 mb-1.5">
-                            <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-indigo-950/80 text-indigo-300 border border-indigo-500/40 font-mono tracking-wider">
+                        <div className="flex items-center gap-2 mb-1">
+                            <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-indigo-950/80 text-indigo-300 border border-indigo-500/40 font-mono tracking-wider">
                                 NTU Smart MHI All-English Guided Study
                             </span>
                             <span className="text-xs text-gray-400">
                                 來源：<strong className="text-gray-200">{currentChunk.source}</strong>
                             </span>
                         </div>
-                        <h1 className="text-2xl md:text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400">
+                        <h1 className="text-xl md:text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400">
                             全英文分段精讀複習工作台
                         </h1>
-                        <p className="text-xs text-gray-400 mt-1">
+                        <p className="text-xs text-gray-400 mt-0.5">
                             純英文段落寬鬆排版，搭配 PDF 投影片並排對照與理工工程類比，大幅提升全英專有名詞熟練度。
                         </p>
                     </div>
@@ -654,7 +654,7 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
 
                 {/* 自訂文本輸入區 (若處於自訂模式) */}
                 {isCustomMode && (
-                    <div className="p-4 bg-gray-850 rounded-2xl border border-purple-500/30 flex flex-col gap-3 animate-fade-in">
+                    <div className="p-3.5 bg-gray-850 rounded-xl border border-purple-500/30 flex flex-col gap-2.5 animate-fade-in">
                         <div className="flex justify-between items-center">
                             <span className="text-xs font-bold text-purple-300 flex items-center gap-1.5">
                                 <FileText className="w-4 h-4" /> 貼上您想精讀的原汁原味全英課文（段落間請空一行）：
@@ -664,7 +664,7 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                             </span>
                         </div>
                         <textarea
-                            rows={6}
+                            rows={5}
                             value={customText}
                             onChange={(e) => {
                                 setCustomText(e.target.value);
@@ -677,11 +677,11 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                 )}
 
                 {/* 段落導航進度條 */}
-                <div className="flex items-center justify-between bg-gray-850/90 px-4 py-3 rounded-2xl border border-gray-800 shadow-md">
+                <div className="flex items-center justify-between bg-gray-850/80 px-3.5 py-2 rounded-xl border border-gray-800/80 shadow-sm">
                     <button
                         disabled={currentChunkIdx === 0}
                         onClick={() => setCurrentChunkIdx(prev => Math.max(0, prev - 1))}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                        className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
                             currentChunkIdx === 0
                                 ? 'text-gray-600 cursor-not-allowed'
                                 : 'text-gray-300 hover:text-white hover:bg-gray-800'
@@ -694,7 +694,7 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                         <span className="text-xs font-mono font-bold text-indigo-300">
                             段落 {currentChunkIdx + 1} / {chunks.length}
                         </span>
-                        <div className="w-24 sm:w-48 bg-gray-800 h-2 rounded-full overflow-hidden">
+                        <div className="w-20 sm:w-44 bg-gray-800 h-1.5 rounded-full overflow-hidden">
                             <div
                                 className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 h-full transition-all duration-300 rounded-full"
                                 style={{ width: `${((currentChunkIdx + 1) / chunks.length) * 100}%` }}
@@ -705,7 +705,7 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                     <button
                         disabled={currentChunkIdx === chunks.length - 1}
                         onClick={() => setCurrentChunkIdx(prev => Math.min(chunks.length - 1, prev + 1))}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                        className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
                             currentChunkIdx === chunks.length - 1
                                 ? 'text-gray-600 cursor-not-allowed'
                                 : 'text-gray-300 hover:text-white hover:bg-gray-800'
@@ -716,28 +716,28 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                 </div>
 
                 {/* ================= 核心工作區：圖文對照並排佈局 (Split Layout Grid) ================= */}
-                <div className={`grid grid-cols-1 ${layoutMode === 'split' ? 'lg:grid-cols-12 gap-8' : 'gap-6'} items-start`}>
+                <div className={`grid grid-cols-1 ${layoutMode === 'split' ? 'lg:grid-cols-12 gap-5' : 'gap-4'} items-start`}>
 
                     {/* ===== 左側主欄：純英文學術正文與心智模型 ===== */}
-                    <div className={`${layoutMode === 'split' ? 'lg:col-span-7' : 'w-full'} flex flex-col gap-6`}>
-                        <div className="bg-gradient-to-b from-gray-850 to-gray-900 rounded-3xl border border-indigo-500/25 shadow-2xl p-6 md:p-8 flex flex-col gap-6">
+                    <div className={`${layoutMode === 'split' ? 'lg:col-span-7' : 'w-full'} flex flex-col gap-4`}>
+                        <div className="bg-gray-900/90 rounded-2xl border border-gray-800/80 shadow-xl p-4 sm:p-5 md:p-6 flex flex-col gap-4">
 
                             {/* 段落標題與發音朗讀 */}
-                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-gray-800 pb-5">
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-gray-800/70 pb-3">
                                 <div>
                                     {currentChunk.term_en && (
-                                        <span className="text-xs font-mono font-bold text-indigo-400 block mb-1">
+                                        <span className="text-xs font-mono font-bold text-indigo-400 block mb-0.5">
                                             {currentChunk.term_en}
                                         </span>
                                     )}
-                                    <h2 className="text-xl md:text-2xl font-black text-white font-mono leading-snug">
+                                    <h2 className="text-lg md:text-xl font-black text-white font-mono leading-snug">
                                         {currentChunk.title}
                                     </h2>
                                 </div>
 
                                 <button
                                     onClick={() => speakText(`${currentChunk.title}. ${currentChunk.text}`)}
-                                    className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border shrink-0 ${
+                                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border shrink-0 ${
                                         isSpeaking
                                             ? 'bg-rose-950/60 text-rose-300 border-rose-500/40 animate-pulse'
                                             : 'bg-gray-800 hover:bg-gray-750 text-indigo-300 border-gray-700'
@@ -749,17 +749,17 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                                 </button>
                             </div>
 
-                            {/* 純英文學術正文（間距放大、寬敞舒適可讀性） */}
-                            <div className={`text-gray-100 ${getFontSizeClass()} ${getLineSpacingClass()} whitespace-pre-wrap font-sans bg-gray-900/85 p-6 md:p-8 rounded-3xl border border-gray-800 shadow-2xl shadow-black/40`}>
+                            {/* 純英文學術正文（間距放大、乾淨無重複包框、寬敞舒適可讀性） */}
+                            <div className={`text-gray-100 ${getFontSizeClass()} ${getLineSpacingClass()} whitespace-pre-wrap font-sans leading-relaxed tracking-normal select-text py-1`}>
                                 {renderAnnotatedText(currentChunk.text)}
                             </div>
 
-                            {/* 理工心智錨點註解框 (Engineering Analogy Callout) */}
+                            {/* 理工心智錨點註解 (Sleek Engineering Analogy Callout) */}
                             {currentChunk.analogy && (
-                                <div className="p-4 md:p-5 rounded-2xl bg-cyan-950/30 border border-cyan-500/30 flex items-start gap-3.5 shadow-inner">
-                                    <Zap className="w-5 h-5 text-cyan-400 shrink-0 mt-0.5" />
-                                    <div>
-                                        <h4 className="text-xs font-extrabold uppercase tracking-wider text-cyan-300 font-mono mb-1">
+                                <div className="border-l-2 border-cyan-400 bg-cyan-950/20 pl-3.5 pr-3 py-2.5 rounded-r-xl flex items-start gap-2.5">
+                                    <Zap className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+                                    <div className="min-w-0">
+                                        <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-cyan-300 font-mono mb-0.5">
                                             ⚡ 理工工程直覺心智模型 (Engineering Analogy)
                                         </h4>
                                         <p className="text-xs md:text-sm text-gray-200 leading-relaxed font-mono">
@@ -771,10 +771,10 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
 
                             {/* 可折疊之繁體中文對照翻譯 (輔助理解，不覆蓋原文) */}
                             {currentChunk.translation_zh && (
-                                <div className="border border-gray-800 rounded-2xl overflow-hidden bg-gray-900/50">
+                                <div className="border border-gray-800/70 rounded-xl overflow-hidden bg-gray-950/30">
                                     <button
                                         onClick={() => setShowTranslation(!showTranslation)}
-                                        className="w-full px-4 py-3 flex items-center justify-between text-xs font-bold text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+                                        className="w-full px-3.5 py-2 flex items-center justify-between text-xs font-bold text-gray-400 hover:text-white hover:bg-gray-800/40 transition-colors"
                                     >
                                         <span className="flex items-center gap-1.5">
                                             <Languages className="w-3.5 h-3.5 text-indigo-400" />
@@ -783,7 +783,7 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                                         {showTranslation ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                                     </button>
                                     {showTranslation && (
-                                        <div className="p-5 pt-2 text-xs md:text-sm text-gray-300 leading-relaxed border-t border-gray-800 bg-gray-950/40 font-sans">
+                                        <div className="px-3.5 py-3 text-xs md:text-sm text-gray-300 leading-relaxed border-t border-gray-800/70 bg-gray-950/40 font-sans">
                                             {currentChunk.translation_zh}
                                         </div>
                                     )}
@@ -791,7 +791,7 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                             )}
 
                             {/* 底部段落切換快捷列 */}
-                            <div className="flex justify-between items-center pt-3 border-t border-gray-800">
+                            <div className="flex justify-between items-center pt-2.5 border-t border-gray-800/70">
                                 <span className="text-[11px] text-gray-400">
                                     💡 提示：點擊綠色標籤即可查看理工工程類比與詞根拆解
                                 </span>
@@ -803,7 +803,7 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                                         }
                                     }}
                                     disabled={currentChunkIdx === chunks.length - 1}
-                                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
                                         currentChunkIdx === chunks.length - 1
                                             ? 'opacity-30 cursor-not-allowed text-gray-500'
                                             : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/20 hover:scale-[1.02]'
@@ -818,18 +818,18 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
 
                     {/* ===== 右側邊欄：相關 PDF 講義 / 投影片與圖解觀測區 ===== */}
                     {layoutMode === 'split' && (
-                        <div className="lg:col-span-5 flex flex-col gap-4 lg:sticky lg:top-4">
-                            <div className="bg-gray-850/95 rounded-3xl border border-indigo-500/30 p-5 shadow-2xl flex flex-col gap-4 backdrop-blur-md">
-                                <div className="flex items-center justify-between pb-3 border-b border-gray-750">
+                        <div className="lg:col-span-5 flex flex-col gap-3 lg:sticky lg:top-4">
+                            <div className="bg-gray-900/90 rounded-2xl border border-gray-800/80 p-3.5 sm:p-4 shadow-xl flex flex-col gap-3 backdrop-blur-md">
+                                <div className="flex items-center justify-between pb-2.5 border-b border-gray-800/70">
                                     <div className="flex items-center gap-2">
-                                        <div className="w-8 h-8 rounded-xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400">
-                                            <ImageIcon className="w-4 h-4" />
+                                        <div className="w-7 h-7 rounded-lg bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+                                            <ImageIcon className="w-3.5 h-3.5" />
                                         </div>
                                         <div>
-                                            <h3 className="text-sm font-extrabold text-white flex items-center gap-1.5">
+                                            <h3 className="text-xs font-extrabold text-white flex items-center gap-1.5">
                                                 <span>相關講義 / PDF 投影片對照</span>
                                             </h3>
-                                            <span className="text-[11px] text-gray-400">
+                                            <span className="text-[10px] text-gray-400">
                                                 {activeSlide?.page ? `投影片第 ${activeSlide.page} 頁` : '講義示意圖'} {activeSlide?.isDirectMatch ? '· 本章直屬' : '· 牌組投影片'}
                                             </span>
                                         </div>
@@ -1004,26 +1004,26 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
 
                 {/* 彈出式生醫專有名詞解析卡 (Active Term Modal) */}
                 {activeTermModal && (
-                    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
-                        <div className="bg-gray-900 border border-emerald-500/40 rounded-3xl p-6 md:p-8 max-w-lg w-full shadow-2xl relative space-y-4">
+                    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-fade-in">
+                        <div className="bg-gray-900 border border-emerald-500/30 rounded-2xl p-4 sm:p-5 max-w-md w-full shadow-2xl relative space-y-3">
                             <button
                                 onClick={() => setActiveTermModal(null)}
-                                className="absolute top-5 right-5 p-1.5 rounded-full bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white transition-colors"
+                                className="absolute top-4 right-4 p-1 rounded-full bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white transition-colors"
                             >
                                 <X className="w-4 h-4" />
                             </button>
 
-                            <div className="flex items-start justify-between gap-3 pr-8">
+                            <div className="flex items-start justify-between gap-2 pr-7">
                                 <div>
                                     <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-widest block mb-0.5">
                                         專有名詞即時標註
                                     </span>
-                                    <h3 className="text-xl md:text-2xl font-black text-white font-mono text-emerald-300">
+                                    <h3 className="text-lg md:text-xl font-black text-white font-mono text-emerald-300">
                                         {activeTermModal.term_en}
                                     </h3>
                                 </div>
                                 {activeTermModal.term_zh && (
-                                    <span className="text-xs font-bold px-2.5 py-1 rounded-xl bg-emerald-950/80 border border-emerald-500/40 text-emerald-200 whitespace-nowrap">
+                                    <span className="text-xs font-bold px-2 py-0.5 rounded-lg bg-emerald-950/80 border border-emerald-500/40 text-emerald-200 whitespace-nowrap">
                                         {activeTermModal.term_zh}
                                     </span>
                                 )}
@@ -1031,8 +1031,8 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
 
                             {/* 理工直覺對等概念 */}
                             {activeTermModal.engineeringAnchor && (
-                                <div className="p-3.5 bg-cyan-950/40 rounded-xl border border-cyan-500/30 text-xs text-cyan-200 font-mono flex items-start gap-2.5 shadow-inner">
-                                    <Zap className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+                                <div className="border-l-2 border-cyan-400 bg-cyan-950/30 pl-3 pr-2.5 py-2 rounded-r-lg text-xs text-cyan-200 font-mono flex items-start gap-2 shadow-inner">
+                                    <Zap className="w-3.5 h-3.5 text-cyan-400 shrink-0 mt-0.5" />
                                     <div>
                                         <strong className="text-cyan-300 block mb-0.5">⚡ 理工直覺對齊：</strong>
                                         <span>{activeTermModal.engineeringAnchor}</span>
@@ -1042,23 +1042,23 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
 
                             {/* 詞根拆解 */}
                             {activeTermModal.etymology && (
-                                <div className="p-2.5 bg-amber-950/20 rounded-xl border border-amber-500/20 text-xs text-amber-300/90 italic">
+                                <div className="p-2 bg-amber-950/20 rounded-lg border border-amber-500/20 text-[11px] text-amber-300/90 italic">
                                     🌱 詞根拆解：{activeTermModal.etymology}
                                 </div>
                             )}
 
                             {/* 全英簡明定義 */}
                             {activeTermModal.definition_en && (
-                                <div className="text-xs text-gray-300 leading-relaxed border-t border-gray-800 pt-3">
-                                    <span className="font-bold text-gray-400 block mb-1">學術定義 (Definition)：</span>
+                                <div className="text-xs text-gray-300 leading-relaxed border-t border-gray-800/80 pt-2.5">
+                                    <span className="font-bold text-gray-400 block mb-0.5 text-[11px]">學術定義 (Definition)：</span>
                                     {activeTermModal.definition_en}
                                 </div>
                             )}
 
-                            <div className="flex justify-between items-center pt-2">
+                            <div className="flex justify-between items-center pt-1 border-t border-gray-800/60">
                                 <button
                                     onClick={() => speakText(activeTermModal.term_en)}
-                                    className="px-3.5 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-750 text-indigo-300 text-xs font-bold flex items-center gap-1.5 transition-colors"
+                                    className="px-3 py-1 rounded-lg bg-gray-800 hover:bg-gray-750 text-indigo-300 text-xs font-bold flex items-center gap-1.5 transition-colors"
                                 >
                                     <Volume2 className="w-3.5 h-3.5" />
                                     <span>聽發音</span>
@@ -1066,7 +1066,7 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
 
                                 <button
                                     onClick={() => setActiveTermModal(null)}
-                                    className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition-all"
+                                    className="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition-all"
                                 >
                                     了解，繼續閱讀
                                 </button>
