@@ -3,7 +3,7 @@ import { get as getIDB } from 'idb-keyval';
 import {
     BookOpenCheck, Highlighter, Volume2, VolumeX, Sparkles, ChevronLeft,
     ChevronRight, Zap, Bookmark, Layers, Search, Cpu, Check, HelpCircle,
-    FileText, ArrowRight, X, Play, Pause
+    FileText, ArrowRight, X, Play, Pause, Languages, ChevronDown, ChevronUp
 } from 'lucide-react';
 
 // NTU Smart MHI 基礎名詞對照庫
@@ -57,6 +57,13 @@ const DEFAULT_GLOSSARY_MAP = {
         etymology: "Voltage-Gated [電壓門控] + Sodium (Na+) + Channel [導通孔道]",
         definition_en: "Transmembrane protein that selectively conducts Na+ into the cell when the membrane depolarizes."
     },
+    "voltage-gated sodium channels": {
+        term_en: "Voltage-Gated Sodium Channels",
+        term_zh: "電位敏感型鈉離子通道",
+        engineeringAnchor: "壓控開關 (Voltage-Controlled Switch) 自帶超時自鎖 (Inactivation Gate)",
+        etymology: "Voltage-Gated [電壓門控] + Sodium (Na+) + Channel [導通孔道]",
+        definition_en: "Transmembrane proteins that selectively conduct Na+ into the cell when the membrane depolarizes."
+    },
     "ligand-gated ion channel": {
         term_en: "Ligand-Gated Ion Channel",
         term_zh: "配體門控離子通道",
@@ -71,12 +78,26 @@ const DEFAULT_GLOSSARY_MAP = {
         etymology: "Guanine nucleotide-binding + Coupled [偶聯] + Receptor",
         definition_en: "Large family of 7-transmembrane receptors that transduce signals via G proteins."
     },
+    "g-protein coupled receptors": {
+        term_en: "G-Protein Coupled Receptors (GPCRs)",
+        term_zh: "G蛋白偶聯受體",
+        engineeringAnchor: "非同步中繼代理 / 訊息佇列轉發器 (Message Broker & Relay)",
+        etymology: "Guanine nucleotide-binding + Coupled [偶聯] + Receptor",
+        definition_en: "Large family of 7-transmembrane receptors that transduce signals via G proteins."
+    },
     "gpcr": {
         term_en: "GPCR",
         term_zh: "G蛋白偶聯受體",
         engineeringAnchor: "非同步中繼代理 / 訊息佇列轉發器 (Message Broker)",
         etymology: "G-Protein Coupled Receptor 縮寫",
         definition_en: "7-transmembrane cell-surface receptor mediating cellular responses to hormones and neurotransmitters."
+    },
+    "gpcrs": {
+        term_en: "GPCRs",
+        term_zh: "G蛋白偶聯受體",
+        engineeringAnchor: "非同步中繼代理 / 訊息佇列轉發器 (Message Broker)",
+        etymology: "G-Protein Coupled Receptor 縮寫",
+        definition_en: "7-transmembrane cell-surface receptors mediating cellular responses to hormones and neurotransmitters."
     },
     "negative feedback": {
         term_en: "Negative Feedback Loop",
@@ -92,14 +113,61 @@ const DEFAULT_GLOSSARY_MAP = {
         etymology: "Saltatory [跳躍的, 來自拉丁語saltare跳] + Conduction [傳導]",
         definition_en: "Propagation of action potentials jumping from node to node along myelinated axons."
     },
-    "threshold": {
+    "threshold potential": {
         term_en: "Threshold Potential",
         term_zh: "閾電位 (門檻電位)",
         engineeringAnchor: "邏輯閘切換閾值 (Logic Gate High-Level Trigger, ~ -55mV)",
         etymology: "Threshold [門檻/臨界點]",
         definition_en: "The critical membrane potential required to trigger a regenerative action potential."
+    },
+    "nernst equation": {
+        term_en: "Nernst Equation",
+        term_zh: "能斯特方程式",
+        engineeringAnchor: "濃度差與電位差之物理熱力學平衡公式",
+        etymology: "Walther Nernst [物理化學家姓氏]",
+        definition_en: "Equation relating the reduction potential of an electrochemical reaction to the standard electrode potential, temperature, and activities of the chemical species."
     }
 };
+
+// 專屬 NTU Smart MHI 的高品質全英精讀範例篇章（開箱即用）
+const DEFAULT_MHI_CHUNKS = [
+    {
+        id: "mhi_en_1",
+        term_en: "Resting Membrane Potential & Nernst Equation",
+        title: "1. Resting Membrane Potential & The Nernst Equilibrium",
+        text_en: "In excitable cells such as neurons and cardiomyocytes, the Resting Membrane Potential (typically around -70 mV) is established predominantly by the selective permeability of the plasma membrane to potassium ions via leak channels, combined with the electrogenic action of the Na+/K+-ATPase pump. From an electrical engineering perspective, this state represents a stable DC bias or ground offset maintained across the lipid bilayer, which behaves as a biological capacitor. The electrochemical equilibrium potential for each individual ion species can be precisely calculated using the Nernst equation.",
+        translation_zh: "在神經元與心肌細胞等可興奮細胞中，靜止膜電位（通常約為 -70 mV）主要是由細胞膜對鉀離子的選擇性通透性（透過洩漏通道）以及鈉鉀幫浦（Na+/K+-ATPase）的生電活性共同建立的。從電機工程的角度來看，這種狀態代表跨過脂質雙層介電質維持的穩定直流偏壓（DC Bias）或基準地電位。每種離子的電化學平衡電位皆可藉由能斯特方程式精確計算。",
+        analogy: "系統靜態偏壓 (DC Bias) 與介電質電容儲能 (RC 基準面，約 -70mV)",
+        source: "NTU Smart MHI: Cellular Bioelectricity"
+    },
+    {
+        id: "mhi_en_2",
+        term_en: "Action Potential & Voltage-Gated Sodium Channels",
+        title: "2. Threshold Breach & Regenerative Depolarization",
+        text_en: "When an excitatory stimulus causes the membrane potential to cross the critical Threshold Potential (approximately -55 mV), Voltage-Gated Sodium Channels undergo a conformational shift and rapidly open. This permits a massive, regenerative influx of Na+ driven by both concentration and electrical gradients, resulting in explosive Depolarization where the membrane potential surges toward +30 mV. In circuit theory, this positive feedback behavior is equivalent to a Schmitt Trigger or monostable multivibrator transitioning across its threshold voltage to generate an all-or-none digital pulse.",
+        translation_zh: "當興奮性刺激導致膜電位跨過臨界閾電位（約 -55 mV）時，電位敏感型鈉離子通道會發生構型改變並迅速開啟。這會引發受濃度差與電位差共同驅動的大量再生性鈉離子內流，造成爆發性的去極化，使膜電位迅速上升至 +30 mV。在電路理論中，這種正回饋行為等效於施密特觸發器或單穩態多諧振盪器跨過閾值電壓，產生全有或全無的數位脈衝。",
+        analogy: "施密特觸發器上升沿導通 (Rising Edge) / 電容急速充電 (RC 躍遷)",
+        source: "NTU Smart MHI: Cellular Bioelectricity"
+    },
+    {
+        id: "mhi_en_3",
+        term_en: "Refractory Period & Inactivation Gates",
+        title: "3. Inactivation Gates & The Refractory Period",
+        text_en: "Shortly after opening, Voltage-Gated Sodium Channels close automatically via a tethered cytoplasmic peptide block known as the inactivation gate. During this absolute Refractory Period, the channel cannot be reactivated regardless of the stimulus intensity. This refractory state functions exactly like a hardware debounce timer or non-overlapping dead time in power electronics, preventing bidirectional signal feedback loops and guaranteeing that the Action Potential propagates strictly in a single forward direction along the axon.",
+        translation_zh: "在開啟後不久，電位敏感型鈉通道會透過細胞質端的失活門（Inactivation Gate）自動堵塞關閉。在此絕對不反應期期間，無論刺激強度多大，通道都無法再次被活化。這種不反應狀態的功能完全如同電力電子學中的硬體防彈跳定時器（Debounce）或死區時間（Dead Time），防止信號產生雙向反饋迴路，確保動作電位嚴格沿著軸突單向向前傳播。",
+        analogy: "硬體超時自鎖與防抖延遲死區 (Debounce Dead Time / 避免反向震盪短路)",
+        source: "NTU Smart MHI: Cellular Bioelectricity"
+    },
+    {
+        id: "mhi_en_4",
+        term_en: "G-Protein Coupled Receptors (GPCR)",
+        title: "4. GPCR Transduction & Intracellular Signal Amplification",
+        text_en: "G-Protein Coupled Receptors (GPCRs) represent the largest class of cell-surface signal transducers in human physiology and modern pharmacology. Upon extracellular ligand binding, the GPCR undergoes a conformational change that catalyzes GDP-GTP exchange on the associated heterotrimeric G protein alpha subunit. In software architecture, this mechanism operates as an asynchronous Message Broker or pub-sub relay: the surface receptor acts as an API endpoint, while downstream second messengers (such as cAMP and IP3) serve as multi-threaded worker queues orchestrating physiological responses.",
+        translation_zh: "G蛋白偶聯受體（GPCR）是人體生理學與現代藥理學中最大的一類細胞表面信號轉導分子。當細胞外配體結合時，GPCR 會發生構型改變，催化其偶聯的異三聚體 G 蛋白 α 次單元進行 GDP-GTP 交換。在軟體架構中，此機制的運作如同非同步訊息佇列代理（Message Broker）或發布-訂閱中繼：表面受體如同 API 端點，而下游第二傳訊者（如 cAMP 與 IP3）則如同多執行緒工作佇列，協調全域生理反應。",
+        analogy: "API 端點交握與非同步訊息佇列轉發器 (Message Broker & Queue Relay)",
+        source: "NTU Smart MHI: Cellular Bioelectricity"
+    }
+];
 
 const ReaderMode = ({ cards = [], topic = 'All' }) => {
     const [currentChunkIdx, setCurrentChunkIdx] = useState(0);
@@ -109,6 +177,7 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
     const [customText, setCustomText] = useState('');
     const [isCustomMode, setIsCustomMode] = useState(false);
     const [highlightTerms, setHighlightTerms] = useState(true);
+    const [showTranslation, setShowTranslation] = useState(false);
 
     // 載入自訂 glossary
     useEffect(() => {
@@ -163,25 +232,41 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
 
             return rawParagraphs.map((p, idx) => ({
                 id: `custom_p_${idx}`,
-                title: `段落 ${idx + 1}：文本精讀`,
+                title: `Section ${idx + 1}: Guided Reading Passage`,
+                text_en: p,
                 text: p,
+                translation_zh: '',
                 analogy: '',
-                source: '自訂文本'
+                source: '自訂全英課文'
             }));
         }
 
-        if (!cards || cards.length === 0) return [];
+        // 若無自訂卡片，或選取 All 且卡片全為植物藥用時，自動提供 NTU Smart MHI 專業全英範例
+        const isPlantDeck = cards.some(c => c.source && c.source.includes('藥用植物'));
+        if (!cards || cards.length === 0 || (isPlantDeck && topic === 'All')) {
+            return DEFAULT_MHI_CHUNKS;
+        }
 
-        return cards.map((card, idx) => ({
-            id: card.id || `chunk_${idx}`,
-            term_en: card.term_en || '',
-            title: card.title || `第 ${idx + 1} 單元`,
-            text: card.description || '無文字段落。',
-            analogy: card.engineeringAnalogy || card.analogy || '',
-            source: card.source || '課程講義',
-            imagePath: card.imagePath || ''
-        }));
-    }, [cards, isCustomMode, customText]);
+        return cards.map((card, idx) => {
+            // 判斷是否有儲存純英文段落 text_en
+            const hasEnglishText = Boolean(card.text_en && card.text_en.length > 10);
+            const englishPassage = hasEnglishText
+                ? card.text_en
+                : (/[a-zA-Z]{20,}/.test(card.description) ? card.description : null);
+
+            return {
+                id: card.id || `chunk_${idx}`,
+                term_en: card.term_en || '',
+                title: card.title || `Section ${idx + 1}`,
+                text_en: englishPassage,
+                text: englishPassage || card.description || 'No reading text available.',
+                translation_zh: card.translation_zh || (!englishPassage ? '' : card.description),
+                analogy: card.engineeringAnalogy || card.analogy || '',
+                source: card.source || '課程講義',
+                imagePath: card.imagePath || ''
+            };
+        });
+    }, [cards, isCustomMode, customText, topic]);
 
     // 取得當前段落
     const currentChunk = chunks[currentChunkIdx] || chunks[0];
@@ -218,7 +303,7 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                 <span
                     key={`${start}-${end}`}
                     onClick={() => setActiveTermModal(termInfo || { term_en: matchedWord })}
-                    className="inline-flex items-center gap-0.5 px-1.5 py-0.5 mx-0.5 rounded-lg bg-emerald-950/70 border border-emerald-500/40 text-emerald-300 font-bold font-mono text-xs cursor-pointer hover:bg-emerald-600 hover:text-white hover:border-emerald-400 transition-all shadow-sm"
+                    className="inline-flex items-center gap-0.5 px-1.5 py-0.5 mx-0.5 rounded-lg bg-emerald-950/70 border border-emerald-500/40 text-emerald-300 font-bold font-mono text-sm cursor-pointer hover:bg-emerald-600 hover:text-white hover:border-emerald-400 transition-all shadow-sm"
                     title="點擊查看中文翻譯與理工工程類比"
                 >
                     <span>{matchedWord}</span>
@@ -268,6 +353,7 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
     };
 
     useEffect(() => {
+        setShowTranslation(false);
         return () => stopSpeech();
     }, [currentChunkIdx]);
 
@@ -298,17 +384,17 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                     <div>
                         <div className="flex items-center gap-2 mb-1">
                             <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-indigo-950/80 text-indigo-300 border border-indigo-500/30 font-mono">
-                                NTU Smart MHI Guided Study
+                                NTU Smart MHI All-English Guided Study
                             </span>
                             <span className="text-xs text-gray-500">
                                 來源：{currentChunk.source}
                             </span>
                         </div>
                         <h1 className="text-2xl md:text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400">
-                            分段精讀複習工作台
+                            全英文分段精讀複習工作台
                         </h1>
                         <p className="text-xs text-gray-400 mt-1">
-                            純粹閱讀與消化。特別的生醫英文單字已為您即時標出，點擊即可對齊理工直覺與詞根。
+                            正文嚴格保持純英文教材段落！專業生醫術語直接在文中標記，點擊即可對齊理工直覺，拒絕全文機翻破壞語感。
                         </p>
                     </div>
 
@@ -338,7 +424,7 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                             }`}
                         >
                             <FileText className="w-3.5 h-3.5" />
-                            <span>{isCustomMode ? "返回牌組精讀" : "自訂文本段落"}</span>
+                            <span>{isCustomMode ? "返回牌組精讀" : "貼上自訂英文課文"}</span>
                         </button>
                     </div>
                 </div>
@@ -348,14 +434,14 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                     <div className="p-4 bg-gray-850 rounded-2xl border border-purple-500/30 flex flex-col gap-3 animate-fade-in">
                         <div className="flex justify-between items-center">
                             <span className="text-xs font-bold text-purple-300 flex items-center gap-1.5">
-                                <FileText className="w-4 h-4" /> 貼上您想分段精讀的全英課文或筆記：
+                                <FileText className="w-4 h-4" /> 貼上您想精讀的原汁原味全英課文（段落間請空一行）：
                             </span>
                             <span className="text-[11px] text-gray-500">
-                                系統將以空行（段落）自動切分，並自動標註出現的所有專有名詞
+                                系統將保留純英文段落，並自動為您標出專有名詞
                             </span>
                         </div>
                         <textarea
-                            rows={5}
+                            rows={6}
                             value={customText}
                             onChange={(e) => {
                                 setCustomText(e.target.value);
@@ -417,7 +503,7 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                                     {currentChunk.term_en}
                                 </span>
                             )}
-                            <h2 className="text-xl md:text-2xl font-black text-white">
+                            <h2 className="text-xl md:text-2xl font-black text-white font-mono">
                                 {currentChunk.title}
                             </h2>
                         </div>
@@ -432,7 +518,7 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                             title="點擊聆聽全英發音朗讀"
                         >
                             {isSpeaking ? <Pause className="w-3.5 h-3.5 text-rose-400" /> : <Play className="w-3.5 h-3.5 text-indigo-400" />}
-                            <span>{isSpeaking ? "停止朗讀" : "朗讀本段 (英文)"}</span>
+                            <span>{isSpeaking ? "停止朗讀" : "全英文朗讀本段"}</span>
                         </button>
                     </div>
 
@@ -447,8 +533,8 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                         </div>
                     )}
 
-                    {/* 標註後正文文本 */}
-                    <div className="text-gray-200 text-sm md:text-base leading-relaxed tracking-wide whitespace-pre-wrap font-sans">
+                    {/* 純英文學術正文（標註專有名詞） */}
+                    <div className="text-gray-100 text-sm md:text-base leading-relaxed tracking-wide whitespace-pre-wrap font-sans bg-gray-900/60 p-5 rounded-2xl border border-gray-800/80 shadow-inner">
                         {renderAnnotatedText(currentChunk.text)}
                     </div>
 
@@ -464,6 +550,27 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                                     {currentChunk.analogy}
                                 </p>
                             </div>
+                        </div>
+                    )}
+
+                    {/* 可折疊之繁體中文對照翻譯 (輔助理解，不覆蓋原文) */}
+                    {currentChunk.translation_zh && (
+                        <div className="border border-gray-800 rounded-2xl overflow-hidden bg-gray-900/40">
+                            <button
+                                onClick={() => setShowTranslation(!showTranslation)}
+                                className="w-full px-4 py-2.5 flex items-center justify-between text-xs font-bold text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+                            >
+                                <span className="flex items-center gap-1.5">
+                                    <Languages className="w-3.5 h-3.5 text-indigo-400" />
+                                    <span>{showTranslation ? "隱藏中文對照翻譯" : "📖 看不懂？點擊展開繁體中文對照翻譯"}</span>
+                                </span>
+                                {showTranslation ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                            </button>
+                            {showTranslation && (
+                                <div className="p-4 pt-2 text-xs md:text-sm text-gray-300 leading-relaxed border-t border-gray-800 bg-gray-950/30 font-sans">
+                                    {currentChunk.translation_zh}
+                                </div>
+                            )}
                         </div>
                     )}
 

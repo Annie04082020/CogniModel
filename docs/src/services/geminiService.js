@@ -40,9 +40,11 @@ const SYSTEM_INSTRUCTION = `你是一位認知學習科學與第一性原理教�
   "cards": [
     {
       "term_en": "核心英文專有名詞（例如：Action Potential）",
-      "title": "核心機制 / 中文名稱（例如：動作電位）",
+      "title": "核心機制英文與中文名稱（例如：Action Potential (動作電位)）",
+      "text_en": "【極度重要】全英文精讀段落！嚴禁翻譯為中文！必須提供完整、高質量的純英文學術課文段落（保留原文教材精華或原汁原味全英段落），供學生直接閱讀訓練全英考題語感，並自然融入該專有名詞。",
+      "translation_zh": "對應的繁體中文輔助翻譯（供學生在需要時點擊展開對照，嚴禁覆蓋英文原文）",
       "engineeringAnalogy": "精準理工工程類比（以電路、狀態機、中斷、PID反饋或機械閥門類比生醫機制）",
-      "description": "深入淺出的機制推演、臨界條件與運作原理"
+      "description": "核心英文課文段落（可附帶中文重點提示）"
     }
   ],
   "mechanismChains": [
@@ -99,10 +101,11 @@ const SYSTEM_INSTRUCTION = `你是一位認知學習科學與第一性原理教�
 }
 
 注意事項：
-1. 數量建議：glossary 4~8 個核心生醫英文術語，cards 4~8 張，mechanismChains 2~4 組，socraticQuestions 2~4 組，logicPairs 3~5 組，mythBusters 3~5 題，scenarios 2~3 題。
-2. 類比必須「精確對齊理工（EE/CS/ME）」，切忌空泛；英文術語務必提供標準英文學術單字。
-3. 絕不產生死背名詞的記憶題，所有內容務必圍繞「動態因果」、「干擾推演」與「專有名詞實質理解」。
-4. 語言以繁體中文為主，生醫專有名詞保持中英雙語對照。`;
+1. 【嚴禁直接翻譯英文文本】：學生就讀 NTU Smart MHI 全英學程，考試與論文皆為全英！cards 的 text_en 必須保持【純英文學術課文段落】，嚴禁把學習正文直接翻成中文！學生需要直接閱讀英文原文，透過標註單字與理工類比來輔助理解。
+2. 數量建議：glossary 4~8 個核心生醫英文術語，cards 4~8 張，mechanismChains 2~4 組，socraticQuestions 2~4 組，logicPairs 3~5 組，mythBusters 3~5 題，scenarios 2~3 題。
+3. 類比必須「精確對齊理工（EE/CS/ME）」，切忌空泛；英文術語務必提供標準英文學術單字。
+4. 絕不產生死背名詞的記憶題，所有內容務必圍繞「動態因果」、「干擾推演」與「專有名詞實質理解」。
+5. 除 text_en 保持純英文外，其他解析以繁體中文搭配英文專有名詞。`;
 
 // 支援的備選模型清單（優先使用最新的 gemini-3.8-flash，具備自動容錯回退）
 const CANDIDATE_MODELS = ['gemini-3.8-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
