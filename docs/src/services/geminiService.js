@@ -107,8 +107,8 @@ const SYSTEM_INSTRUCTION = `你是一位認知學習科學與第一性原理教�
 4. 絕不產生死背名詞的記憶題，所有內容務必圍繞「動態因果」、「干擾推演」與「專有名詞實質理解」。
 5. 除 text_en 保持純英文外，其他解析以繁體中文搭配英文專有名詞。`;
 
-// 支援的備選模型清單（優先使用最新的 gemini-3.8-flash，具備自動容錯回退）
-const CANDIDATE_MODELS = ['gemini-3.8-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+// 支援的備選模型清單（優先使用速度極快、額度超高且免費的 Flash 模型）
+const CANDIDATE_MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
 
 const sendGeminiRequest = async (parts, apiKey) => {
     let lastError = null;
@@ -595,4 +595,197 @@ export const fetchOpenAccessPaper = async (queryOrUrl) => {
     }
 
     throw new Error(`找不到與「${raw}」相關的開源論文資料。請確認網址、DOI、PMID 是否正確，或嘗試輸入更完整的論文英文名稱。`);
+};
+
+// ================= 理工學伴即時問答 (CogniTutor：極省 Token AI 與 0 額度離線檢索) =================
+
+export const searchOfflineKnowledge = ({
+    question,
+    contextChunk,
+    glossary = [],
+    mechanismChains = [],
+    logicPairs = []
+}) => {
+    const qLower = (question || '').toLowerCase().trim();
+
+    // 1. 檢索專有名詞庫
+    const matchedTerms = (glossary || []).filter(g => {
+        const en = (g.term_en || '').toLowerCase();
+        const zh = (g.term_zh || '').toLowerCase();
+        if (!en && !zh) return false;
+        return (en && qLower.includes(en)) || (zh && qLower.includes(zh)) ||
+               qLower.split(/[\s,，、]+/).some(word => word.length >= 2 && (en.includes(word) || zh.includes(word)));
+    });
+
+    // 2. 檢索機制骨牌鏈
+    const matchedChains = (mechanismChains || []).filter(chain => {
+        const title = (chain.chainTitle || '').toLowerCase();
+        return title && (qLower.includes(title) || title.includes(qLower));
+    });
+
+    // 3. 檢索因果邏輯對
+    const matchedPairs = (logicPairs || []).filter(p => {
+        const c = (p.cause || '').toLowerCase();
+        const e = (p.effect || '').toLowerCase();
+        return (c && qLower.includes(c)) || (e && qLower.includes(e));
+    });
+
+    let answer = "";
+    if (matchedTerms.length > 0) {
+        answer += `🔍 **本機知識庫命中專有名詞**：\n\n`;
+        matchedTerms.slice(0, 3).forEach(t => {
+            answer += `• **${t.term_en}** ${t.term_zh ? `(${t.term_zh})` : ''}\n`;
+            if (t.engineeringAnchor) {
+                answer += `  ⚡ **理工直覺對齊**：${t.engineeringAnchor}\n`;
+            }
+            if (t.etymology) {
+                answer += `  🌱 **詞根拆解**：${t.etymology}\n`;
+            }
+            if (t.definition_en) {
+                answer += `  📖 **學術定義**：${t.definition_en}\n`;
+            }
+            answer += `\n`;
+        });
+    }
+
+    if (matchedPairs.length > 0) {
+        answer += `⚡ **因果推導關係**：\n`;
+        matchedPairs.slice(0, 3).forEach(p => {
+            answer += `• 【${p.cause}】 ➔ 【${p.effect}】\n  _${p.explanation || ''}_\n`;
+        });
+        answer += `\n`;
+    }
+
+    if (matchedChains.length > 0) {
+        answer += `⛓️ **動態機制連鎖**：\n`;
+        matchedChains.slice(0, 2).forEach(c => {
+            answer += `• **${c.chainTitle}**：\n`;
+            (c.steps || []).forEach((s, idx) => {
+                answer += `  ${idx + 1}. ${s}\n`;
+            });
+            if (c.perturbation) {
+                answer += `  ⚠️ **異常干擾推演**：${c.perturbation.condition} ➔ ${c.perturbation.outcome}\n`;
+            }
+        });
+        answer += `\n`;
+    }
+
+    if (!answer) {
+        answer = `💡 **根據當前研讀段落重點解析**：\n\n`;
+        if (contextChunk?.analogy) {
+            answer += `⚡ **理工工程心智模型**：\n${contextChunk.analogy}\n\n`;
+        }
+        if (contextChunk?.text) {
+            answer += `📄 **原文核心英文字段**：\n"${contextChunk.text.slice(0, 200)}..."\n\n`;
+        }
+        if (contextChunk?.translation_zh) {
+            answer += `📖 **中文輔助參考**：\n${contextChunk.translation_zh.slice(0, 160)}...\n\n`;
+        }
+        answer += `_（💡 提示：本回答由本機離線知識庫直接產出，耗費 0 API 額度。若需更深層自由追問，可啟用 Gemini Flash AI 模式。）_`;
+    }
+
+    return {
+        answer: answer.trim(),
+        mode: 'offline',
+        model: 'Local Zero-Cost RAG'
+    };
+};
+
+export const askCogniTutor = async ({
+    question,
+    contextChunk,
+    glossary = [],
+    mechanismChains = [],
+    logicPairs = [],
+    apiKey = null,
+    forceOffline = false
+}) => {
+    const rawQ = (question || '').trim();
+    if (!rawQ) throw new Error("請輸入您的提問。");
+
+    const key = apiKey || getGeminiApiKey();
+
+    // 若使用者選擇強制離線模式，或尚未填寫 API Key，使用零額度本機檢索
+    if (forceOffline || !key) {
+        return searchOfflineKnowledge({
+            question: rawQ,
+            contextChunk,
+            glossary,
+            mechanismChains,
+            logicPairs
+        });
+    }
+
+    // 線上模式：使用 Gemini Flash 極省 Token 架構（僅帶入當前段落，輸入 < 500 tokens，每天免費 1,500 次）
+    const currentText = contextChunk?.text || '';
+    const currentTitle = contextChunk?.title || '';
+    const currentAnalogy = contextChunk?.analogy || '';
+    const currentTerm = contextChunk?.term_en || '';
+
+    const tutorSystemPrompt = `你是一位精通第一性原理的 AI 理工學伴，專門輔導理工背景（電機、資工、機械）攻讀臺大智慧醫療全英學程（NTU Smart MHI）的研究生。
+【核心答題原則】：
+1. 學生痛點是生物專有名詞無規律且缺乏工程直覺，請盡量用【理工工程直覺（電路、狀態機、訊號中斷、PID反饋、機械閥門）】給出一針見血的解答。
+2. 緊扣【學生當前閱讀的課文段落】回答，幫助理解英文專有名詞背後的因果機轉。
+3. 語氣簡潔俐落（150~300 字內），直擊本質，避免冗長的教科書廢話。
+4. 使用繁體中文回答，專有名詞保留標準學術英文。`;
+
+    const userPrompt = `【學生當前研讀的學術段落】：
+標題: ${currentTitle} (${currentTerm})
+課文: ${currentText}
+${currentAnalogy ? `工程心智錨點: ${currentAnalogy}` : ''}
+
+【學生提問】：
+${rawQ}
+
+請以理工工程直覺簡明扼要解答：`;
+
+    for (const model of CANDIDATE_MODELS) {
+        try {
+            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
+            const requestBody = {
+                contents: [{ role: "user", parts: [{ text: userPrompt }] }],
+                systemInstruction: { parts: [{ text: tutorSystemPrompt }] },
+                generationConfig: {
+                    temperature: 0.4,
+                    maxOutputTokens: 500
+                }
+            };
+
+            const response = await fetch(endpoint, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(requestBody)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                const errMsg = errorData.error?.message || `狀態碼: ${response.status}`;
+                if (errMsg.includes('not available') || errMsg.includes('not found') || response.status === 404) {
+                    continue;
+                }
+                throw new Error(errMsg);
+            }
+
+            const data = await response.json();
+            const answer = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (answer) {
+                return {
+                    answer: answer.trim(),
+                    mode: 'ai',
+                    model: model
+                };
+            }
+        } catch (err) {
+            console.warn(`Model ${model} failed in tutor:`, err);
+        }
+    }
+
+    // 容錯備援：若 API 呼叫異常，自動回退至本機離線知識庫
+    return searchOfflineKnowledge({
+        question: rawQ,
+        contextChunk,
+        glossary,
+        mechanismChains,
+        logicPairs
+    });
 };

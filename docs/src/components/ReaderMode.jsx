@@ -5,8 +5,10 @@ import {
     ChevronRight, Zap, Bookmark, Layers, Search, Cpu, Check, HelpCircle,
     FileText, ArrowRight, X, Play, Pause, Languages, ChevronDown, ChevronUp,
     Maximize2, Minimize2, ZoomIn, ZoomOut, Image as ImageIcon,
-    Columns, UploadCloud, Copy, Sliders, Type, AlignJustify
+    Columns, UploadCloud, Copy, Sliders, Type, AlignJustify,
+    Bot, Send, MessageSquare, RotateCcw, Loader
 } from 'lucide-react';
+import { askCogniTutor, getGeminiApiKey } from '../services/geminiService';
 
 // NTU Smart MHI 基礎名詞對照庫
 const DEFAULT_GLOSSARY_MAP = {
@@ -390,6 +392,91 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
             setSelectedSlideIdx(0);
         } catch (err) {
             console.error("Failed to attach image to card", err);
+        }
+    };
+
+    // ================= 理工學伴 (CogniTutor) 問答狀態 =================
+    const [tutorQuestion, setTutorQuestion] = useState('');
+    const [tutorHistory, setTutorHistory] = useState([]);
+    const [tutorLoading, setTutorLoading] = useState(false);
+    const [tutorForceOffline, setTutorForceOffline] = useState(false);
+    const [isTutorOpen, setIsTutorOpen] = useState(true);
+
+    const currentDeckGlossary = useMemo(() => {
+        return Object.values(glossaryDict || {});
+    }, [glossaryDict]);
+
+    const currentDeckChains = useMemo(() => {
+        const list = [];
+        (cards || []).forEach(c => {
+            if (c.mechanismChains && Array.isArray(c.mechanismChains)) {
+                list.push(...c.mechanismChains);
+            }
+        });
+        return list;
+    }, [cards]);
+
+    const currentDeckPairs = useMemo(() => {
+        const list = [];
+        (cards || []).forEach(c => {
+            if (c.logicPairs && Array.isArray(c.logicPairs)) {
+                list.push(...c.logicPairs);
+            }
+        });
+        return list;
+    }, [cards]);
+
+    // 切換段落時，自動保留或附加該段落提示
+    const handleAskTutor = async (promptText = null) => {
+        const q = (promptText || tutorQuestion || '').trim();
+        if (!q || tutorLoading) return;
+
+        const userMsg = {
+            id: `msg_${Date.now()}_u`,
+            role: 'user',
+            text: q,
+            timestamp: Date.now()
+        };
+
+        setTutorHistory(prev => [...prev, userMsg]);
+        setTutorQuestion('');
+        setTutorLoading(true);
+
+        try {
+            const res = await askCogniTutor({
+                question: q,
+                contextChunk: currentChunk,
+                glossary: currentDeckGlossary,
+                mechanismChains: currentDeckChains,
+                logicPairs: currentDeckPairs,
+                apiKey: getGeminiApiKey(),
+                forceOffline: tutorForceOffline
+            });
+
+            const botMsg = {
+                id: `msg_${Date.now()}_b`,
+                role: 'assistant',
+                text: res.answer,
+                mode: res.mode,
+                model: res.model,
+                timestamp: Date.now()
+            };
+
+            setTutorHistory(prev => [...prev, botMsg]);
+        } catch (err) {
+            console.error("Tutor Error:", err);
+            setTutorHistory(prev => [
+                ...prev,
+                {
+                    id: `msg_${Date.now()}_err`,
+                    role: 'assistant',
+                    text: `⚠️ 解答過程發生狀況：${err.message || '請確認網路或 API Key'}`,
+                    mode: 'offline',
+                    timestamp: Date.now()
+                }
+            ]);
+        } finally {
+            setTutorLoading(false);
         }
     };
 
@@ -789,6 +876,166 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                                     )}
                                 </div>
                             )}
+
+                            {/* ================= 理工心智學伴即時問答 (CogniTutor) ================= */}
+                            <div className="border border-indigo-500/25 rounded-xl overflow-hidden bg-gradient-to-b from-gray-900/90 to-gray-950/90 shadow-lg flex flex-col">
+                                {/* 學伴標題列與模式切換 */}
+                                <div className="px-3.5 py-2.5 bg-gray-850/80 border-b border-gray-800 flex items-center justify-between flex-wrap gap-2">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-6 h-6 rounded-lg bg-indigo-600/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400">
+                                            <Bot className="w-3.5 h-3.5" />
+                                        </div>
+                                        <h4 className="text-xs font-black text-white flex items-center gap-1.5 font-mono">
+                                            <span>💡 理工學伴 (CogniTutor)</span>
+                                            <span className="text-[10px] font-normal text-indigo-300">
+                                                · 依當前課文答疑
+                                            </span>
+                                        </h4>
+                                    </div>
+
+                                    {/* 模式切換按鈕組 (AI 模式 vs 離線 0 額度模式) */}
+                                    <div className="flex items-center gap-1 bg-gray-800/80 p-0.5 rounded-lg border border-gray-700 text-xs">
+                                        <button
+                                            type="button"
+                                            onClick={() => setTutorForceOffline(false)}
+                                            className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition-all flex items-center gap-1 ${
+                                                !tutorForceOffline
+                                                    ? 'bg-emerald-600 text-white shadow'
+                                                    : 'text-gray-400 hover:text-white'
+                                            }`}
+                                            title="使用 Gemini Flash 極輕量回答（每天 1,500 次免費額度，每次僅吃 ~300 tokens）"
+                                        >
+                                            <Sparkles className="w-3 h-3 text-emerald-200" />
+                                            <span>AI 深度解讀</span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setTutorForceOffline(true)}
+                                            className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition-all flex items-center gap-1 ${
+                                                tutorForceOffline
+                                                    ? 'bg-purple-600 text-white shadow'
+                                                    : 'text-gray-400 hover:text-white'
+                                            }`}
+                                            title="100% 離線檢索本機因果鏈與工程錨點，完全不消耗任何 API 額度"
+                                        >
+                                            <Cpu className="w-3 h-3 text-purple-200" />
+                                            <span>⚡ 離線 0 額度</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* 快速提問建議標籤 (One-Tap Prompts) */}
+                                <div className="px-3 py-2 bg-gray-900/50 border-b border-gray-800/60 flex items-center gap-1.5 flex-wrap">
+                                    <span className="text-[10px] font-bold text-gray-500">快速發問：</span>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleAskTutor("請用電機電路或狀態機的角度，再為我白話解釋一次這段機制。")}
+                                        className="px-2 py-0.5 rounded-md bg-gray-800 hover:bg-gray-750 text-indigo-300 border border-indigo-500/20 text-[11px] font-mono transition-colors"
+                                    >
+                                        ⚡ 電機角度白話
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleAskTutor("這段課文裡面的生醫專有名詞，核心因果連鎖關係是什麼？")}
+                                        className="px-2 py-0.5 rounded-md bg-gray-800 hover:bg-gray-750 text-cyan-300 border border-cyan-500/20 text-[11px] font-mono transition-colors"
+                                    >
+                                        ⛓️ 核心因果骨牌
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleAskTutor("如果這個機轉被藥物或突變干擾阻斷，系統會發生什麼極端狀態變化？")}
+                                        className="px-2 py-0.5 rounded-md bg-gray-800 hover:bg-gray-750 text-amber-300 border border-amber-500/20 text-[11px] font-mono transition-colors"
+                                    >
+                                        ⚠️ 異常干擾推演
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleAskTutor("請根據這段純英文內容，出一題臺大 Smart MHI 期末考風格的觀念選擇題考考我。")}
+                                        className="px-2 py-0.5 rounded-md bg-gray-800 hover:bg-gray-750 text-rose-300 border border-rose-500/20 text-[11px] font-mono transition-colors"
+                                    >
+                                        🎯 出 1 題英文測驗
+                                    </button>
+                                </div>
+
+                                {/* 歷史問答對話泡泡 */}
+                                <div className="p-3.5 flex flex-col gap-2.5 max-h-64 overflow-y-auto custom-scrollbar">
+                                    {tutorHistory.length === 0 ? (
+                                        <div className="py-2.5 text-center text-gray-500 text-xs">
+                                            💬 讀不懂這段或想知道更多理工直覺類比？點擊上方快速標籤或在下方直接提問！
+                                        </div>
+                                    ) : (
+                                        tutorHistory.map(msg => (
+                                            <div
+                                                key={msg.id}
+                                                className={`flex gap-2 items-start ${
+                                                    msg.role === 'user' ? 'justify-end' : 'justify-start'
+                                                }`}
+                                            >
+                                                {msg.role === 'assistant' && (
+                                                    <div className="w-5 h-5 rounded-md bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center text-indigo-300 shrink-0 mt-0.5">
+                                                        <Bot className="w-3 h-3" />
+                                                    </div>
+                                                )}
+                                                <div
+                                                    className={`max-w-[88%] rounded-xl p-2.5 text-xs leading-relaxed ${
+                                                        msg.role === 'user'
+                                                            ? 'bg-indigo-600 text-white font-medium shadow-sm'
+                                                            : 'bg-gray-850 border border-gray-750 text-gray-200 font-sans shadow-inner whitespace-pre-wrap'
+                                                    }`}
+                                                >
+                                                    {msg.role === 'assistant' && (
+                                                        <div className="flex items-center gap-1.5 mb-1 pb-1 border-b border-gray-750 text-[10px] text-gray-400">
+                                                            <span>{msg.mode === 'ai' ? '🟢 Gemini Flash (極省額度)' : '⚡ 離線知識庫 (0 額度消耗)'}</span>
+                                                        </div>
+                                                    )}
+                                                    <div>{msg.text}</div>
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
+                                    {tutorLoading && (
+                                        <div className="flex gap-2 items-center text-xs text-indigo-400 py-1">
+                                            <Loader className="w-3.5 h-3.5 animate-spin text-indigo-400" />
+                                            <span>理工學伴正在為您思考解答...</span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* 發問輸入框 */}
+                                <div className="p-2.5 bg-gray-950/60 border-t border-gray-800 flex items-center gap-2">
+                                    <input
+                                        type="text"
+                                        value={tutorQuestion}
+                                        onChange={(e) => setTutorQuestion(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                e.preventDefault();
+                                                handleAskTutor();
+                                            }
+                                        }}
+                                        placeholder="針對本段課文提問（例如：為什麼需要去極化？這和電容充電有何不同？）..."
+                                        className="flex-1 bg-gray-900 border border-gray-750 rounded-xl px-3 py-1.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 font-mono"
+                                    />
+                                    <button
+                                        disabled={tutorLoading || !tutorQuestion.trim()}
+                                        onClick={() => handleAskTutor()}
+                                        className="p-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white transition-all shadow-sm shrink-0"
+                                        title="發送提問"
+                                    >
+                                        <Send className="w-3.5 h-3.5" />
+                                    </button>
+                                    {tutorHistory.length > 0 && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setTutorHistory([])}
+                                            className="p-1.5 rounded-xl bg-gray-800 hover:bg-gray-750 text-gray-400 hover:text-white transition-colors shrink-0"
+                                            title="清空問答紀錄"
+                                        >
+                                            <RotateCcw className="w-3.5 h-3.5" />
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
 
                             {/* 底部段落切換快捷列 */}
                             <div className="flex justify-between items-center pt-2.5 border-t border-gray-800/70">
