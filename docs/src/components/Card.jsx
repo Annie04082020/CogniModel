@@ -23,14 +23,27 @@ const Card = ({ card, isFlipped: externalIsFlipped, onFlip }) => {
     return (
         <div className="relative w-full max-w-[90%] md:max-w-4xl aspect-[16/10] md:aspect-video cursor-pointer perspective-1000 select-none" onClick={handleFlip}>
             <motion.div
-                className="w-full h-full relative preserve-3d"
+                className="w-full h-full relative"
                 initial={false}
                 animate={{ rotateY: isFlipped ? 180 : 0 }}
-                transition={{ duration: 0.6, type: "spring", stiffness: 260, damping: 20 }}
-                style={{ transformStyle: 'preserve-3d' }}
+                transition={{ duration: 0.55, type: "spring", stiffness: 220, damping: 22 }}
+                style={{
+                    transformStyle: 'preserve-3d',
+                    WebkitTransformStyle: 'preserve-3d',
+                }}
             >
                 {/* ================= 正面 (Front) ================= */}
-                <div className="absolute w-full h-full backface-hidden bg-gray-900 rounded-2xl overflow-hidden shadow-2xl border border-gray-700/80 flex flex-col md:flex-row">
+                <div
+                    className="absolute inset-0 w-full h-full bg-gray-900 rounded-2xl overflow-hidden shadow-2xl border border-gray-700/80 flex flex-col md:flex-row transition-opacity duration-200"
+                    style={{
+                        backfaceVisibility: 'hidden',
+                        WebkitBackfaceVisibility: 'hidden',
+                        transform: 'rotateY(0deg)',
+                        opacity: isFlipped ? 0 : 1,
+                        pointerEvents: isFlipped ? 'none' : 'auto',
+                        zIndex: isFlipped ? 0 : 10,
+                    }}
+                >
                     {hasImage ? (
                         <>
                             {/* 圖片/縮圖版面 */}
@@ -136,8 +149,15 @@ const Card = ({ card, isFlipped: externalIsFlipped, onFlip }) => {
 
                 {/* ================= 背面 (Back) ================= */}
                 <div
-                    className="absolute w-full h-full backface-hidden bg-gradient-to-br from-indigo-700 via-purple-700 to-pink-700 rounded-2xl shadow-2xl flex flex-col items-center justify-center p-8 text-center"
-                    style={{ transform: 'rotateY(180deg)', backfaceVisibility: 'hidden' }}
+                    className="absolute inset-0 w-full h-full bg-gradient-to-br from-indigo-700 via-purple-700 to-pink-700 rounded-2xl shadow-2xl flex flex-col items-center justify-center p-8 text-center transition-opacity duration-200"
+                    style={{
+                        backfaceVisibility: 'hidden',
+                        WebkitBackfaceVisibility: 'hidden',
+                        transform: 'rotateY(180deg)',
+                        opacity: isFlipped ? 1 : 0,
+                        pointerEvents: isFlipped ? 'auto' : 'none',
+                        zIndex: isFlipped ? 10 : 0,
+                    }}
                 >
                     <div className="max-w-xl flex flex-col items-center gap-3">
                         <span className="px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-widest bg-white/20 text-white/90 backdrop-blur">

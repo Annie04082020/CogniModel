@@ -30,6 +30,10 @@ function App() {
                 allCards = [...allCards, ...customCards];
             }
 
+            // Exclude decks user explicitly deleted
+            const deletedDecks = (await getIDB('deleted_decks')) || [];
+            allCards = allCards.filter(card => !deletedDecks.includes(card.source));
+
             setCards(allCards);
         } catch (err) {
             console.error("Failed to load cards", err);
@@ -45,6 +49,12 @@ function App() {
 
     // Extract unique topics
     const topics = [...new Set(cards.map(card => card.source))]
+
+    useEffect(() => {
+        if (currentTopic !== "All" && currentTopic !== "Mistakes" && topics.length > 0 && !topics.includes(currentTopic)) {
+            setCurrentTopic("All");
+        }
+    }, [topics, currentTopic]);
 
     // 1. Get all valid cards suitable for quizzing (no cover pages)
     const validCards = cards.filter(card => !card.imagePath || !card.imagePath.includes('_p0.'));

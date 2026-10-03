@@ -5,13 +5,14 @@ import {
     Upload, FileText, CheckCircle, AlertCircle, Loader, Trash2, Database,
     Sparkles, Mic, Key, Edit3, Plus, ArrowRight, HelpCircle, FileAudio, Layers,
     Youtube, Video, ExternalLink, FolderPlus, FolderCheck, Tag,
-    Camera, Image as ImageIcon, Clipboard
+    Camera, Image as ImageIcon, Clipboard, GitMerge, RefreshCw, X, CheckSquare, Square
 } from 'lucide-react';
 import {
     getGeminiApiKey, setGeminiApiKey, analyzeTextWithGemini, analyzeAudioWithGemini,
     analyzeYouTubeWithGemini, analyzeImageWithGemini, extractYouTubeVideoId, parseOfflineText
 } from '../services/geminiService';
 import AudioDenoisePlayer from './AudioDenoisePlayer';
+import cardsData from '../data/cards.json';
 
 // Configure PDF.js worker
 import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
@@ -26,6 +27,14 @@ const ImportMode = ({ onDeckUpdate }) => {
     const [status, setStatus] = useState("ideal"); // ideal, success, error
     const [statusMsg, setStatusMsg] = useState("");
     const [storedDecks, setStoredDecks] = useState([]);
+    const [deletedDecksCount, setDeletedDecksCount] = useState(0);
+
+    // Merge Modal States
+    const [isMergeModalOpen, setIsMergeModalOpen] = useState(false);
+    const [selectedDecksToMerge, setSelectedDecksToMerge] = useState([]);
+    const [mergedTargetName, setMergedTargetName] = useState('');
+    const [deleteOriginalsAfterMerge, setDeleteOriginalsAfterMerge] = useState(true);
+    const [mergeProcessing, setMergeProcessing] = useState(false);
 
     // API Key State
     const [apiKey, setApiKey] = useState('');
@@ -87,21 +96,51 @@ const ImportMode = ({ onDeckUpdate }) => {
     }, []);
 
     const fetchStoredDecks = async () => {
-        const customCards = await getIDB('custom_cards');
-        if (customCards && Array.isArray(customCards)) {
+        try {
+            const customCards = (await getIDB('custom_cards')) || [];
+            const deletedDecks = (await getIDB('deleted_decks')) || [];
+            setDeletedDecksCount(deletedDecks.length);
+
             const deckMap = {};
-            customCards.forEach(card => {
-                deckMap[card.source] = (deckMap[card.source] || 0) + 1;
+
+            // 1. Static decks (excluding deleted)
+            cardsData.forEach(card => {
+                if (!deletedDecks.includes(card.source)) {
+                    if (!deckMap[card.source]) {
+                        deckMap[card.source] = { name: card.source, count: 0, isCustom: false, glossaryCount: 0 };
+                    }
+                    deckMap[card.source].count += 1;
+                }
             });
-            const decks = Object.entries(deckMap).map(([name, count]) => ({ name, count }));
+
+            // 2. Custom cards (excluding deleted)
+            if (Array.isArray(customCards)) {
+                customCards.forEach(card => {
+                    if (!deletedDecks.includes(card.source)) {
+                        if (!deckMap[card.source]) {
+                            deckMap[card.source] = { name: card.source, count: 0, isCustom: true, glossaryCount: 0 };
+                        }
+                        deckMap[card.source].count += 1;
+                        if (card.glossary && Array.isArray(card.glossary)) {
+                            deckMap[card.source].glossaryCount += card.glossary.length;
+                        }
+                    }
+                });
+            }
+
+            const decks = Object.values(deckMap);
             setStoredDecks(decks);
+
             if (decks.length > 0) {
+                if (!selectedExistingDeck || !decks.some(d => d.name === selectedExistingDeck)) {
+                    setSelectedExistingDeck(decks[0].name);
+                }
                 setCategoryMode('existing');
-                setSelectedExistingDeck(decks[0].name);
             } else {
                 setCategoryMode('new');
             }
-        } else {
+        } catch (err) {
+            console.error("fetchStoredDecks error:", err);
             setStoredDecks([]);
             setCategoryMode('new');
         }
@@ -115,21 +154,197 @@ const ImportMode = ({ onDeckUpdate }) => {
     };
 
     const handleDeleteDeck = async (deckName) => {
-        if (!confirm(`確定要刪除牌組「${deckName}」嗎？`)) return;
+        const deck = storedDecks.find(d => d.name === deckName);
+        const countInfo = deck ? `（內含 ${deck.count} 張卡片與相關推演模型）` : '';
+        if (!confirm(`確定要刪除「${deckName}」模組嗎？${countInfo}\n此動作將從認知庫中永久移除。`)) return;
 
         try {
-            const customCards = await getIDB('custom_cards') || [];
+            const customCards = (await getIDB('custom_cards')) || [];
             const updatedCards = customCards.filter(card => card.source !== deckName);
             await setIDB('custom_cards', updatedCards);
 
+            const deletedDecks = (await getIDB('deleted_decks')) || [];
+            if (!deletedDecks.includes(deckName)) {
+                await setIDB('deleted_decks', [...deletedDecks, deckName]);
+            }
+
             setStatus("success");
-            setStatusMsg(`已刪除牌組：${deckName}`);
-            fetchStoredDecks();
+            setStatusMsg(`🗑️ 已成功刪除模組「${deckName}」！`);
+            await fetchStoredDecks();
             if (onDeckUpdate) onDeckUpdate();
         } catch (error) {
             console.error("Delete Error:", error);
             setStatus("error");
-            setStatusMsg("刪除失敗");
+            setStatusMsg("刪除模組失敗，請稍後再試。");
+        }
+    };
+
+    const handleRestoreDefaultDecks = async () => {
+        if (!confirm("確定要還原所有被刪除的內建預設模組嗎？")) return;
+        try {
+            await setIDB('deleted_decks', []);
+            setStatus("success");
+            setStatusMsg("🔄 已成功還原內建預設模組！");
+            await fetchStoredDecks();
+            if (onDeckUpdate) onDeckUpdate();
+        } catch (error) {
+            console.error("Restore Error:", error);
+            setStatus("error");
+            setStatusMsg("還原失敗。");
+        }
+    };
+
+    // 模組合併處理
+    const openMergeModal = (initialDeckName = null) => {
+        if (initialDeckName) {
+            setSelectedDecksToMerge([initialDeckName]);
+            setMergedTargetName(initialDeckName + ' (整合)');
+        } else {
+            setSelectedDecksToMerge([]);
+            setMergedTargetName('');
+        }
+        setDeleteOriginalsAfterMerge(true);
+        setIsMergeModalOpen(true);
+    };
+
+    const toggleDeckSelectionForMerge = (deckName) => {
+        setSelectedDecksToMerge(prev => {
+            const next = prev.includes(deckName)
+                ? prev.filter(n => n !== deckName)
+                : [...prev, deckName];
+
+            if (next.length >= 2) {
+                setMergedTargetName(next.join(' + '));
+            } else if (next.length === 1) {
+                setMergedTargetName(next[0] + ' (整合)');
+            }
+            return next;
+        });
+    };
+
+    const handleExecuteMerge = async () => {
+        if (selectedDecksToMerge.length < 2) {
+            alert("請至少勾選 2 個模組以進行合併！");
+            return;
+        }
+        const targetName = mergedTargetName.trim();
+        if (!targetName) {
+            alert("請輸入合併後的模組名稱！");
+            return;
+        }
+
+        setMergeProcessing(true);
+        try {
+            const customCards = (await getIDB('custom_cards')) || [];
+            const deletedDecks = (await getIDB('deleted_decks')) || [];
+
+            const cardsToMerge = [];
+            const glossaryMap = new Map();
+            const mechanismChains = [];
+            const socraticQuestions = [];
+            const logicPairs = [];
+            const mythBusters = [];
+            const scenarios = [];
+            const readingChunks = [];
+
+            // 1. 從內建靜態卡片收集
+            cardsData.forEach(card => {
+                if (selectedDecksToMerge.includes(card.source)) {
+                    cardsToMerge.push({ ...card, isCustom: true });
+                }
+            });
+
+            // 2. 從自訂卡片收集與彙整中繼資料
+            customCards.forEach(card => {
+                if (selectedDecksToMerge.includes(card.source)) {
+                    cardsToMerge.push({ ...card });
+                    if (card.glossary && Array.isArray(card.glossary)) {
+                        card.glossary.forEach(g => {
+                            const key = (g.term_en || '').toLowerCase().trim();
+                            if (key && !glossaryMap.has(key)) {
+                                glossaryMap.set(key, g);
+                            }
+                        });
+                    }
+                    if (card.mechanismChains && Array.isArray(card.mechanismChains)) {
+                        mechanismChains.push(...card.mechanismChains);
+                    }
+                    if (card.socraticQuestions && Array.isArray(card.socraticQuestions)) {
+                        socraticQuestions.push(...card.socraticQuestions);
+                    }
+                    if (card.logicPairs && Array.isArray(card.logicPairs)) {
+                        logicPairs.push(...card.logicPairs);
+                    }
+                    if (card.mythBusters && Array.isArray(card.mythBusters)) {
+                        mythBusters.push(...card.mythBusters);
+                    }
+                    if (card.scenarios && Array.isArray(card.scenarios)) {
+                        scenarios.push(...card.scenarios);
+                    }
+                    if (card.readingChunks && Array.isArray(card.readingChunks)) {
+                        readingChunks.push(...card.readingChunks);
+                    }
+                }
+            });
+
+            if (cardsToMerge.length === 0) {
+                alert("所選的模組中沒有任何可合併的卡片。");
+                setMergeProcessing(false);
+                return;
+            }
+
+            const timestamp = Date.now();
+            const consolidatedGlossary = Array.from(glossaryMap.values());
+
+            // 建立合併後的新卡片組，將整合後的元資料集中存放於第 0 張卡
+            const newMergedCards = cardsToMerge.map((card, idx) => ({
+                ...card,
+                id: `merged_${timestamp}_${idx}`,
+                source: targetName,
+                isCustom: true,
+                glossary: idx === 0 ? consolidatedGlossary : [],
+                mechanismChains: idx === 0 ? mechanismChains : [],
+                socraticQuestions: idx === 0 ? socraticQuestions : [],
+                logicPairs: idx === 0 ? logicPairs : [],
+                mythBusters: idx === 0 ? mythBusters : [],
+                scenarios: idx === 0 ? scenarios : [],
+                readingChunks: idx === 0 ? readingChunks : []
+            }));
+
+            let updatedCustom = [...customCards];
+            let updatedDeleted = [...deletedDecks];
+
+            if (deleteOriginalsAfterMerge) {
+                // 從自訂卡片中移除被合併的原始模組
+                updatedCustom = updatedCustom.filter(c => !selectedDecksToMerge.includes(c.source));
+                // 將原始模組名稱加入 deletedDecks，以確保靜態預設模組也被隱藏
+                selectedDecksToMerge.forEach(d => {
+                    if (d !== targetName && !updatedDeleted.includes(d)) {
+                        updatedDeleted.push(d);
+                    }
+                });
+            }
+
+            // 確保目標模組名稱不在刪除清單中
+            updatedDeleted = updatedDeleted.filter(d => d !== targetName);
+
+            // 追加合併後卡片
+            updatedCustom = [...updatedCustom, ...newMergedCards];
+
+            await setIDB('custom_cards', updatedCustom);
+            await setIDB('deleted_decks', updatedDeleted);
+
+            setIsMergeModalOpen(false);
+            setStatus("success");
+            setStatusMsg(`🎉 成功整合 ${selectedDecksToMerge.length} 個模組！共 ${newMergedCards.length} 張卡片與 ${consolidatedGlossary.length} 個全英名詞已匯入「${targetName}」！`);
+
+            await fetchStoredDecks();
+            if (onDeckUpdate) onDeckUpdate();
+        } catch (err) {
+            console.error("Merge error:", err);
+            alert("模組合併失敗：" + err.message);
+        } finally {
+            setMergeProcessing(false);
         }
     };
 
@@ -1142,38 +1357,293 @@ const ImportMode = ({ onDeckUpdate }) => {
                 </div>
             )}
 
-            {/* ================= 本地自訂牌組管理清單 (Local Decks) ================= */}
-            <div className="mt-10 pt-6 border-t border-gray-800">
-                <div className="flex items-center gap-2 mb-4 text-gray-300 font-bold text-sm">
-                    <Database className="w-4 h-4 text-indigo-400" />
-                    <span>本機牌組庫管理 ({storedDecks.length} 個自訂主題)</span>
+            {/* ================= 模組與知識庫管理中心 (Module Management & Consolidation Hub) ================= */}
+            <div className="mt-12 pt-8 border-t border-gray-800">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                    <div>
+                        <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400">
+                                <Database className="w-4 h-4" />
+                            </div>
+                            <div>
+                                <h3 className="text-base md:text-lg font-black text-white flex items-center gap-2">
+                                    <span>模組知識庫管理中心</span>
+                                    <span className="text-xs px-2.5 py-0.5 rounded-full bg-indigo-950/60 border border-indigo-500/30 text-indigo-300 font-mono">
+                                        {storedDecks.length} 個模組單元
+                                    </span>
+                                </h3>
+                                <p className="text-xs text-gray-400 mt-0.5">
+                                    可獨立刪除任何自訂或預設模組，或將多個章節內容一鍵合併為大單元整合模組
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-2.5 flex-wrap w-full sm:w-auto">
+                        {deletedDecksCount > 0 && (
+                            <button
+                                onClick={handleRestoreDefaultDecks}
+                                className="px-3 py-2 rounded-xl bg-gray-800 hover:bg-gray-750 border border-gray-700 text-xs font-bold text-gray-300 flex items-center gap-1.5 transition-all"
+                                title="還原被刪除的內建預設模組"
+                            >
+                                <RefreshCw className="w-3.5 h-3.5 text-cyan-400" />
+                                <span>還原預設模組 ({deletedDecksCount})</span>
+                            </button>
+                        )}
+                        <button
+                            onClick={() => openMergeModal()}
+                            disabled={storedDecks.length < 2}
+                            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shadow-lg transition-all ${
+                                storedDecks.length >= 2
+                                    ? 'bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white shadow-cyan-500/20 hover:scale-[1.02]'
+                                    : 'bg-gray-800 text-gray-500 border border-gray-700 cursor-not-allowed'
+                            }`}
+                            title={storedDecks.length < 2 ? "需要至少 2 個模組才能進行合併" : "勾選多個模組進行深層整合"}
+                        >
+                            <GitMerge className="w-4 h-4 text-cyan-300" />
+                            <span>合併模組內容</span>
+                        </button>
+                    </div>
                 </div>
 
                 {storedDecks.length === 0 ? (
-                    <p className="text-xs text-gray-500 italic">尚無自訂牌組。請貼上 YouTube 連結、筆記、上傳錄音或匯入 PDF 建立您的第一個牌組！</p>
+                    <div className="p-8 text-center bg-gray-850/60 rounded-2xl border border-gray-800">
+                        <Database className="w-10 h-10 text-gray-600 mx-auto mb-2 opacity-50" />
+                        <p className="text-sm font-bold text-gray-400">目前題庫中暫無任何模組</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                            可點擊上方上傳 YouTube 影片、貼上講義文本、錄音或 PDF，或點擊「還原預設模組」重新載入。
+                        </p>
+                        {deletedDecksCount > 0 && (
+                            <button
+                                onClick={handleRestoreDefaultDecks}
+                                className="mt-4 px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all"
+                            >
+                                立即還原預設牌組
+                            </button>
+                        )}
+                    </div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5">
                         {storedDecks.map((deck) => (
                             <div
                                 key={deck.name}
-                                className="bg-gray-850 p-4 rounded-2xl border border-gray-750 flex items-center justify-between group hover:border-gray-650 transition-all"
+                                className="bg-gray-850/90 hover:bg-gray-800 p-4 rounded-2xl border border-gray-750 hover:border-indigo-500/50 flex flex-col justify-between group transition-all shadow-md"
                             >
-                                <div className="truncate pr-2">
-                                    <h4 className="font-bold text-white text-sm truncate" title={deck.name}>{deck.name}</h4>
-                                    <p className="text-[11px] text-gray-400">{deck.count} 張卡片與理解題目</p>
+                                <div>
+                                    <div className="flex items-start justify-between gap-2 mb-2">
+                                        <div className="flex items-center gap-1.5 flex-wrap">
+                                            <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md border ${
+                                                deck.isCustom
+                                                    ? 'bg-purple-950/70 text-purple-300 border-purple-500/30'
+                                                    : 'bg-emerald-950/70 text-emerald-300 border-emerald-500/30'
+                                            }`}>
+                                                {deck.isCustom ? "自訂匯入" : "內建預設"}
+                                            </span>
+                                            {deck.glossaryCount > 0 && (
+                                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-cyan-950/50 text-cyan-300 border border-cyan-500/20">
+                                                    🔤 {deck.glossaryCount} 專有名詞
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <h4 className="font-extrabold text-white text-sm leading-snug line-clamp-2" title={deck.name}>
+                                        {deck.name}
+                                    </h4>
+                                    <p className="text-xs text-gray-400 mt-1.5">
+                                        共 <span className="font-mono text-gray-200 font-bold">{deck.count}</span> 張卡片與心智推演
+                                    </p>
                                 </div>
-                                <button
-                                    onClick={() => handleDeleteDeck(deck.name)}
-                                    className="p-2 text-gray-500 hover:text-red-400 hover:bg-gray-800 rounded-xl transition-colors"
-                                    title="刪除此牌組"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </button>
+
+                                <div className="mt-4 pt-3 border-t border-gray-750 flex items-center justify-between gap-2">
+                                    <button
+                                        onClick={() => openMergeModal(deck.name)}
+                                        className="text-xs font-bold text-cyan-400 hover:text-cyan-300 hover:bg-cyan-950/40 px-2.5 py-1 rounded-lg border border-cyan-500/20 flex items-center gap-1 transition-all"
+                                        title="以此模組為基礎與其他模組合併"
+                                    >
+                                        <GitMerge className="w-3.5 h-3.5" />
+                                        <span>合併</span>
+                                    </button>
+
+                                    <button
+                                        onClick={() => handleDeleteDeck(deck.name)}
+                                        className="text-xs font-bold text-gray-500 hover:text-red-400 hover:bg-red-950/30 p-1.5 rounded-lg transition-all"
+                                        title={`刪除「${deck.name}」模組`}
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                </div>
                             </div>
                         ))}
                     </div>
                 )}
             </div>
+
+            {/* ================= 合併模組彈跳視窗 (Merge Modules Modal) ================= */}
+            {isMergeModalOpen && (
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fade-in">
+                    <div className="bg-gray-900 border border-indigo-500/40 rounded-3xl p-6 md:p-8 max-w-xl w-full shadow-2xl flex flex-col gap-5 max-h-[90vh] overflow-y-auto custom-scrollbar">
+                        {/* 彈窗頂部 */}
+                        <div className="flex justify-between items-start pb-4 border-b border-gray-800">
+                            <div>
+                                <h3 className="text-lg md:text-xl font-black text-white flex items-center gap-2">
+                                    <GitMerge className="w-5 h-5 text-cyan-400" />
+                                    <span>合併模組內容 (Consolidate Modules)</span>
+                                </h3>
+                                <p className="text-xs text-gray-400 mt-1">
+                                    將所選模組的卡片、全英專有名詞庫與因果推演模型深度融合為單一整合模組
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => setIsMergeModalOpen(false)}
+                                className="text-gray-400 hover:text-white p-1 rounded-lg hover:bg-gray-800"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        {/* 步驟一：選擇模組 */}
+                        <div>
+                            <div className="flex justify-between items-center mb-2">
+                                <label className="text-xs font-extrabold uppercase tracking-wider text-indigo-400">
+                                    1. 勾選要合併的模組（已勾選 {selectedDecksToMerge.length} 個）
+                                </label>
+                                <div className="flex gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const allNames = storedDecks.map(d => d.name);
+                                            setSelectedDecksToMerge(allNames);
+                                            setMergedTargetName(allNames.slice(0, 3).join(' + ') + (allNames.length > 3 ? '...' : ''));
+                                        }}
+                                        className="text-[11px] text-cyan-400 hover:underline font-bold"
+                                    >
+                                        全選
+                                    </button>
+                                    <span className="text-gray-600 text-xs">|</span>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setSelectedDecksToMerge([]);
+                                            setMergedTargetName('');
+                                        }}
+                                        className="text-[11px] text-gray-400 hover:underline"
+                                    >
+                                        清空
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="space-y-2 max-h-52 overflow-y-auto custom-scrollbar p-2 bg-gray-950/70 rounded-2xl border border-gray-800">
+                                {storedDecks.map((deck) => {
+                                    const isChecked = selectedDecksToMerge.includes(deck.name);
+                                    return (
+                                        <div
+                                            key={deck.name}
+                                            onClick={() => toggleDeckSelectionForMerge(deck.name)}
+                                            className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
+                                                isChecked
+                                                    ? 'bg-indigo-950/40 border-indigo-500/60 text-white'
+                                                    : 'bg-gray-900/60 border-gray-800 text-gray-300 hover:border-gray-700'
+                                            }`}
+                                        >
+                                            <div className="flex items-center gap-3 truncate">
+                                                <div className="shrink-0 text-indigo-400">
+                                                    {isChecked ? <CheckSquare className="w-4 h-4 text-cyan-400" /> : <Square className="w-4 h-4 text-gray-500" />}
+                                                </div>
+                                                <div className="truncate">
+                                                    <span className="text-sm font-bold truncate block">{deck.name}</span>
+                                                    <span className="text-[11px] text-gray-400">
+                                                        {deck.count} 張卡片 {deck.glossaryCount > 0 ? `· ${deck.glossaryCount} 詞彙` : ''}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <span className="text-[10px] px-2 py-0.5 rounded bg-gray-800 text-gray-400 shrink-0 font-mono">
+                                                {deck.isCustom ? '自訂' : '預設'}
+                                            </span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {/* 步驟二：指定合併後模組名稱 */}
+                        <div>
+                            <label className="text-xs font-extrabold uppercase tracking-wider text-indigo-400 block mb-1.5">
+                                2. 合併後新模組名稱
+                            </label>
+                            <input
+                                type="text"
+                                value={mergedTargetName}
+                                onChange={(e) => setMergedTargetName(e.target.value)}
+                                placeholder="例如：NTU MHI 期中整合複習模組"
+                                className="w-full bg-gray-950 border border-gray-700 focus:border-cyan-400 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none transition-colors"
+                            />
+                            <div className="flex gap-1.5 mt-2 flex-wrap">
+                                <span className="text-[11px] text-gray-400">快速填入：</span>
+                                {selectedDecksToMerge.map(deckName => (
+                                    <button
+                                        key={deckName}
+                                        type="button"
+                                        onClick={() => setMergedTargetName(deckName)}
+                                        className="text-[11px] px-2 py-0.5 rounded-md bg-gray-800 hover:bg-gray-750 text-cyan-300 border border-gray-700 transition-colors"
+                                        title={`以此現有模組名稱覆蓋合併`}
+                                    >
+                                        合併至「{deckName}」
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* 步驟三：選項 */}
+                        <div className="p-3 bg-gray-950/60 rounded-xl border border-gray-800">
+                            <label className="flex items-center gap-2.5 cursor-pointer text-xs text-gray-300 select-none">
+                                <input
+                                    type="checkbox"
+                                    checked={deleteOriginalsAfterMerge}
+                                    onChange={(e) => setDeleteOriginalsAfterMerge(e.target.checked)}
+                                    className="w-4 h-4 rounded text-cyan-500 bg-gray-900 border-gray-700 focus:ring-0 focus:ring-offset-0"
+                                />
+                                <span>
+                                    合併後刪除/隱藏原本被合併的個別模組 <span className="text-gray-400 font-normal">（推薦勾選，保持模組清單簡潔）</span>
+                                </span>
+                            </label>
+                        </div>
+
+                        {/* 底部按鈕 */}
+                        <div className="flex gap-3 justify-end pt-3 border-t border-gray-800">
+                            <button
+                                type="button"
+                                onClick={() => setIsMergeModalOpen(false)}
+                                className="px-5 py-2.5 rounded-xl border border-gray-700 hover:bg-gray-800 text-xs font-bold text-gray-300 transition-colors"
+                            >
+                                取消
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleExecuteMerge}
+                                disabled={selectedDecksToMerge.length < 2 || !mergedTargetName.trim() || mergeProcessing}
+                                className={`px-6 py-2.5 rounded-xl text-xs md:text-sm font-bold flex items-center gap-2 shadow-lg transition-all ${
+                                    selectedDecksToMerge.length >= 2 && mergedTargetName.trim() && !mergeProcessing
+                                        ? 'bg-gradient-to-r from-cyan-600 via-indigo-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white shadow-cyan-500/20 hover:scale-[1.02]'
+                                        : 'bg-gray-800 text-gray-500 border border-gray-700 cursor-not-allowed'
+                                }`}
+                            >
+                                {mergeProcessing ? (
+                                    <>
+                                        <Loader className="w-4 h-4 animate-spin" />
+                                        <span>正在執行深層融合...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <GitMerge className="w-4 h-4 text-cyan-300" />
+                                        <span>確認執行模組合併</span>
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

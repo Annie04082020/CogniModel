@@ -94,6 +94,7 @@ const Deck = ({ cards }) => {
                         dragConstraints={{ left: 0, right: 0 }}
                         dragElastic={1}
                         onDragEnd={handleDragEnd}
+                        style={{ transformStyle: 'preserve-3d', WebkitTransformStyle: 'preserve-3d' }}
                         className="absolute w-full h-full cursor-grab active:cursor-grabbing flex items-center justify-center"
                     >
                         <Card
