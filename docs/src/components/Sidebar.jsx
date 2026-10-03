@@ -1,14 +1,15 @@
 import { useState } from 'react';
-import { Menu, X, BookOpen, Gamepad2, Search, Library, BarChart2, AlertCircle, Upload, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Menu, X, BookOpen, Gamepad2, Search, Library, BarChart2, AlertCircle, Upload, ChevronLeft, ChevronRight, Sparkles, Brain } from 'lucide-react';
 
 const Sidebar = ({ topics, currentTopic, onSelectTopic, currentMode, onSelectMode, isOpen, setIsOpen }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
 
     const modes = [
-        { id: 'review', label: 'Review', icon: BookOpen },
-        { id: 'quiz', label: 'Quiz Mode', icon: Gamepad2 },
-        { id: 'stats', label: 'Stats', icon: BarChart2 },
-        { id: 'search', label: 'Search', icon: Search },
+        { id: 'understand', label: '深度理解遊戲', icon: Brain, badge: 'NEW' },
+        { id: 'review', label: '翻卡複習', icon: BookOpen },
+        { id: 'quiz', label: '測驗挑戰', icon: Gamepad2 },
+        { id: 'stats', label: '學習統計', icon: BarChart2 },
+        { id: 'search', label: '詞典檢索', icon: Search },
     ];
 
     return (
@@ -42,33 +43,34 @@ const Sidebar = ({ topics, currentTopic, onSelectTopic, currentMode, onSelectMod
                 {/* Logo / Header */}
                 <div className={`p-6 border-b border-gray-800 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
                     {!isCollapsed && (
-                        <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500 whitespace-nowrap">
-                            Review Deck
+                        <h1 className="text-xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 whitespace-nowrap">
+                            Review & Learn
                         </h1>
                     )}
                     {/* Desktop Collapse Toggle */}
                     <button
                         onClick={() => setIsCollapsed(!isCollapsed)}
                         className="hidden md:block text-gray-400 hover:text-white transition-colors"
-                        title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+                        title={isCollapsed ? "展開側邊欄" : "收合側邊欄"}
                     >
                         {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
                     </button>
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-8 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar">
 
                     {/* Modes Section */}
                     <div>
                         {!isCollapsed && (
                             <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-2 fade-in">
-                                Modes
+                                模式選擇
                             </h3>
                         )}
-                        <div className="space-y-1">
+                        <div className="space-y-1.5">
                             {modes.map((mode) => {
                                 const Icon = mode.icon;
+                                const isActive = currentMode === mode.id;
                                 return (
                                     <button
                                         key={mode.id}
@@ -77,15 +79,22 @@ const Sidebar = ({ topics, currentTopic, onSelectTopic, currentMode, onSelectMod
                                             setIsOpen(false);
                                         }}
                                         className={`
-                                            w-full flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} px-3 py-2 rounded-lg transition-colors
-                                            ${currentMode === mode.id
-                                                ? 'bg-blue-600/20 text-blue-400'
+                                            w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} px-3 py-2.5 rounded-xl transition-all
+                                            ${isActive
+                                                ? 'bg-gradient-to-r from-indigo-600/30 to-purple-600/30 text-indigo-300 border border-indigo-500/30 shadow-md font-bold'
                                                 : 'text-gray-400 hover:bg-gray-800 hover:text-white'}
                                         `}
                                         title={isCollapsed ? mode.label : ''}
                                     >
-                                        <Icon size={20} className="shrink-0" />
-                                        {!isCollapsed && <span className="truncate">{mode.label}</span>}
+                                        <div className="flex items-center space-x-3">
+                                            <Icon size={18} className="shrink-0" />
+                                            {!isCollapsed && <span className="truncate text-sm">{mode.label}</span>}
+                                        </div>
+                                        {!isCollapsed && mode.badge && (
+                                            <span className="text-[10px] font-black px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                                                {mode.badge}
+                                            </span>
+                                        )}
                                     </button>
                                 );
                             })}
@@ -93,11 +102,11 @@ const Sidebar = ({ topics, currentTopic, onSelectTopic, currentMode, onSelectMod
                     </div>
 
                     {/* Topics Section */}
-                    {(currentMode === 'review' || currentMode === 'quiz') && (
+                    {(currentMode === 'review' || currentMode === 'quiz' || currentMode === 'understand') && (
                         <div>
                             {!isCollapsed && (
                                 <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-2 fade-in">
-                                    Topics
+                                    主題與章節
                                 </h3>
                             )}
                             <div className="space-y-1">
@@ -109,13 +118,13 @@ const Sidebar = ({ topics, currentTopic, onSelectTopic, currentMode, onSelectMod
                                     className={`
                                         w-full flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} px-3 py-2 rounded-lg transition-colors
                                         ${currentTopic === "All"
-                                            ? 'bg-purple-600/20 text-purple-400'
+                                            ? 'bg-purple-600/20 text-purple-400 font-bold'
                                             : 'text-gray-400 hover:bg-gray-800 hover:text-white'}
                                     `}
-                                    title="All Cards"
+                                    title="全部卡片"
                                 >
-                                    <Library size={20} className="shrink-0" />
-                                    {!isCollapsed && <span className="truncate">All Cards</span>}
+                                    <Library size={18} className="shrink-0" />
+                                    {!isCollapsed && <span className="truncate text-sm">全部卡片</span>}
                                 </button>
 
                                 <button
@@ -126,13 +135,13 @@ const Sidebar = ({ topics, currentTopic, onSelectTopic, currentMode, onSelectMod
                                     className={`
                                         w-full flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} px-3 py-2 rounded-lg transition-colors
                                         ${currentTopic === "Mistakes"
-                                            ? 'bg-red-600/20 text-red-400'
+                                            ? 'bg-red-600/20 text-red-400 font-bold'
                                             : 'text-gray-400 hover:bg-gray-800 hover:text-white'}
                                     `}
-                                    title="My Mistakes"
+                                    title="錯題本"
                                 >
-                                    <AlertCircle size={20} className="shrink-0" />
-                                    {!isCollapsed && <span className="truncate">My Mistakes</span>}
+                                    <AlertCircle size={18} className="shrink-0 text-red-400" />
+                                    {!isCollapsed && <span className="truncate text-sm">錯題本</span>}
                                 </button>
 
                                 {!isCollapsed && (
@@ -146,11 +155,12 @@ const Sidebar = ({ topics, currentTopic, onSelectTopic, currentMode, onSelectMod
                                                     setIsOpen(false);
                                                 }}
                                                 className={`
-                                                    w-full text-left px-3 py-2 rounded-lg transition-colors text-sm truncate
+                                                    w-full text-left px-3 py-1.5 rounded-lg transition-colors text-xs truncate
                                                     ${currentTopic === topic
-                                                        ? 'bg-purple-600/20 text-purple-400'
+                                                        ? 'bg-purple-600/20 text-purple-400 font-bold'
                                                         : 'text-gray-400 hover:bg-gray-800 hover:text-white'}
                                                 `}
+                                                title={topic}
                                             >
                                                 {topic}
                                             </button>
@@ -170,13 +180,15 @@ const Sidebar = ({ topics, currentTopic, onSelectTopic, currentMode, onSelectMod
                             setIsOpen(false);
                         }}
                         className={`
-                            w-full p-3 rounded-xl flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} transition-colors 
-                            ${currentMode === 'import' ? 'bg-blue-600 text-white' : 'hover:bg-gray-800 text-gray-300'}
+                            w-full p-3 rounded-xl flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} transition-all 
+                            ${currentMode === 'import'
+                                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg'
+                                : 'hover:bg-gray-800 text-gray-300'}
                         `}
-                        title="Import PDF"
+                        title="知識匯入與提煉"
                     >
-                        <Upload size={20} className="shrink-0" />
-                        {!isCollapsed && <span className="font-medium truncate">Import PDF</span>}
+                        <Sparkles size={18} className="shrink-0 text-yellow-300" />
+                        {!isCollapsed && <span className="font-bold text-sm truncate">知識匯入與提煉</span>}
                     </button>
                 </div>
             </div>

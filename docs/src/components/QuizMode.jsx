@@ -144,6 +144,8 @@ const QuizMode = ({ cards, allCards, topic, onExit }) => {
             const input = option.title.trim().toLowerCase();
             const isMatch = input === targetLower;
 
+            console.log("Handle Answer:", { input, target, attempts });
+
             setTypedAnswer('');
 
             if (isMatch) {
@@ -155,14 +157,21 @@ const QuizMode = ({ cards, allCards, topic, onExit }) => {
                 // Wrong
                 const newAttempts = attempts + 1;
                 setAttempts(newAttempts);
+                console.log("Wrong! New Attempts:", newAttempts);
 
                 if (newAttempts < 3) {
-                    // Generate Clue indices
-                    // We want to show 1 char on first fail (Attempts -> 1)
-                    // We want to show 2 chars on second fail (Attempts -> 2)
+                    // Update: 1st fail -> 1 char. 2nd fail -> up to 3 chars.
                     const validIndices = target.split('').map((c, i) => c !== ' ' ? i : -1).filter(i => i !== -1);
-                    const needed = newAttempts; // 1 or 2
+
+                    let needed = 1;
+                    if (newAttempts === 2) {
+                        // Reveal up to 3 chars, but capping at length
+                        needed = Math.min(validIndices.length, 3);
+                    }
+
+                    // Logic: Ensure we reveal AT LEAST 'needed' amount.
                     let current = [...revealedIndices];
+                    console.log("Gen Clue. Needed:", needed, "Current:", current, "Valid:", validIndices);
 
                     while (current.length < needed && current.length < validIndices.length) {
                         const remaining = validIndices.filter(i => !current.includes(i));
@@ -170,6 +179,7 @@ const QuizMode = ({ cards, allCards, topic, onExit }) => {
                         const randIndex = Math.floor(Math.random() * remaining.length);
                         current.push(remaining[randIndex]);
                     }
+                    console.log("New Revealed:", current);
                     setRevealedIndices(current);
                     return;
                 } else {
@@ -348,8 +358,32 @@ const QuizMode = ({ cards, allCards, topic, onExit }) => {
             </div>
 
             <div className="flex-1 flex flex-col lg:flex-row gap-8 items-center justify-center w-full">
-                <div className="flex-1 w-full max-w-2xl aspect-video lg:h-[500px] bg-black rounded-2xl overflow-hidden shadow-2xl ring-1 ring-gray-700 relative group">
-                    <img src={currentQuestion.imagePath} alt="Quiz Question" className="w-full h-full object-contain" />
+                <div className="flex-1 w-full max-w-2xl aspect-video lg:h-[500px] bg-gray-900 rounded-2xl overflow-hidden shadow-2xl ring-1 ring-gray-700 relative group flex items-center justify-center p-6">
+                    {currentQuestion.imagePath ? (
+                        <img src={currentQuestion.imagePath} alt="Quiz Question" className="w-full h-full object-contain" />
+                    ) : (
+                        <div className="w-full h-full flex flex-col justify-between p-4 md:p-8 bg-gradient-to-br from-gray-900 via-gray-850 to-gray-900 rounded-xl border border-gray-750">
+                            <div>
+                                <span className="text-xs uppercase font-extrabold tracking-widest text-indigo-400 block mb-2">
+                                    {currentQuestion.source || "概念測驗"}
+                                </span>
+                                {currentQuestion.analogy && (
+                                    <div className="text-xs text-amber-300 bg-amber-950/20 p-2.5 rounded-lg border border-amber-500/20 mb-3">
+                                        💡 思考提示：{currentQuestion.analogy}
+                                    </div>
+                                )}
+                            </div>
+                            <div className="overflow-y-auto custom-scrollbar my-auto">
+                                <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">機制特徵與描述</h4>
+                                <p className="text-gray-100 text-base md:text-xl font-medium leading-relaxed whitespace-pre-wrap">
+                                    {currentQuestion.description || "請根據上述線索推導正確答案。"}
+                                </p>
+                            </div>
+                            <div className="text-xs text-gray-500 pt-2 border-t border-gray-800">
+                                請在右側選擇對應的核心概念或機制名詞
+                            </div>
+                        </div>
+                    )}
                     <div className="absolute top-4 right-4 bg-black/50 backdrop-blur px-3 py-1 rounded text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">source: {currentQuestion.source}</div>
                 </div>
 
@@ -366,8 +400,11 @@ const QuizMode = ({ cards, allCards, topic, onExit }) => {
                                 onChange={(e) => setTypedAnswer(e.target.value)}
                                 disabled={gameState === 'feedback'}
                                 onKeyDown={(e) => {
-                                    if (e.key === 'Enter' && typedAnswer.trim()) {
-                                        handleAnswer({ title: typedAnswer.trim(), isTyped: true });
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault(); // Prevent accidental form submissions/reloads
+                                        if (typedAnswer.trim()) {
+                                            handleAnswer({ title: typedAnswer.trim(), isTyped: true });
+                                        }
                                     }
                                 }}
                             />

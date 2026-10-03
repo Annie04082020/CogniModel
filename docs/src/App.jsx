@@ -6,6 +6,7 @@ import QuizMode from './components/QuizMode'
 import StatsMode from './components/StatsMode'
 import SearchMode from './components/SearchMode'
 import ImportMode from './components/ImportMode'
+import UnderstandMode from './components/UnderstandMode'
 import './index.css'
 import cardsData from './data/cards.json'
 
@@ -13,7 +14,7 @@ function App() {
     const [cards, setCards] = useState([])
     const [loading, setLoading] = useState(true)
     const [currentTopic, setCurrentTopic] = useState("All")
-    const [currentMode, setCurrentMode] = useState("review")
+    const [currentMode, setCurrentMode] = useState("understand") // 預設推薦進入深度理解模式
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
     const refreshData = async () => {
@@ -45,7 +46,7 @@ function App() {
     const topics = [...new Set(cards.map(card => card.source))]
 
     // 1. Get all valid cards suitable for quizzing (no cover pages)
-    const validCards = cards.filter(card => !card.imagePath.includes('_p0.'));
+    const validCards = cards.filter(card => !card.imagePath || !card.imagePath.includes('_p0.'));
 
     // 2. Filter for current topic/mode
     let filteredCards = validCards;
@@ -65,7 +66,10 @@ function App() {
     if (loading) {
         return (
             <div className="h-screen w-full flex items-center justify-center bg-gray-900 text-white">
-                Loading...
+                <div className="flex flex-col items-center gap-3">
+                    <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                    <span className="text-gray-400 text-sm">載入知識庫中...</span>
+                </div>
             </div>
         )
     }
@@ -73,15 +77,17 @@ function App() {
     // Allow empty cards if in Import mode (so user can import to fix empty state)
     if (cards.length === 0 && currentMode !== 'import') {
         return (
-            <div className="h-screen w-full flex items-center justify-center bg-gray-900 text-white">
-                <div className="text-center">
-                    <h1 className="text-2xl font-bold mb-4">No Cards Found</h1>
-                    <p className="mb-4">Please run the python script or import a PDF.</p>
+            <div className="h-screen w-full flex items-center justify-center bg-gray-900 text-white p-6">
+                <div className="text-center max-w-md">
+                    <h1 className="text-2xl font-bold mb-3">尚未建立任何卡片</h1>
+                    <p className="text-gray-400 mb-6 text-sm">
+                        您可以貼上課文段落、筆記、上傳錄音檔，或是匯入 PDF 講義開始學習！
+                    </p>
                     <button
                         onClick={() => setCurrentMode('import')}
-                        className="px-4 py-2 bg-blue-600 rounded-lg text-white hover:bg-blue-500"
+                        className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl text-white font-bold hover:scale-105 transition-all shadow-lg shadow-indigo-500/20"
                     >
-                        Import PDF
+                        前往知識匯入中心
                     </button>
                 </div>
             </div>
@@ -89,6 +95,18 @@ function App() {
     }
 
     const renderContent = () => {
+        if (currentMode === 'understand') {
+            return (
+                <div className="flex-grow flex items-center justify-center p-4 relative w-full h-full overflow-hidden">
+                    <UnderstandMode
+                        key={currentTopic}
+                        cards={filteredCards}
+                        topic={currentTopic}
+                        onOpenImport={() => setCurrentMode('import')}
+                    />
+                </div>
+            )
+        }
         if (currentMode === 'review') {
             return (
                 <div className="flex-grow flex items-center justify-center p-4 relative w-full h-full overflow-hidden">
@@ -96,9 +114,9 @@ function App() {
                         <Deck key={currentTopic} cards={filteredCards} />
                     ) : (
                         <div className="text-gray-500 text-center">
-                            <p className="text-xl mb-2">No cards in this topic</p>
+                            <p className="text-xl mb-2">此主題暫無卡片</p>
                             {currentTopic === "Mistakes" && (
-                                <p className="text-sm">Great job! You haven't made any mistakes yet (or you fixed them all).</p>
+                                <p className="text-sm">太棒了！您目前沒有錯題（或已全數複習完成）。</p>
                             )}
                         </div>
                     )}
@@ -108,16 +126,15 @@ function App() {
         if (currentMode === 'quiz') {
             return (
                 <div className="flex-grow flex items-center justify-center w-full h-full">
-                    {/* Allow quiz if we have ANY cards in the filtered deck, provided we have enough TOTAL cards for distractors */}
                     {filteredCards.length > 0 && validCards.length >= 4 ? (
                         <QuizMode cards={filteredCards} allCards={validCards} topic={currentTopic} />
                     ) : (
                         <div className="text-center p-8">
-                            <h2 className="text-xl font-bold mb-2">Not Enough Cards</h2>
-                            <p className="text-gray-400">
+                            <h2 className="text-xl font-bold mb-2">卡片數量不足</h2>
+                            <p className="text-gray-400 text-sm">
                                 {filteredCards.length === 0
-                                    ? "No cards available in this deck."
-                                    : "You need at least 4 total cards in the library to play (for distractors)."
+                                    ? "此牌組中暫無卡片。"
+                                    : "測驗模式需要整個題庫至少 4 張卡片作為干擾選項。"
                                 }
                             </p>
                         </div>
