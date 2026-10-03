@@ -61,27 +61,37 @@ def extract_youtube_id(url):
     return match.group(1) if match else None
 
 def call_gemini(parts, api_key):
-    endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+    candidate_models = ["gemini-3.8-flash", "gemini-2.0-flash", "gemini-1.5-flash"]
     payload = {
         "contents": [{"role": "user", "parts": parts}],
         "systemInstruction": {"parts": [{"text": SYSTEM_INSTRUCTION}]},
         "generationConfig": {"responseMimeType": "application/json"}
     }
     data_bytes = json.dumps(payload).encode("utf-8")
-    req = urllib.request.Request(endpoint, data=data_bytes, headers={"Content-Type": "application/json"})
-    try:
-        with urllib.request.urlopen(req) as resp:
-            resp_body = resp.read().decode("utf-8")
-            res_json = json.loads(resp_body)
-            cand_text = res_json["candidates"][0]["content"]["parts"][0]["text"]
-            return json.loads(cand_text)
-    except urllib.error.HTTPError as e:
-        err_msg = e.read().decode("utf-8")
-        print(f"Gemini API 請求錯誤: {e.code} - {err_msg}")
-        sys.exit(1)
-    except Exception as e:
-        print(f"錯誤: {e}")
-        sys.exit(1)
+
+    last_err = None
+    for model in candidate_models:
+        endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+        req = urllib.request.Request(endpoint, data=data_bytes, headers={"Content-Type": "application/json"})
+        try:
+            with urllib.request.urlopen(req) as resp:
+                resp_body = resp.read().decode("utf-8")
+                res_json = json.loads(resp_body)
+                cand_text = res_json["candidates"][0]["content"]["parts"][0]["text"]
+                return json.loads(cand_text)
+        except urllib.error.HTTPError as e:
+            err_msg = e.read().decode("utf-8")
+            if "not available" in err_msg or "not found" in err_msg or e.code == 404:
+                last_err = err_msg
+                continue
+            print(f"Gemini API 請求錯誤: {e.code} - {err_msg}")
+            sys.exit(1)
+        except Exception as e:
+            print(f"錯誤: {e}")
+            sys.exit(1)
+
+    print(f"所有模型嘗試均失敗: {last_err}")
+    sys.exit(1)
 
 def main():
     if len(sys.argv) < 2:

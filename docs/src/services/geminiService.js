@@ -62,53 +62,80 @@ const SYSTEM_INSTRUCTION = `你是一位認知學習科學與深度教學專家�
 4. 語言請以繁體中文（台灣習慣用詞）輸出。
 `;
 
+// 支援的備選模型清單（優先使用最新的 gemini-3.8-flash，具備自動容錯回退）
+const CANDIDATE_MODELS = ['gemini-3.8-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+
+const sendGeminiRequest = async (parts, apiKey) => {
+    let lastError = null;
+
+    for (const model of CANDIDATE_MODELS) {
+        try {
+            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+            const requestBody = {
+                contents: [
+                    {
+                        role: "user",
+                        parts: parts
+                    }
+                ],
+                systemInstruction: {
+                    parts: [{ text: SYSTEM_INSTRUCTION }]
+                },
+                generationConfig: {
+                    responseMimeType: "application/json"
+                }
+            };
+
+            const response = await fetch(endpoint, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(requestBody)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                const errMsg = errorData.error?.message || `狀態碼: ${response.status}`;
+                // 若為模型不可用，嘗試下一個模型
+                if (errMsg.includes('not available') || errMsg.includes('not found') || response.status === 404) {
+                    console.warn(`Model ${model} 不可用，嘗試下一個模型...`, errMsg);
+                    lastError = new Error(errMsg);
+                    continue;
+                }
+                throw new Error(errMsg);
+            }
+
+            const data = await response.json();
+            const candidateText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (!candidateText) {
+                throw new Error("Gemini API 未回傳有效內容");
+            }
+
+            try {
+                return JSON.parse(candidateText);
+            } catch (e) {
+                const cleaned = candidateText.replace(/^```json/m, '').replace(/^```/m, '').trim();
+                return JSON.parse(cleaned);
+            }
+        } catch (err) {
+            lastError = err;
+            if (err.message && (err.message.includes('not available') || err.message.includes('not found'))) {
+                continue;
+            }
+            throw err;
+        }
+    }
+
+    throw lastError || new Error("呼叫 Gemini 模型失敗，請確認 API Key 是否正確。");
+};
+
 export const analyzeTextWithGemini = async (text, apiKey = null) => {
     const key = apiKey || getGeminiApiKey();
     if (!key) {
         throw new Error("請先填入 Gemini API Key 才能進行 AI 深度理解提煉。");
     }
 
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`;
     const prompt = `請分析以下抽象學習內容，並按照指令輸出結構化的深度學習遊戲資料：\n\n${text}`;
-
-    const requestBody = {
-        contents: [
-            {
-                role: "user",
-                parts: [{ text: prompt }]
-            }
-        ],
-        systemInstruction: {
-            parts: [{ text: SYSTEM_INSTRUCTION }]
-        },
-        generationConfig: {
-            responseMimeType: "application/json"
-        }
-    };
-
-    const response = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody)
-    });
-
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error?.message || `Gemini API 請求失敗 (狀態碼: ${response.status})`);
-    }
-
-    const data = await response.json();
-    const candidateText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!candidateText) {
-        throw new Error("Gemini API 未回傳有效內容");
-    }
-
-    try {
-        return JSON.parse(candidateText);
-    } catch (e) {
-        const cleaned = candidateText.replace(/^```json/m, '').replace(/^```/m, '').trim();
-        return JSON.parse(cleaned);
-    }
+    return await sendGeminiRequest([{ text: prompt }], key);
 };
 
 export const analyzeAudioWithGemini = async (audioFile, apiKey = null) => {
@@ -129,55 +156,17 @@ export const analyzeAudioWithGemini = async (audioFile, apiKey = null) => {
     });
 
     const mimeType = audioFile.type || 'audio/mp3';
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`;
     const prompt = "這是課堂或學習錄音，請聽取內容並進行深度理解解構，整理出核心概念卡片、因果配對、迷思破解與情境應用題。";
 
-    const requestBody = {
-        contents: [
-            {
-                role: "user",
-                parts: [
-                    {
-                        inlineData: {
-                            mimeType: mimeType,
-                            data: base64Data
-                        }
-                    },
-                    { text: prompt }
-                ]
+    return await sendGeminiRequest([
+        {
+            inlineData: {
+                mimeType: mimeType,
+                data: base64Data
             }
-        ],
-        systemInstruction: {
-            parts: [{ text: SYSTEM_INSTRUCTION }]
         },
-        generationConfig: {
-            responseMimeType: "application/json"
-        }
-    };
-
-    const response = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody)
-    });
-
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error?.message || `音訊解析失敗 (狀態碼: ${response.status})。若音檔較大請確保格式為 mp3/wav/m4a。`);
-    }
-
-    const data = await response.json();
-    const candidateText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!candidateText) {
-        throw new Error("Gemini API 未回傳有效內容");
-    }
-
-    try {
-        return JSON.parse(candidateText);
-    } catch (e) {
-        const cleaned = candidateText.replace(/^```json/m, '').replace(/^```/m, '').trim();
-        return JSON.parse(cleaned);
-    }
+        { text: prompt }
+    ], key);
 };
 
 // YouTube 網址工具函式
@@ -209,61 +198,21 @@ export const analyzeYouTubeWithGemini = async (youtubeUrl, apiKey = null) => {
         throw new Error("請輸入有效的 YouTube 影片網址 (例如: https://www.youtube.com/watch?v=... 或 https://youtu.be/...)");
     }
 
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`;
     const prompt = `這是老師指定的考試範圍 YouTube 影片。請深入觀看與聆聽此影片內容，掌握影片中講解的核心概念、原理機制、重點公式或因果邏輯，並按照指令輸出結構化的深度學習與理解遊戲資料。`;
 
-    const requestBody = {
-        contents: [
-            {
-                role: "user",
-                parts: [
-                    {
-                        fileData: {
-                            fileUri: normalizedUrl,
-                            mimeType: "video/mp4"
-                        }
-                    },
-                    { text: prompt }
-                ]
+    const parsed = await sendGeminiRequest([
+        {
+            fileData: {
+                fileUri: normalizedUrl,
+                mimeType: "video/mp4"
             }
-        ],
-        systemInstruction: {
-            parts: [{ text: SYSTEM_INSTRUCTION }]
         },
-        generationConfig: {
-            responseMimeType: "application/json"
-        }
-    };
+        { text: prompt }
+    ], key);
 
-    const response = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody)
-    });
-
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error?.message || `YouTube 影片分析失敗 (狀態碼: ${response.status})。請確認該影片是否設定為「公開」影片。`);
-    }
-
-    const data = await response.json();
-    const candidateText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!candidateText) {
-        throw new Error("Gemini API 未回傳有效內容");
-    }
-
-    try {
-        const parsed = JSON.parse(candidateText);
-        parsed.videoId = videoId;
-        parsed.videoUrl = normalizedUrl;
-        return parsed;
-    } catch (e) {
-        const cleaned = candidateText.replace(/^```json/m, '').replace(/^```/m, '').trim();
-        const parsed = JSON.parse(cleaned);
-        parsed.videoId = videoId;
-        parsed.videoUrl = normalizedUrl;
-        return parsed;
-    }
+    parsed.videoId = videoId;
+    parsed.videoUrl = normalizedUrl;
+    return parsed;
 };
 
 // 免 API 的離線降級解析規則（當用戶沒填 API key 時）
@@ -276,7 +225,6 @@ export const parseOfflineText = (rawText) => {
     let currentDesc = [];
 
     lines.forEach((line) => {
-        // 判斷是否為因果句 "A -> B" 或定義句 "A : B"
         if (line.includes('->') || line.includes('→')) {
             const parts = line.split(/->|→/);
             if (parts.length >= 2) {
@@ -300,7 +248,6 @@ export const parseOfflineText = (rawText) => {
             }
         }
 
-        // 段落式處理：如果遇到以 # 開頭或字數較短的行，當作標題
         if (line.startsWith('#') || (line.length < 25 && !line.endsWith('。') && !line.endsWith('.'))) {
             if (currentTitle) {
                 cards.push({
