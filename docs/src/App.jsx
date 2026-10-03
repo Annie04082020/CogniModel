@@ -7,6 +7,7 @@ import StatsMode from './components/StatsMode'
 import SearchMode from './components/SearchMode'
 import ImportMode from './components/ImportMode'
 import UnderstandMode from './components/UnderstandMode'
+import ReaderMode from './components/ReaderMode'
 import './index.css'
 import cardsData from './data/cards.json'
 
@@ -103,6 +104,17 @@ function App() {
                         cards={filteredCards}
                         topic={currentTopic}
                         onOpenImport={() => setCurrentMode('import')}
+                    />
+                </div>
+            )
+        }
+        if (currentMode === 'reader') {
+            return (
+                <div className="flex-grow flex items-center justify-center p-2 relative w-full h-full overflow-hidden">
+                    <ReaderMode
+                        key={currentTopic}
+                        cards={filteredCards}
+                        topic={currentTopic}
                     />
                 </div>
             )

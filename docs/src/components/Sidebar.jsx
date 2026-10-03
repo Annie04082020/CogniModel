@@ -1,15 +1,16 @@
 import { useState } from 'react';
-import { Menu, X, BookOpen, Gamepad2, Search, Library, BarChart2, AlertCircle, Upload, ChevronLeft, ChevronRight, Sparkles, Brain } from 'lucide-react';
+import { Menu, X, BookOpen, Gamepad2, Search, Library, BarChart2, AlertCircle, Upload, ChevronLeft, ChevronRight, Sparkles, Brain, BookOpenCheck } from 'lucide-react';
 
 const Sidebar = ({ topics, currentTopic, onSelectTopic, currentMode, onSelectMode, isOpen, setIsOpen }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
 
     const modes = [
         { id: 'understand', label: '心智模型推演', icon: Brain, badge: 'PRO' },
+        { id: 'reader', label: '分段精讀複習', icon: BookOpenCheck, badge: 'NEW' },
+        { id: 'search', label: '雙語術語工作台', icon: Search, badge: 'MHI' },
         { id: 'review', label: '概念翻卡速覽', icon: BookOpen },
         { id: 'quiz', label: '邏輯推演校準', icon: Gamepad2 },
         { id: 'stats', label: '認知分析儀表', icon: BarChart2 },
-        { id: 'search', label: '雙語術語工作台', icon: Search, badge: 'MHI' },
     ];
 
     return (
@@ -102,7 +103,7 @@ const Sidebar = ({ topics, currentTopic, onSelectTopic, currentMode, onSelectMod
                     </div>
 
                     {/* Topics Section */}
-                    {(currentMode === 'review' || currentMode === 'quiz' || currentMode === 'understand') && (
+                    {(currentMode === 'review' || currentMode === 'quiz' || currentMode === 'understand' || currentMode === 'reader') && (
                         <div>
                             {!isCollapsed && (
                                 <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-2 fade-in">
