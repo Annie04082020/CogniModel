@@ -6,7 +6,8 @@ import {
     FileText, ArrowRight, X, Play, Pause, Languages, ChevronDown, ChevronUp,
     Maximize2, Minimize2, ZoomIn, ZoomOut, Image as ImageIcon,
     Columns, UploadCloud, Copy, Sliders, Type, AlignJustify,
-    Bot, Send, MessageSquare, RotateCcw, Loader
+    Bot, Send, MessageSquare, RotateCcw, Loader,
+    Youtube, Video, ExternalLink
 } from 'lucide-react';
 import { askCogniTutor, getGeminiApiKey } from '../services/geminiService';
 
@@ -203,6 +204,7 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
     const [layoutMode, setLayoutMode] = useState('split'); // 'split' (圖文對照) | 'focus' (單欄沉浸)
     const [lightboxImage, setLightboxImage] = useState(null);
     const [lightboxZoom, setLightboxZoom] = useState(1);
+    const [playingVideoModal, setPlayingVideoModal] = useState(null);
     const fileInputRef = useRef(null);
 
     // 載入自訂 glossary
@@ -290,6 +292,9 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                 source: card.source || '課程講義',
                 imagePath: card.imagePath || '',
                 page: card.page || null,
+                videoUrl: card.videoUrl || null,
+                videoId: card.videoId || null,
+                detectedVideos: card.detectedVideos || null,
                 rawCard: card
             };
         });
@@ -307,7 +312,10 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                         imagePath: c.imagePath,
                         page: c.page || (idx + 1),
                         cardIndex: idx,
-                        term_en: c.term_en || ''
+                        term_en: c.term_en || '',
+                        videoUrl: c.videoUrl || null,
+                        videoId: c.videoId || null,
+                        detectedVideos: c.detectedVideos || null
                     });
                 }
             });
@@ -340,7 +348,10 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                 imagePath: currentChunk.imagePath,
                 title: currentChunk.title,
                 page: currentChunk.page || currentChunkIdx + 1,
-                isDirectMatch: true
+                isDirectMatch: true,
+                videoUrl: currentChunk.videoUrl,
+                videoId: currentChunk.videoId,
+                detectedVideos: currentChunk.detectedVideos
             };
         }
         if (deckSlides.length > 0 && deckSlides[selectedSlideIdx]) {
@@ -1139,6 +1150,32 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                                     </div>
                                 )}
 
+                                {/* 若此頁投影片關聯 YouTube 影片，顯示影音連動按鈕 */}
+                                {activeSlide?.videoUrl && (
+                                    <div className="p-3 bg-gradient-to-r from-red-950/50 via-gray-900 to-gray-900 border border-red-500/40 rounded-2xl flex items-center justify-between gap-3 shadow-md animate-fade-in">
+                                        <div className="flex items-center gap-2.5 overflow-hidden">
+                                            <div className="w-8 h-8 rounded-xl bg-red-600/20 border border-red-500/30 flex items-center justify-center text-red-400 shrink-0">
+                                                <Youtube className="w-4 h-4" />
+                                            </div>
+                                            <div className="truncate">
+                                                <span className="text-xs font-bold text-white block truncate">
+                                                    本頁投影片提及 YouTube 補充講解
+                                                </span>
+                                                <span className="text-[10px] text-gray-400">
+                                                    點擊直接在系統內觀看，不打斷精讀節奏
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => setPlayingVideoModal(activeSlide)}
+                                            className="px-3 py-1.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md transition-all shrink-0"
+                                        >
+                                            <Play className="w-3.5 h-3.5 fill-current" />
+                                            <span>觀看影音</span>
+                                        </button>
+                                    </div>
+                                )}
+
                                 {/* 投影片切換與縮圖列（若牌組有多張投影片） */}
                                 {deckSlides.length > 1 && (
                                     <div className="pt-2 border-t border-gray-750">
@@ -1317,6 +1354,59 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                                 >
                                     了解，繼續閱讀
                                 </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* 投影片關聯之 YouTube 播放彈窗 */}
+                {playingVideoModal && (
+                    <div
+                        className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in"
+                        onClick={() => setPlayingVideoModal(null)}
+                    >
+                        <div
+                            className="relative w-full max-w-3xl bg-gray-900 border border-gray-750 rounded-3xl overflow-hidden shadow-2xl p-4 flex flex-col gap-3"
+                            onClick={e => e.stopPropagation()}
+                        >
+                            <div className="flex items-center justify-between pb-2 border-b border-gray-800">
+                                <div className="flex items-center gap-2 overflow-hidden">
+                                    <Youtube className="w-5 h-5 text-red-500 shrink-0" />
+                                    <h4 className="text-sm font-bold text-white truncate">
+                                        {playingVideoModal.title || `投影片第 ${playingVideoModal.page || ''} 頁 YouTube 補充影音`}
+                                    </h4>
+                                </div>
+                                <button
+                                    onClick={() => setPlayingVideoModal(null)}
+                                    className="p-1.5 rounded-xl bg-gray-800 hover:bg-gray-750 text-gray-400 hover:text-white transition-colors shrink-0"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+                            <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-black border border-gray-800">
+                                <iframe
+                                    src={`https://www.youtube-nocookie.com/embed/${playingVideoModal.videoId || (playingVideoModal.videoUrl ? playingVideoModal.videoUrl.match(/(?:youtube\.com\/(?:watch\?.*v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i)?.[1] : '')}?autoplay=1`}
+                                    title="YouTube video player"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                    className="w-full h-full border-0"
+                                />
+                            </div>
+                            <div className="flex items-center justify-between text-xs text-gray-400 pt-1">
+                                <span>
+                                    {playingVideoModal.page ? `對應投影片第 ${playingVideoModal.page} 頁` : '講義補充影片'}
+                                </span>
+                                {playingVideoModal.videoUrl && (
+                                    <a
+                                        href={playingVideoModal.videoUrl}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="text-red-400 hover:underline inline-flex items-center gap-1 font-semibold"
+                                    >
+                                        <span>在 YouTube 原網站開啟</span>
+                                        <ExternalLink className="w-3 h-3" />
+                                    </a>
+                                )}
                             </div>
                         </div>
                     </div>

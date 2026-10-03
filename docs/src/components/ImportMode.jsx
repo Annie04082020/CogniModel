@@ -6,7 +6,7 @@ import {
     Sparkles, Mic, Key, Edit3, Plus, ArrowRight, HelpCircle, FileAudio, Layers,
     Youtube, Video, ExternalLink, FolderPlus, FolderCheck, Tag,
     Camera, Image as ImageIcon, Clipboard, GitMerge, RefreshCw, X, CheckSquare, Square,
-    Globe, BookOpenCheck
+    Globe, BookOpenCheck, Play
 } from 'lucide-react';
 import {
     getGeminiApiKey, setGeminiApiKey, analyzeTextWithGemini, analyzeAudioWithGemini,
@@ -70,8 +70,10 @@ const ImportMode = ({ onDeckUpdate }) => {
     const [fetchedPaper, setFetchedPaper] = useState(null);
     const [paperNotes, setPaperNotes] = useState('');
 
-    // PDF Drag State
+    // PDF Drag State & YouTube Video Detection
     const [isDragging, setIsDragging] = useState(false);
+    const [detectedPdfVideos, setDetectedPdfVideos] = useState([]);
+    const [previewVideoModal, setPreviewVideoModal] = useState(null);
 
     // AI 提煉後的預覽與編輯資料
     const [extractedData, setExtractedData] = useState(null); // { deckName, summary, cards, logicPairs, mythBusters, scenarios, mechanismChains, socraticQuestions, videoId, videoUrl }
@@ -667,6 +669,7 @@ const ImportMode = ({ onDeckUpdate }) => {
             const timestamp = Date.now();
             const defaultSource = file.name.replace('.pdf', '');
             const deckName = resolveTargetDeckName(defaultSource);
+            const allDetectedVideos = [];
 
             for (let i = 1; i <= totalPages; i++) {
                 const page = await pdf.getPage(i);
@@ -675,6 +678,50 @@ const ImportMode = ({ onDeckUpdate }) => {
 
                 const title = lines.length > 0 ? lines[0] : `Page ${i}`;
                 const description = lines.length > 1 ? lines.slice(1).join('\n') : "未提取到文字說明。";
+
+                // 掃描 PDF 內頁中的 YouTube 連結 (支援超連結 Annotation 與內文網址)
+                const pageDetectedVideos = [];
+                try {
+                    const annotations = await page.getAnnotations();
+                    for (const annot of annotations) {
+                        const targetUrl = annot?.url || annot?.unsafeUrl;
+                        if (targetUrl) {
+                            const vid = extractYouTubeVideoId(targetUrl);
+                            if (vid && !pageDetectedVideos.some(v => v.videoId === vid)) {
+                                pageDetectedVideos.push({
+                                    videoId: vid,
+                                    url: targetUrl.startsWith('http') ? targetUrl : `https://${targetUrl}`,
+                                    page: i,
+                                    sourceTitle: title
+                                });
+                            }
+                        }
+                    }
+                } catch (annotErr) {
+                    console.warn(`第 ${i} 頁 Annotation 讀取略過:`, annotErr);
+                }
+
+                // 掃描純文字中的 YouTube 網址
+                const pageRawText = lines.join(' ');
+                const ytTextRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?.*v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/gi;
+                let textMatch;
+                while ((textMatch = ytTextRegex.exec(pageRawText)) !== null) {
+                    const vid = textMatch[1];
+                    if (vid && !pageDetectedVideos.some(v => v.videoId === vid)) {
+                        pageDetectedVideos.push({
+                            videoId: vid,
+                            url: `https://www.youtube.com/watch?v=${vid}`,
+                            page: i,
+                            sourceTitle: title
+                        });
+                    }
+                }
+
+                pageDetectedVideos.forEach(v => {
+                    if (!allDetectedVideos.some(item => item.videoId === v.videoId)) {
+                        allDetectedVideos.push(v);
+                    }
+                });
 
                 const scale = 1.5;
                 const viewport = page.getViewport({ scale });
@@ -686,6 +733,8 @@ const ImportMode = ({ onDeckUpdate }) => {
                 await page.render({ canvasContext: context, viewport: viewport }).promise;
                 const imagePath = canvas.toDataURL('image/jpeg', 0.8);
 
+                const primaryVideo = pageDetectedVideos[0] || null;
+
                 newCards.push({
                     id: `custom_${timestamp}_${i}`,
                     title: title,
@@ -693,7 +742,10 @@ const ImportMode = ({ onDeckUpdate }) => {
                     imagePath: imagePath,
                     source: deckName,
                     page: i,
-                    isCustom: true
+                    isCustom: true,
+                    videoUrl: primaryVideo ? primaryVideo.url : null,
+                    videoId: primaryVideo ? primaryVideo.videoId : null,
+                    detectedVideos: pageDetectedVideos
                 });
 
                 setProgress(Math.round((i / totalPages) * 100));
@@ -704,11 +756,17 @@ const ImportMode = ({ onDeckUpdate }) => {
             const mergedCards = [...existingCustomCards, ...newCards];
             await setIDB('custom_cards', mergedCards);
 
+            if (allDetectedVideos.length > 0) {
+                setDetectedPdfVideos(allDetectedVideos);
+            }
+
             setStatus("success");
             setStatusMsg(
-                previousCount > 0
-                    ? `🎉 成功追加 ${newCards.length} 張 PDF 卡片至「${deckName}」！（累計 ${previousCount + newCards.length} 張）`
-                    : `🎉 成功從 PDF 建立「${deckName}」，共匯入 ${newCards.length} 張簡報卡片！`
+                allDetectedVideos.length > 0
+                    ? `🎉 成功解析 ${newCards.length} 張簡報卡片至「${deckName}」，並自動辨識出 ${allDetectedVideos.length} 部 YouTube 影音連結！`
+                    : (previousCount > 0
+                        ? `🎉 成功追加 ${newCards.length} 張 PDF 卡片至「${deckName}」！（累計 ${previousCount + newCards.length} 張）`
+                        : `🎉 成功從 PDF 建立「${deckName}」，共匯入 ${newCards.length} 張簡報卡片！`)
             );
             fetchStoredDecks();
             if (onDeckUpdate) onDeckUpdate();
@@ -1135,8 +1193,9 @@ const ImportMode = ({ onDeckUpdate }) => {
 
             {/* ================= Tab 4: PDF 講義簡報 ================= */}
             {activeTab === 'pdf' && (
-                <div
-                    onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                <div className="flex flex-col gap-4">
+                    <div
+                        onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
                     onDragLeave={() => setIsDragging(false)}
                     onDrop={(e) => {
                         e.preventDefault();
@@ -1188,6 +1247,84 @@ const ImportMode = ({ onDeckUpdate }) => {
                         </div>
                     )}
                 </div>
+
+                {/* 偵測到的 PDF 內嵌 YouTube 影音展架 */}
+                {detectedPdfVideos.length > 0 && (
+                    <div className="mt-5 p-5 bg-gradient-to-r from-red-950/40 via-purple-950/30 to-gray-900 border border-red-500/40 rounded-3xl shadow-xl flex flex-col gap-4 animate-fade-in">
+                        <div className="flex items-center justify-between pb-3 border-b border-gray-800">
+                            <div className="flex items-center gap-2.5">
+                                <div className="w-9 h-9 rounded-xl bg-red-600/20 border border-red-500/40 flex items-center justify-center text-red-400">
+                                    <Youtube className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                                        <span>從此 PDF 成功抓取 {detectedPdfVideos.length} 部 YouTube 補充影音！</span>
+                                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/30">
+                                            自動識別
+                                        </span>
+                                    </h4>
+                                    <p className="text-xs text-gray-400 mt-0.5">
+                                        系統已將影音自動關聯至各投影片頁，可直接在此在線觀看，或一鍵送至 AI 提煉影音考點。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                            {detectedPdfVideos.map((vid, idx) => (
+                                <div key={idx} className="bg-gray-900/90 border border-gray-750 hover:border-red-500/40 rounded-2xl p-3 flex flex-col gap-2.5 transition-all group shadow-md">
+                                    <div className="relative aspect-video rounded-xl overflow-hidden bg-black border border-gray-800">
+                                        <img
+                                            src={`https://img.youtube.com/vi/${vid.videoId}/mqdefault.jpg`}
+                                            alt="Video Thumbnail"
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                        />
+                                        <span className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-[10px] font-bold text-yellow-300 border border-yellow-500/30">
+                                            第 {vid.page} 頁提及
+                                        </span>
+                                        <button
+                                            onClick={() => setPreviewVideoModal(vid)}
+                                            className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 text-white font-bold text-xs"
+                                        >
+                                            <Play className="w-6 h-6 text-red-500 fill-current" />
+                                        </button>
+                                    </div>
+
+                                    <div className="flex-1">
+                                        <div className="text-xs font-bold text-gray-200 line-clamp-1">
+                                            {vid.sourceTitle || `Page ${vid.page} 投影片補充`}
+                                        </div>
+                                        <div className="text-[11px] text-gray-400 font-mono truncate mt-0.5">
+                                            {vid.url}
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-2 pt-1 border-t border-gray-800">
+                                        <button
+                                            onClick={() => setPreviewVideoModal(vid)}
+                                            className="flex-1 py-1.5 bg-gray-800 hover:bg-gray-750 text-gray-200 hover:text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition-all"
+                                        >
+                                            <Play className="w-3 h-3 text-red-400 fill-current" />
+                                            <span>直接播放</span>
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setYoutubeUrl(vid.url);
+                                                setActiveTab('youtube');
+                                            }}
+                                            className="flex-1 py-1.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1 shadow-md transition-all"
+                                            title="切換至 YouTube AI 解構頁面"
+                                        >
+                                            <Sparkles className="w-3 h-3 text-yellow-300" />
+                                            <span>AI 提煉</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
             )}
 
             {/* ================= Tab 5: 截圖/黑板圖表認知解構 (支援 Ctrl+V) ================= */}
@@ -1894,6 +2031,59 @@ const ImportMode = ({ onDeckUpdate }) => {
                                         <span>確認執行模組合併</span>
                                     </>
                                 )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* YouTube 影片即時預覽彈窗 */}
+            {previewVideoModal && (
+                <div
+                    className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in"
+                    onClick={() => setPreviewVideoModal(null)}
+                >
+                    <div
+                        className="relative w-full max-w-3xl bg-gray-900 border border-gray-700/80 rounded-3xl overflow-hidden shadow-2xl p-4 flex flex-col gap-3"
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between pb-2 border-b border-gray-800">
+                            <div className="flex items-center gap-2 overflow-hidden">
+                                <Youtube className="w-5 h-5 text-red-500 shrink-0" />
+                                <h4 className="text-sm font-bold text-white truncate">
+                                    {previewVideoModal.sourceTitle || `投影片第 ${previewVideoModal.page} 頁提及的 YouTube 影音`}
+                                </h4>
+                            </div>
+                            <button
+                                onClick={() => setPreviewVideoModal(null)}
+                                className="p-1.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white transition-colors shrink-0"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                        <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-black border border-gray-800">
+                            <iframe
+                                src={`https://www.youtube-nocookie.com/embed/${previewVideoModal.videoId}?autoplay=1`}
+                                title="YouTube video player"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                                className="w-full h-full border-0"
+                            />
+                        </div>
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-1">
+                            <span className="text-xs text-gray-400 font-mono">
+                                投影片第 {previewVideoModal.page} 頁 · ID: {previewVideoModal.videoId}
+                            </span>
+                            <button
+                                onClick={() => {
+                                    setYoutubeUrl(previewVideoModal.url);
+                                    setActiveTab('youtube');
+                                    setPreviewVideoModal(null);
+                                }}
+                                className="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-md transition-all"
+                            >
+                                <Sparkles className="w-3.5 h-3.5 text-yellow-300" />
+                                <span>一鍵帶入 YouTube AI 解構與出題</span>
                             </button>
                         </div>
                     </div>
