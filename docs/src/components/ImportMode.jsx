@@ -10,6 +10,7 @@ import {
     getGeminiApiKey, setGeminiApiKey, analyzeTextWithGemini, analyzeAudioWithGemini,
     analyzeYouTubeWithGemini, extractYouTubeVideoId, parseOfflineText
 } from '../services/geminiService';
+import AudioDenoisePlayer from './AudioDenoisePlayer';
 
 // Configure PDF.js worker
 import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
@@ -167,9 +168,10 @@ const ImportMode = ({ onDeckUpdate }) => {
         }
     };
 
-    // 處理音訊分析
-    const handleAnalyzeAudio = async () => {
-        if (!audioFile) {
+    // 處理音訊分析 (支援接收降噪處理後的檔案)
+    const handleAnalyzeAudio = async (cleanAudioFile = null) => {
+        const targetFile = cleanAudioFile || audioFile;
+        if (!targetFile) {
             setStatus("error");
             setStatusMsg("請先選擇或上傳錄音檔案。");
             return;
@@ -184,10 +186,10 @@ const ImportMode = ({ onDeckUpdate }) => {
 
         setProcessing(true);
         setStatus("ideal");
-        setStatusMsg("正在傳送音訊進行深度轉錄與理解解構，請稍候...");
+        setStatusMsg("正在傳送降噪後的純淨音訊進行深度轉錄與理解解構，請稍候...");
 
         try {
-            const result = await analyzeAudioWithGemini(audioFile, apiKey);
+            const result = await analyzeAudioWithGemini(targetFile, apiKey);
             if (customDeckName.trim()) {
                 result.deckName = customDeckName.trim();
             }
@@ -613,55 +615,65 @@ const ImportMode = ({ onDeckUpdate }) => {
                         />
                     </div>
 
-                    <div
-                        onClick={() => audioInputRef.current?.click()}
-                        className="border-2 border-dashed border-gray-700 hover:border-purple-500/60 rounded-3xl p-10 flex flex-col items-center justify-center cursor-pointer transition-all bg-gray-900/50 hover:bg-gray-900 group"
-                    >
-                        <input
-                            ref={audioInputRef}
-                            type="file"
-                            accept="audio/*,.mp3,.m4a,.wav,.aac,.webm,.ogg"
-                            className="hidden"
-                            onChange={(e) => {
-                                if (e.target.files && e.target.files[0]) {
-                                    setAudioFile(e.target.files[0]);
-                                }
-                            }}
-                        />
-                        <div className="w-16 h-16 rounded-2xl bg-purple-950/60 border border-purple-600/30 flex items-center justify-center text-purple-400 mb-4 group-hover:scale-105 transition-transform">
-                            <Mic className="w-8 h-8" />
-                        </div>
-                        <p className="text-white font-bold text-base mb-1">
-                            {audioFile ? `已選擇：${audioFile.name}` : "點擊此處選擇或拖曳音訊檔"}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                            {audioFile ? `大小: ${(audioFile.size / 1024 / 1024).toFixed(2)} MB` : "支援常見格式：.mp3, .m4a, .wav, .aac"}
-                        </p>
-                    </div>
-
-                    <div className="flex justify-end pt-2">
-                        <button
-                            disabled={processing || !audioFile}
-                            onClick={handleAnalyzeAudio}
-                            className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
-                                !audioFile
-                                    ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
-                                    : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-lg shadow-purple-500/20'
-                            }`}
+                    {!audioFile ? (
+                        <div
+                            onClick={() => audioInputRef.current?.click()}
+                            className="border-2 border-dashed border-gray-700 hover:border-purple-500/60 rounded-3xl p-10 flex flex-col items-center justify-center cursor-pointer transition-all bg-gray-900/50 hover:bg-gray-900 group"
                         >
-                            {processing ? (
-                                <>
-                                    <Loader className="w-4 h-4 animate-spin" />
-                                    <span>AI 聆聽與解構分析中...</span>
-                                </>
-                            ) : (
-                                <>
-                                    <Sparkles className="w-4 h-4 text-yellow-300" />
-                                    <span>開始 AI 語音理解提煉</span>
-                                </>
-                            )}
-                        </button>
-                    </div>
+                            <input
+                                ref={audioInputRef}
+                                type="file"
+                                accept="audio/*,.mp3,.m4a,.wav,.aac,.webm,.ogg"
+                                className="hidden"
+                                onChange={(e) => {
+                                    if (e.target.files && e.target.files[0]) {
+                                        setAudioFile(e.target.files[0]);
+                                    }
+                                }}
+                            />
+                            <div className="w-16 h-16 rounded-2xl bg-purple-950/60 border border-purple-600/30 flex items-center justify-center text-purple-400 mb-4 group-hover:scale-105 transition-transform">
+                                <Mic className="w-8 h-8" />
+                            </div>
+                            <p className="text-white font-bold text-base mb-1">
+                                點擊此處選擇或拖曳課堂錄音檔
+                            </p>
+                            <p className="text-xs text-gray-500">
+                                支援常見格式：.mp3, .m4a, .wav, .aac (內建空調雜訊濾除與人聲增強試聽)
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="flex flex-col gap-4">
+                            <input
+                                ref={audioInputRef}
+                                type="file"
+                                accept="audio/*,.mp3,.m4a,.wav,.aac,.webm,.ogg"
+                                className="hidden"
+                                onChange={(e) => {
+                                    if (e.target.files && e.target.files[0]) {
+                                        setAudioFile(e.target.files[0]);
+                                    }
+                                }}
+                            />
+                            <div className="flex justify-between items-center">
+                                <span className="text-xs text-purple-300 font-bold">
+                                    💡 提示：點擊下方播放鍵試聽，可隨時切換「降噪」與「原音」親耳確認清晰度。
+                                </span>
+                                <button
+                                    onClick={() => audioInputRef.current?.click()}
+                                    className="text-xs text-gray-400 hover:text-white underline"
+                                >
+                                    更換音訊檔案
+                                </button>
+                            </div>
+
+                            {/* 降噪播放監聽室 */}
+                            <AudioDenoisePlayer
+                                file={audioFile}
+                                onConfirmDenoised={handleAnalyzeAudio}
+                                isAnalyzing={processing}
+                            />
+                        </div>
+                    )}
                 </div>
             )}
 
