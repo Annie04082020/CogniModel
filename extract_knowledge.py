@@ -1,11 +1,12 @@
 """
 extract_knowledge.py
-本機 Python 腳本：支援從長篇文字檔案 (.txt, .md) 或音訊檔案 (.mp3, .wav, .m4a)
+本機 Python 腳本：支援從 YouTube 影片、長篇文字檔案 (.txt, .md) 或音訊檔案 (.mp3, .wav, .m4a)
 透過 Google Gemini API 深度解構知識，產生概念卡片、因果配對題、迷思是非題與情境應用題。
 """
 
 import sys
 import os
+import re
 import json
 import base64
 import urllib.request
@@ -13,7 +14,7 @@ import urllib.error
 
 SYSTEM_INSTRUCTION = """你是一位認知學習科學與深度教學專家。
 用戶正在學習難度較高、抽象且不容易一眼看懂的課程內容。
-你的任務是將用戶提供的【抽象筆記/課文長文/課堂錄音】進行深度解構，幫助用戶建立真正的理解，而不是死記硬背名詞。
+你的任務是將用戶提供的【YouTube教學影片/抽象筆記/課文長文/課堂錄音】進行深度解構，幫助用戶建立真正的理解，而不是死記硬背名詞。
 
 請務必返回嚴格符合以下 JSON 格式的數據：
 {
@@ -54,6 +55,11 @@ SYSTEM_INSTRUCTION = """你是一位認知學習科學與深度教學專家。
 請以繁體中文輸出。
 """
 
+def extract_youtube_id(url):
+    pattern = r'(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})'
+    match = re.search(pattern, url)
+    return match.group(1) if match else None
+
 def call_gemini(parts, api_key):
     endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
     payload = {
@@ -80,45 +86,59 @@ def call_gemini(parts, api_key):
 def main():
     if len(sys.argv) < 2:
         print("使用方式:")
-        print("  python extract_knowledge.py <文字檔.txt或音訊檔.mp3> [自訂牌組名稱] [GEMINI_API_KEY]")
-        print("  (也可先設定環境變數 GEMINI_API_KEY)")
+        print("  1. 讀取 YouTube 影片:")
+        print("     python extract_knowledge.py \"https://www.youtube.com/watch?v=...\" [自訂牌組名稱] [GEMINI_API_KEY]")
+        print("  2. 讀取文字檔或錄音檔:")
+        print("     python extract_knowledge.py <文字檔.txt或音訊檔.mp3> [自訂牌組名稱] [GEMINI_API_KEY]")
         sys.exit(1)
 
-    file_path = sys.argv[1]
+    target_input = sys.argv[1]
     deck_name_arg = sys.argv[2] if len(sys.argv) > 2 else ""
     api_key = sys.argv[3] if len(sys.argv) > 3 else os.environ.get("GEMINI_API_KEY", "")
 
     if not api_key:
         api_key = input("請輸入您的 Gemini API Key: ").strip()
 
-    if not os.path.exists(file_path):
-        print(f"檔案不存在: {file_path}")
-        sys.exit(1)
+    youtube_id = extract_youtube_id(target_input)
+    video_url = ""
+    youtube_thumb = ""
 
-    ext = os.path.splitext(file_path)[1].lower()
-    print(f"正在讀取檔案: {file_path} ...")
-
-    if ext in ['.txt', '.md', '.text']:
-        with open(file_path, "r", encoding="utf-8") as f:
-            content = f.read()
-        parts = [{"text": f"請分析以下抽象學習內容，並按照指令輸出結構化的深度學習遊戲資料：\n\n{content}"}]
-    elif ext in ['.mp3', '.m4a', '.wav', '.aac', '.webm', '.ogg']:
-        mime_map = {
-            '.mp3': 'audio/mp3',
-            '.m4a': 'audio/m4a',
-            '.wav': 'audio/wav',
-            '.aac': 'audio/aac',
-            '.webm': 'audio/webm',
-            '.ogg': 'audio/ogg'
-        }
-        with open(file_path, "rb") as f:
-            audio_b64 = base64.b64encode(f.read()).decode("utf-8")
+    if youtube_id:
+        print(f"辨識為 YouTube 影片 (ID: {youtube_id}) ...")
+        video_url = f"https://www.youtube.com/watch?v={youtube_id}"
+        youtube_thumb = f"https://img.youtube.com/vi/{youtube_id}/hqdefault.jpg"
         parts = [
-            {"inlineData": {"mimeType": mime_map.get(ext, 'audio/mp3'), "data": audio_b64}},
-            {"text": "這是課堂或學習錄音，請聽取內容並進行深度理解解構，整理出核心概念卡片、因果配對、迷思破解與情境應用題。"}
+            {"fileData": {"fileUri": video_url, "mimeType": "video/mp4"}},
+            {"text": "這是老師指定的考試範圍 YouTube 影片。請深入觀看與聆聽此影片內容，掌握影片中講解的核心概念、原理機制、重點公式或因果邏輯，並輸出結構化理解遊戲資料。"}
         ]
+    elif os.path.exists(target_input):
+        ext = os.path.splitext(target_input)[1].lower()
+        print(f"正在讀取檔案: {target_input} ...")
+
+        if ext in ['.txt', '.md', '.text']:
+            with open(target_input, "r", encoding="utf-8") as f:
+                content = f.read()
+            parts = [{"text": f"請分析以下抽象學習內容，並按照指令輸出結構化的深度學習遊戲資料：\n\n{content}"}]
+        elif ext in ['.mp3', '.m4a', '.wav', '.aac', '.webm', '.ogg']:
+            mime_map = {
+                '.mp3': 'audio/mp3',
+                '.m4a': 'audio/m4a',
+                '.wav': 'audio/wav',
+                '.aac': 'audio/aac',
+                '.webm': 'audio/webm',
+                '.ogg': 'audio/ogg'
+            }
+            with open(target_input, "rb") as f:
+                audio_b64 = base64.b64encode(f.read()).decode("utf-8")
+            parts = [
+                {"inlineData": {"mimeType": mime_map.get(ext, 'audio/mp3'), "data": audio_b64}},
+                {"text": "這是課堂或學習錄音，請聽取內容並進行深度理解解構，整理出核心概念卡片、因果配對、迷思破解與情境應用題。"}
+            ]
+        else:
+            print(f"不支援的副檔名: {ext}。請提供 .txt, .md 或音訊檔 .mp3, .m4a, .wav")
+            sys.exit(1)
     else:
-        print(f"不支援的副檔名: {ext}。請提供 .txt, .md 或音訊檔 .mp3, .m4a, .wav")
+        print(f"無效的目標或檔案不存在: {target_input}")
         sys.exit(1)
 
     print("呼叫 Gemini AI 進行深度認知解構中...")
@@ -139,8 +159,8 @@ def main():
         except:
             existing_cards = []
 
-    deck_name = result.get("deckName", os.path.splitext(os.path.basename(file_path))[0])
-    timestamp = int(os.path.getmtime(file_path) * 1000)
+    deck_name = result.get("deckName", "YouTube 影片解析" if youtube_id else os.path.splitext(os.path.basename(target_input))[0])
+    timestamp = int(os.path.getmtime(target_input) * 1000) if os.path.exists(target_input) else int(os.times()[4] * 1000)
 
     new_cards = []
     for idx, card in enumerate(result.get("cards", [])):
@@ -149,7 +169,8 @@ def main():
             "title": card.get("title", ""),
             "description": card.get("description", ""),
             "analogy": card.get("analogy", ""),
-            "imagePath": "",
+            "imagePath": youtube_thumb,
+            "videoUrl": video_url,
             "source": deck_name,
             "logicPairs": result.get("logicPairs", []) if idx == 0 else [],
             "mythBusters": result.get("mythBusters", []) if idx == 0 else [],

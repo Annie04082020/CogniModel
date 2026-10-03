@@ -3,10 +3,12 @@ import * as pdfjsLib from 'pdfjs-dist';
 import { set as setIDB, get as getIDB } from 'idb-keyval';
 import {
     Upload, FileText, CheckCircle, AlertCircle, Loader, Trash2, Database,
-    Sparkles, Mic, Key, Edit3, Plus, ArrowRight, HelpCircle, FileAudio, Layers
+    Sparkles, Mic, Key, Edit3, Plus, ArrowRight, HelpCircle, FileAudio, Layers,
+    Youtube, Video, ExternalLink
 } from 'lucide-react';
 import {
-    getGeminiApiKey, setGeminiApiKey, analyzeTextWithGemini, analyzeAudioWithGemini, parseOfflineText
+    getGeminiApiKey, setGeminiApiKey, analyzeTextWithGemini, analyzeAudioWithGemini,
+    analyzeYouTubeWithGemini, extractYouTubeVideoId, parseOfflineText
 } from '../services/geminiService';
 
 // Configure PDF.js worker
@@ -14,7 +16,7 @@ import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 
 const ImportMode = ({ onDeckUpdate }) => {
-    const [activeTab, setActiveTab] = useState('text'); // 'text', 'audio', 'pdf'
+    const [activeTab, setActiveTab] = useState('youtube'); // 'youtube', 'text', 'audio', 'pdf'
 
     // Status & Common States
     const [processing, setProcessing] = useState(false);
@@ -35,11 +37,15 @@ const ImportMode = ({ onDeckUpdate }) => {
     const [audioFile, setAudioFile] = useState(null);
     const audioInputRef = useRef(null);
 
+    // YouTube Tab States
+    const [youtubeUrl, setYoutubeUrl] = useState('');
+    const detectedVideoId = extractYouTubeVideoId(youtubeUrl);
+
     // PDF Drag State
     const [isDragging, setIsDragging] = useState(false);
 
     // AI 提煉後的預覽與編輯資料
-    const [extractedData, setExtractedData] = useState(null); // { deckName, summary, cards, logicPairs, mythBusters, scenarios }
+    const [extractedData, setExtractedData] = useState(null); // { deckName, summary, cards, logicPairs, mythBusters, scenarios, videoId, videoUrl }
 
     useEffect(() => {
         setApiKey(getGeminiApiKey());
@@ -82,6 +88,42 @@ const ImportMode = ({ onDeckUpdate }) => {
             console.error("Delete Error:", error);
             setStatus("error");
             setStatusMsg("刪除失敗");
+        }
+    };
+
+    // 處理 YouTube 影片分析
+    const handleAnalyzeYouTube = async () => {
+        if (!youtubeUrl.trim() || !detectedVideoId) {
+            setStatus("error");
+            setStatusMsg("請輸入有效的公開 YouTube 影片連結。");
+            return;
+        }
+
+        if (!apiKey) {
+            setShowKeyInput(true);
+            setStatus("error");
+            setStatusMsg("YouTube 影片認知解構需要使用 Gemini API，請先輸入 API Key。");
+            return;
+        }
+
+        setProcessing(true);
+        setStatus("ideal");
+        setStatusMsg("Gemini 正在深入觀看與分析 YouTube 影片內容，請稍候...");
+
+        try {
+            const result = await analyzeYouTubeWithGemini(youtubeUrl, apiKey);
+            if (customDeckName.trim()) {
+                result.deckName = customDeckName.trim();
+            }
+            setExtractedData(result);
+            setStatus("success");
+            setStatusMsg("🎉 YouTube 影片分析完成！已為您提煉出核心考點與理解遊戲。");
+        } catch (err) {
+            console.error("YouTube Analysis Error:", err);
+            setStatus("error");
+            setStatusMsg(err.message || "YouTube 影片分析失敗，請檢查該影片是否為公開影片。");
+        } finally {
+            setProcessing(false);
         }
     };
 
@@ -173,13 +215,18 @@ const ImportMode = ({ onDeckUpdate }) => {
             const timestamp = Date.now();
             const deckName = extractedData.deckName || `自訂牌組_${new Date().toLocaleDateString()}`;
 
-            // 將 logicPairs, mythBusters, scenarios 均勻或全部附加在卡片資料中，供 UnderstandMode 讀取
+            // 若來自 YouTube，使用其縮圖做為可選展示
+            const youtubeThumb = extractedData.videoId
+                ? `https://img.youtube.com/vi/${extractedData.videoId}/hqdefault.jpg`
+                : '';
+
             const newCards = extractedData.cards.map((card, idx) => ({
                 id: `custom_${timestamp}_${idx}`,
                 title: card.title,
                 description: card.description,
                 analogy: card.analogy || '',
-                imagePath: '', // 純文字卡片
+                imagePath: youtubeThumb, // YouTube 縮圖或空字串
+                videoUrl: extractedData.videoUrl || '',
                 source: deckName,
                 isCustom: true,
                 // 第一張卡片攜帶全部附屬理解題目，確保各模式都能調用
@@ -197,6 +244,7 @@ const ImportMode = ({ onDeckUpdate }) => {
             setExtractedData(null);
             setInputText('');
             setAudioFile(null);
+            setYoutubeUrl('');
             setCustomDeckName('');
 
             fetchStoredDecks();
@@ -283,11 +331,11 @@ const ImportMode = ({ onDeckUpdate }) => {
             {/* 頂部標題與 API Key 設定 */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                 <div>
-                    <h1 className="text-2xl md:text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400">
+                    <h1 className="text-2xl md:text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-red-400 via-purple-300 to-indigo-400">
                         知識卡片與理解遊戲生成中心
                     </h1>
                     <p className="text-gray-400 text-xs md:text-sm mt-1">
-                        支援抽象文字段落解構、錄音筆記音訊理解、以及傳統投影片 PDF 匯入
+                        支援 YouTube 教學影片、抽象課文筆記、錄音檔音訊與投影片 PDF 匯入
                     </p>
                 </div>
 
@@ -338,36 +386,46 @@ const ImportMode = ({ onDeckUpdate }) => {
             )}
 
             {/* 匯入來源 Tab 選單 */}
-            <div className="flex bg-gray-900/80 p-1.5 rounded-2xl border border-gray-800 mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 bg-gray-900/80 p-1.5 rounded-2xl border border-gray-800 mb-6">
+                <button
+                    onClick={() => { setActiveTab('youtube'); setExtractedData(null); }}
+                    className={`py-2.5 px-3 rounded-xl font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-2 ${
+                        activeTab === 'youtube'
+                            ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-lg'
+                            : 'text-gray-400 hover:text-white'
+                    }`}
+                >
+                    <Youtube className="w-4 h-4 text-red-300" /> YouTube 影片
+                </button>
                 <button
                     onClick={() => { setActiveTab('text'); setExtractedData(null); }}
-                    className={`flex-1 py-3 rounded-xl font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-2 ${
+                    className={`py-2.5 px-3 rounded-xl font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-2 ${
                         activeTab === 'text'
                             ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
                             : 'text-gray-400 hover:text-white'
                     }`}
                 >
-                    <FileText className="w-4 h-4" /> 抽象文字段落提取
+                    <FileText className="w-4 h-4 text-indigo-300" /> 文字筆記段落
                 </button>
                 <button
                     onClick={() => { setActiveTab('audio'); setExtractedData(null); }}
-                    className={`flex-1 py-3 rounded-xl font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-2 ${
+                    className={`py-2.5 px-3 rounded-xl font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-2 ${
                         activeTab === 'audio'
                             ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
                             : 'text-gray-400 hover:text-white'
                     }`}
                 >
-                    <FileAudio className="w-4 h-4" /> 錄音檔/語音辨識提煉
+                    <FileAudio className="w-4 h-4 text-purple-300" /> 錄音筆記音訊
                 </button>
                 <button
                     onClick={() => { setActiveTab('pdf'); setExtractedData(null); }}
-                    className={`flex-1 py-3 rounded-xl font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-2 ${
+                    className={`py-2.5 px-3 rounded-xl font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-2 ${
                         activeTab === 'pdf'
                             ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg'
                             : 'text-gray-400 hover:text-white'
                     }`}
                 >
-                    <Layers className="w-4 h-4" /> 投影片 PDF 簡報
+                    <Layers className="w-4 h-4 text-blue-300" /> 投影片 PDF
                 </button>
             </div>
 
@@ -383,7 +441,100 @@ const ImportMode = ({ onDeckUpdate }) => {
                 </div>
             )}
 
-            {/* ================= Tab 1: 文字段落提取 ================= */}
+            {/* ================= Tab 1: YouTube 影片提煉 ================= */}
+            {activeTab === 'youtube' && !extractedData && (
+                <div className="flex flex-col gap-4 bg-gray-850 p-6 rounded-3xl border border-gray-800">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+                        <div>
+                            <h3 className="font-bold text-white text-base flex items-center gap-2">
+                                <Youtube className="w-5 h-5 text-red-500" /> 貼上 YouTube 影片網址
+                            </h3>
+                            <p className="text-xs text-gray-400 mt-0.5">
+                                專為「老師指定 YouTube 影片考試內容」打造！Gemini 2.5 直接觀看影片、聽取講解並提煉核心考點。
+                            </p>
+                        </div>
+                        <input
+                            type="text"
+                            placeholder="自訂牌組名稱 (選填)"
+                            value={customDeckName}
+                            onChange={(e) => setCustomDeckName(e.target.value)}
+                            className="bg-gray-900 border border-gray-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-red-500 w-full md:w-56"
+                        />
+                    </div>
+
+                    <div className="flex flex-col gap-3">
+                        <div className="flex gap-2">
+                            <input
+                                type="text"
+                                value={youtubeUrl}
+                                onChange={(e) => setYoutubeUrl(e.target.value)}
+                                placeholder="貼上 YouTube 連結，例如: https://www.youtube.com/watch?v=... 或 https://youtu.be/..."
+                                className="flex-1 p-3.5 bg-gray-900 border border-gray-700/80 rounded-2xl text-gray-100 text-sm focus:outline-none focus:border-red-500 font-mono"
+                            />
+                        </div>
+
+                        {/* 即時影片預覽 */}
+                        {detectedVideoId && (
+                            <div className="mt-2 p-4 bg-gray-900/90 rounded-2xl border border-gray-750 flex flex-col sm:flex-row items-center gap-4 animate-fade-in">
+                                <div className="relative w-full sm:w-48 aspect-video rounded-xl overflow-hidden bg-black shrink-0 border border-gray-700">
+                                    <img
+                                        src={`https://img.youtube.com/vi/${detectedVideoId}/hqdefault.jpg`}
+                                        alt="YouTube 縮圖"
+                                        className="w-full h-full object-cover"
+                                    />
+                                    <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                                        <div className="w-10 h-10 rounded-full bg-red-600/90 flex items-center justify-center text-white shadow-lg">
+                                            <Video className="w-5 h-5" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex-1 text-center sm:text-left">
+                                    <span className="text-xs font-bold text-red-400 uppercase tracking-wider block mb-1">
+                                        已識別 YouTube 影片 ID: {detectedVideoId}
+                                    </span>
+                                    <p className="text-sm font-semibold text-white">
+                                        準備好解析本影片中的關鍵概念、因果機制與易混淆考點
+                                    </p>
+                                    <a
+                                        href={youtubeUrl}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="text-xs text-blue-400 hover:underline mt-1.5 inline-flex items-center gap-1"
+                                    >
+                                        在新分頁開啟影片確認 ↗
+                                    </a>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="flex justify-end pt-2">
+                        <button
+                            disabled={processing || !detectedVideoId}
+                            onClick={handleAnalyzeYouTube}
+                            className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
+                                !detectedVideoId
+                                    ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                                    : 'bg-gradient-to-r from-red-600 via-rose-600 to-purple-600 hover:from-red-500 hover:to-purple-500 text-white shadow-lg shadow-red-500/20'
+                            }`}
+                        >
+                            {processing ? (
+                                <>
+                                    <Loader className="w-4 h-4 animate-spin" />
+                                    <span>AI 觀看影片與深入解構中...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <Sparkles className="w-4 h-4 text-yellow-300" />
+                                    <span>AI 影片考點解構與生成遊戲</span>
+                                </>
+                            )}
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* ================= Tab 2: 文字段落提取 ================= */}
             {activeTab === 'text' && !extractedData && (
                 <div className="flex flex-col gap-4 bg-gray-850 p-6 rounded-3xl border border-gray-800">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
@@ -408,7 +559,7 @@ const ImportMode = ({ onDeckUpdate }) => {
                         rows={8}
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}
-                        placeholder="請在此貼上課文段落、講義文字或你的抽象筆記...&#10;&#10;例如：&#10;動作電位是指神經元受刺激後，細胞膜去極化達閾值，電位敏感型鈉離子通道瞬間打開，鈉離子順電化學梯度迅速內流，使膜電位由負轉正。隨後鈉通道去活化，延遲整流型鉀通道打開，鉀離子外流導致再極化..."
+                        placeholder="請在此貼上課文段落、講義文字或你的抽象筆記..."
                         className="w-full p-4 bg-gray-900 border border-gray-700/80 rounded-2xl text-gray-100 text-sm focus:outline-none focus:border-indigo-500 leading-relaxed font-mono custom-scrollbar"
                     />
 
@@ -441,7 +592,7 @@ const ImportMode = ({ onDeckUpdate }) => {
                 </div>
             )}
 
-            {/* ================= Tab 2: 錄音檔上傳 ================= */}
+            {/* ================= Tab 3: 錄音檔上傳 ================= */}
             {activeTab === 'audio' && !extractedData && (
                 <div className="flex flex-col gap-4 bg-gray-850 p-6 rounded-3xl border border-gray-800">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
@@ -514,7 +665,7 @@ const ImportMode = ({ onDeckUpdate }) => {
                 </div>
             )}
 
-            {/* ================= Tab 3: PDF 講義簡報 ================= */}
+            {/* ================= Tab 4: PDF 講義簡報 ================= */}
             {activeTab === 'pdf' && (
                 <div
                     onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
@@ -573,7 +724,8 @@ const ImportMode = ({ onDeckUpdate }) => {
                 <div className="mt-6 flex flex-col gap-6 bg-gray-850 p-6 md:p-8 rounded-3xl border border-indigo-500/40 shadow-2xl animate-fade-in">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-gray-700">
                         <div>
-                            <span className="text-xs uppercase font-extrabold tracking-widest text-indigo-400">
+                            <span className="text-xs uppercase font-extrabold tracking-widest text-indigo-400 flex items-center gap-1.5">
+                                {extractedData.videoId && <Youtube className="w-4 h-4 text-red-400" />}
                                 提煉預覽與微調
                             </span>
                             <h2 className="text-xl md:text-2xl font-bold text-white mt-1">
@@ -668,7 +820,7 @@ const ImportMode = ({ onDeckUpdate }) => {
                 </div>
 
                 {storedDecks.length === 0 ? (
-                    <p className="text-xs text-gray-500 italic">尚無自訂牌組。請貼上筆記、上傳錄音或匯入 PDF 建立您的第一個牌組！</p>
+                    <p className="text-xs text-gray-500 italic">尚無自訂牌組。請貼上 YouTube 連結、筆記、上傳錄音或匯入 PDF 建立您的第一個牌組！</p>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                         {storedDecks.map((deck) => (

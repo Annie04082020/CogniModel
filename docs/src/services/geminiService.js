@@ -1,4 +1,4 @@
-// geminiService.js - 處理抽象筆記長文與音訊檔案的 AI 認知解構
+// geminiService.js - 處理抽象筆記長文、音訊檔案與 YouTube 影片的 AI 認知解構
 
 const API_KEY_STORAGE_KEY = 'gemini_api_key';
 
@@ -16,7 +16,7 @@ export const setGeminiApiKey = (key) => {
 
 const SYSTEM_INSTRUCTION = `你是一位認知學習科學與深度教學專家。
 用戶正在學習難度較高、抽象且不容易一眼看懂的課程內容。
-你的任務是將用戶提供的【抽象筆記/課文長文/課堂錄音】進行深度解構，幫助用戶建立真正的理解，而不是死記硬背名詞。
+你的任務是將用戶提供的【抽象筆記/課文長文/課堂錄音/教學 YouTube 影片】進行深度解構，幫助用戶建立真正的理解，而不是死記硬背名詞。
 
 請務必返回嚴格符合以下 JSON 格式的數據（不要加入額外的 markdown 程式碼區塊標記外文字）：
 {
@@ -56,9 +56,10 @@ const SYSTEM_INSTRUCTION = `你是一位認知學習科學與深度教學專家�
 }
 
 注意事項：
-1. 數量建議：cards 生成 3~8 張，logicPairs 生成 3~6 組，mythBusters 生成 3~6 題，scenarios 生成 2~4 題。
+1. 數量建議：cards 生成 4~10 張，logicPairs 生成 3~6 組，mythBusters 生成 3~6 題，scenarios 生成 2~4 題。
 2. 題目與解釋請務必注重「因果關聯」、「運作機制」與「概念辨析」，避免純背誦瑣碎定義。
-3. 語言請以繁體中文（台灣習慣用詞）輸出。
+3. 若為 YouTube 影片，請特別注意影片主講者特別強調的考點、推導步驟與實驗觀察。
+4. 語言請以繁體中文（台灣習慣用詞）輸出。
 `;
 
 export const analyzeTextWithGemini = async (text, apiKey = null) => {
@@ -68,7 +69,6 @@ export const analyzeTextWithGemini = async (text, apiKey = null) => {
     }
 
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`;
-
     const prompt = `請分析以下抽象學習內容，並按照指令輸出結構化的深度學習遊戲資料：\n\n${text}`;
 
     const requestBody = {
@@ -117,7 +117,6 @@ export const analyzeAudioWithGemini = async (audioFile, apiKey = null) => {
         throw new Error("請先填入 Gemini API Key 才能進行音訊辨識與深度理解提煉。");
     }
 
-    // Convert file to base64
     const base64Data = await new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => {
@@ -131,7 +130,6 @@ export const analyzeAudioWithGemini = async (audioFile, apiKey = null) => {
 
     const mimeType = audioFile.type || 'audio/mp3';
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`;
-
     const prompt = "這是課堂或學習錄音，請聽取內容並進行深度理解解構，整理出核心概念卡片、因果配對、迷思破解與情境應用題。";
 
     const requestBody = {
@@ -179,6 +177,92 @@ export const analyzeAudioWithGemini = async (audioFile, apiKey = null) => {
     } catch (e) {
         const cleaned = candidateText.replace(/^```json/m, '').replace(/^```/m, '').trim();
         return JSON.parse(cleaned);
+    }
+};
+
+// YouTube 網址工具函式
+export const extractYouTubeVideoId = (url) => {
+    if (!url) return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+};
+
+export const normalizeYouTubeUrl = (url) => {
+    const videoId = extractYouTubeVideoId(url);
+    if (videoId) {
+        return `https://www.youtube.com/watch?v=${videoId}`;
+    }
+    return url;
+};
+
+// YouTube 影片 AI 認知解構
+export const analyzeYouTubeWithGemini = async (youtubeUrl, apiKey = null) => {
+    const key = apiKey || getGeminiApiKey();
+    if (!key) {
+        throw new Error("請先填入 Gemini API Key 才能進行 YouTube 影片 AI 認知解構。");
+    }
+
+    const normalizedUrl = normalizeYouTubeUrl(youtubeUrl);
+    const videoId = extractYouTubeVideoId(youtubeUrl);
+    if (!videoId) {
+        throw new Error("請輸入有效的 YouTube 影片網址 (例如: https://www.youtube.com/watch?v=... 或 https://youtu.be/...)");
+    }
+
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`;
+    const prompt = `這是老師指定的考試範圍 YouTube 影片。請深入觀看與聆聽此影片內容，掌握影片中講解的核心概念、原理機制、重點公式或因果邏輯，並按照指令輸出結構化的深度學習與理解遊戲資料。`;
+
+    const requestBody = {
+        contents: [
+            {
+                role: "user",
+                parts: [
+                    {
+                        fileData: {
+                            fileUri: normalizedUrl,
+                            mimeType: "video/mp4"
+                        }
+                    },
+                    { text: prompt }
+                ]
+            }
+        ],
+        systemInstruction: {
+            parts: [{ text: SYSTEM_INSTRUCTION }]
+        },
+        generationConfig: {
+            responseMimeType: "application/json"
+        }
+    };
+
+    const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestBody)
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error?.message || `YouTube 影片分析失敗 (狀態碼: ${response.status})。請確認該影片是否設定為「公開」影片。`);
+    }
+
+    const data = await response.json();
+    const candidateText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!candidateText) {
+        throw new Error("Gemini API 未回傳有效內容");
+    }
+
+    try {
+        const parsed = JSON.parse(candidateText);
+        parsed.videoId = videoId;
+        parsed.videoUrl = normalizedUrl;
+        return parsed;
+    } catch (e) {
+        const cleaned = candidateText.replace(/^```json/m, '').replace(/^```/m, '').trim();
+        const parsed = JSON.parse(cleaned);
+        parsed.videoId = videoId;
+        parsed.videoUrl = normalizedUrl;
+        return parsed;
     }
 };
 

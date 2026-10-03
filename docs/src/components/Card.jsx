@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, Lightbulb, Compass, RotateCw } from 'lucide-react';
+import { Sparkles, Lightbulb, Compass, RotateCw, Youtube, ExternalLink } from 'lucide-react';
 
 const Card = ({ card, isFlipped: externalIsFlipped, onFlip }) => {
     const [internalIsFlipped, setInternalIsFlipped] = useState(false);
@@ -18,6 +18,7 @@ const Card = ({ card, isFlipped: externalIsFlipped, onFlip }) => {
     };
 
     const hasImage = Boolean(card.imagePath);
+    const isYouTube = Boolean(card.videoUrl || (card.imagePath && card.imagePath.includes('youtube.com')));
 
     return (
         <div className="relative w-full max-w-[90%] md:max-w-4xl aspect-[16/10] md:aspect-video cursor-pointer perspective-1000 select-none" onClick={handleFlip}>
@@ -32,15 +33,28 @@ const Card = ({ card, isFlipped: externalIsFlipped, onFlip }) => {
                 <div className="absolute w-full h-full backface-hidden bg-gray-900 rounded-2xl overflow-hidden shadow-2xl border border-gray-700/80 flex flex-col md:flex-row">
                     {hasImage ? (
                         <>
-                            {/* 傳統簡報圖片版面 */}
-                            <div className="w-full h-2/3 md:w-2/3 md:h-full bg-black flex items-center justify-center relative">
+                            {/* 圖片/縮圖版面 */}
+                            <div className="w-full h-2/3 md:w-2/3 md:h-full bg-black flex items-center justify-center relative group">
                                 <img
                                     src={card.imagePath}
                                     alt="Card Content"
                                     className="max-w-full max-h-full object-contain"
                                 />
+                                {card.videoUrl && (
+                                    <a
+                                        href={card.videoUrl}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="absolute top-3 left-3 bg-red-600/90 hover:bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg backdrop-blur transition-all"
+                                        title="開啟對應 YouTube 影片"
+                                    >
+                                        <Youtube className="w-4 h-4" />
+                                        <span>觀看影片 ↗</span>
+                                    </a>
+                                )}
                                 <div className="absolute bottom-2 right-2 md:hidden bg-black/60 text-white text-[10px] px-2 py-1 rounded-full opacity-60">
-                                    投影片
+                                    {isYouTube ? "影片縮圖" : "投影片"}
                                 </div>
                             </div>
                             <div className="w-full h-1/3 md:w-1/3 md:h-full p-4 md:p-6 flex flex-col justify-center bg-gray-850 border-t md:border-t-0 md:border-l border-gray-750">
@@ -63,18 +77,29 @@ const Card = ({ card, isFlipped: externalIsFlipped, onFlip }) => {
 
                             {/* 頂部標籤列 */}
                             <div className="flex justify-between items-center z-10">
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 flex-wrap">
                                     <span className="px-3 py-1 rounded-full text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 flex items-center gap-1.5">
                                         <Sparkles className="w-3.5 h-3.5" /> {card.source || "抽象概念解析"}
                                     </span>
+                                    {card.videoUrl && (
+                                        <a
+                                            href={card.videoUrl}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            onClick={(e) => e.stopPropagation()}
+                                            className="px-2.5 py-1 rounded-full text-xs font-bold bg-red-600/20 text-red-300 border border-red-500/30 hover:bg-red-600/40 flex items-center gap-1 transition-all"
+                                        >
+                                            <Youtube className="w-3.5 h-3.5 text-red-400" /> YouTube 影片 ↗
+                                        </a>
+                                    )}
                                     {card.analogy && (
                                         <span className="hidden sm:inline-flex px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30 items-center gap-1">
                                             <Lightbulb className="w-3 h-3" /> 直觀比喻助記
                                         </span>
                                     )}
                                 </div>
-                                <div className="flex items-center gap-1 text-xs text-gray-400 opacity-70">
-                                    <RotateCw className="w-3.5 h-3.5" /> 點擊翻轉看答案
+                                <div className="flex items-center gap-1 text-xs text-gray-400 opacity-70 shrink-0">
+                                    <RotateCw className="w-3.5 h-3.5" /> 點擊翻轉
                                 </div>
                             </div>
 
