@@ -818,17 +818,17 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
 
                     {/* ===== 左側主欄：純英文學術正文與心智模型 ===== */}
                     <div className={`${layoutMode === 'split' ? 'lg:col-span-7' : 'w-full'} flex flex-col gap-4`}>
-                        <div className="bg-gray-900/90 rounded-2xl border border-gray-800/80 shadow-xl p-4 sm:p-5 md:p-6 flex flex-col gap-4">
+                        <div className="bg-gray-900/90 rounded-xl border border-gray-800 shadow-lg p-3.5 sm:p-4.5 flex flex-col gap-3.5">
 
                             {/* 段落標題與發音朗讀 */}
-                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-gray-800/70 pb-3">
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-gray-800/70 pb-2.5">
                                 <div>
                                     {currentChunk.term_en && (
                                         <span className="text-xs font-mono font-bold text-indigo-400 block mb-0.5">
                                             {currentChunk.term_en}
                                         </span>
                                     )}
-                                    <h2 className="text-lg md:text-xl font-black text-white font-mono leading-snug">
+                                    <h2 className="text-base md:text-lg font-bold text-white font-mono leading-snug">
                                         {currentChunk.title}
                                     </h2>
                                 </div>
@@ -837,7 +837,7 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                                     {layoutMode === 'split' && activeSlide?.imagePath && (
                                         <a
                                             href="#slide-anchor"
-                                            className="lg:hidden px-2.5 py-1.5 rounded-xl bg-cyan-950/70 border border-cyan-500/30 text-cyan-300 text-xs font-bold flex items-center gap-1 shrink-0 active:scale-95"
+                                            className="lg:hidden px-2.5 py-1.5 rounded-lg bg-cyan-950/70 border border-cyan-500/30 text-cyan-300 text-xs font-semibold flex items-center gap-1 shrink-0 active:scale-95"
                                         >
                                             <ImageIcon className="w-3.5 h-3.5" />
                                             <span>對照投影片 (P.{activeSlide.page || 1}) ↓</span>
@@ -845,10 +845,10 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                                     )}
                                     <button
                                         onClick={() => speakText(`${currentChunk.title}. ${currentChunk.text}`)}
-                                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border shrink-0 ${
+                                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 border shrink-0 ${
                                             isSpeaking
                                                 ? 'bg-rose-950/60 text-rose-300 border-rose-500/40 animate-pulse'
-                                                : 'bg-gray-800 hover:bg-gray-750 text-indigo-300 border-gray-700'
+                                                : 'bg-gray-800 hover:bg-gray-750 text-indigo-300 border-gray-750'
                                         }`}
                                         title="點擊聆聽全英發音朗讀"
                                     >
@@ -865,13 +865,13 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
 
                             {/* 理工心智錨點註解 (Sleek Engineering Analogy Callout) */}
                             {currentChunk.analogy && (
-                                <div className="border-l-2 border-cyan-400 bg-cyan-950/20 pl-3.5 pr-3 py-2.5 rounded-r-xl flex items-start gap-2.5">
-                                    <Zap className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+                                <div className="border-l-2 border-cyan-400 bg-cyan-950/20 pl-3.5 pr-3 py-2 rounded-r-lg flex items-start gap-2.5">
+                                    <Zap className="w-3.5 h-3.5 text-cyan-400 shrink-0 mt-0.5" />
                                     <div className="min-w-0">
-                                        <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-cyan-300 font-mono mb-0.5">
+                                        <h4 className="text-[11px] font-bold uppercase tracking-wider text-cyan-300 font-mono mb-0.5">
                                             ⚡ 理工工程直覺心智模型 (Engineering Analogy)
                                         </h4>
-                                        <p className="text-xs md:text-sm text-gray-200 leading-relaxed font-mono">
+                                        <p className="text-xs sm:text-sm text-gray-200 leading-relaxed font-mono">
                                             {currentChunk.analogy}
                                         </p>
                                     </div>
@@ -880,10 +880,10 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
 
                             {/* 可折疊之繁體中文對照翻譯 (輔助理解，不覆蓋原文) */}
                             {currentChunk.translation_zh && (
-                                <div className="border border-gray-800/70 rounded-xl overflow-hidden bg-gray-950/30">
+                                <div className="border border-gray-800 rounded-lg overflow-hidden bg-gray-950/30">
                                     <button
                                         onClick={() => setShowTranslation(!showTranslation)}
-                                        className="w-full px-3.5 py-2 flex items-center justify-between text-xs font-bold text-gray-400 hover:text-white hover:bg-gray-800/40 transition-colors"
+                                        className="w-full px-3 py-1.5 flex items-center justify-between text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-850 transition-colors"
                                     >
                                         <span className="flex items-center gap-1.5">
                                             <Languages className="w-3.5 h-3.5 text-indigo-400" />
@@ -892,7 +892,7 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                                         {showTranslation ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                                     </button>
                                     {showTranslation && (
-                                        <div className="px-3.5 py-3 text-xs md:text-sm text-gray-300 leading-relaxed border-t border-gray-800/70 bg-gray-950/40 font-sans">
+                                        <div className="px-3.5 py-2.5 text-xs sm:text-sm text-gray-300 leading-relaxed border-t border-gray-800 bg-gray-950/40 font-sans">
                                             {currentChunk.translation_zh}
                                         </div>
                                     )}
@@ -999,7 +999,7 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                                                     </div>
                                                 )}
                                                 <div
-                                                    className={`max-w-[88%] rounded-xl p-2.5 text-xs leading-relaxed ${
+                                                    className={`max-w-[88%] rounded-lg p-2.5 text-xs leading-relaxed ${
                                                         msg.role === 'user'
                                                             ? 'bg-indigo-600 text-white font-medium shadow-sm'
                                                             : 'bg-gray-850 border border-gray-750 text-gray-200 font-sans shadow-inner whitespace-pre-wrap'
@@ -1036,12 +1036,12 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                                             }
                                         }}
                                         placeholder="針對本段課文提問（例如：為什麼需要去極化？這和電容充電有何不同？）..."
-                                        className="flex-1 bg-gray-900 border border-gray-750 rounded-xl px-3 py-1.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 font-mono"
+                                        className="flex-1 bg-gray-900 border border-gray-750 rounded-lg px-3 py-1.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 font-mono"
                                     />
                                     <button
                                         disabled={tutorLoading || !tutorQuestion.trim()}
                                         onClick={() => handleAskTutor()}
-                                        className="p-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white transition-all shadow-sm shrink-0"
+                                        className="p-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white transition-all shadow-sm shrink-0"
                                         title="發送提問"
                                     >
                                         <Send className="w-3.5 h-3.5" />
@@ -1050,7 +1050,7 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                                         <button
                                             type="button"
                                             onClick={() => setTutorHistory([])}
-                                            className="p-1.5 rounded-xl bg-gray-800 hover:bg-gray-750 text-gray-400 hover:text-white transition-colors shrink-0"
+                                            className="p-1.5 rounded-lg bg-gray-800 hover:bg-gray-750 text-gray-400 hover:text-white transition-colors shrink-0"
                                             title="清空問答紀錄"
                                         >
                                             <RotateCcw className="w-3.5 h-3.5" />
@@ -1060,7 +1060,7 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                             </div>
 
                             {/* 底部段落切換快捷列 */}
-                            <div className="flex flex-col sm:flex-row justify-between items-center gap-2.5 pt-2.5 border-t border-gray-800/70">
+                            <div className="flex flex-col sm:flex-row justify-between items-center gap-2.5 pt-2 border-t border-gray-800/70">
                                 <span className="text-[11px] text-gray-400 order-2 sm:order-1 text-center sm:text-left">
                                     💡 提示：點擊綠色標籤即可查看理工工程類比與詞根拆解
                                 </span>
@@ -1069,7 +1069,7 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                                     <button
                                         disabled={currentChunkIdx === 0}
                                         onClick={() => setCurrentChunkIdx(prev => Math.max(0, prev - 1))}
-                                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 border border-gray-750 ${
+                                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 border border-gray-750 ${
                                             currentChunkIdx === 0
                                                 ? 'opacity-30 cursor-not-allowed text-gray-600 bg-gray-900'
                                                 : 'bg-gray-800 hover:bg-gray-750 text-gray-300 hover:text-white active:scale-95'
@@ -1086,10 +1086,10 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                                             }
                                         }}
                                         disabled={currentChunkIdx === chunks.length - 1}
-                                        className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                                        className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
                                             currentChunkIdx === chunks.length - 1
                                                 ? 'opacity-30 cursor-not-allowed text-gray-500'
-                                                : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/20 active:scale-95'
+                                                : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm shadow-indigo-600/20 active:scale-95'
                                         }`}
                                     >
                                         <span>讀完進入下一段</span>
@@ -1103,14 +1103,14 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                     {/* ===== 右側邊欄：相關 PDF 講義 / 投影片與圖解觀測區 ===== */}
                     {layoutMode === 'split' && (
                         <div id="slide-anchor" className="lg:col-span-5 flex flex-col gap-3 lg:sticky lg:top-4 scroll-mt-20">
-                            <div className="bg-gray-900/90 rounded-2xl border border-gray-800/80 p-3.5 sm:p-4 shadow-xl flex flex-col gap-3 backdrop-blur-md">
-                                <div className="flex items-center justify-between pb-2.5 border-b border-gray-800/70">
+                            <div className="bg-gray-900/90 rounded-xl border border-gray-800 p-3 sm:p-3.5 shadow-lg flex flex-col gap-2.5 backdrop-blur-md">
+                                <div className="flex items-center justify-between pb-2 border-b border-gray-800/70">
                                     <div className="flex items-center gap-2">
-                                        <div className="w-7 h-7 rounded-lg bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+                                        <div className="w-6 h-6 rounded bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
                                             <ImageIcon className="w-3.5 h-3.5" />
                                         </div>
                                         <div>
-                                            <h3 className="text-xs font-extrabold text-white flex items-center gap-1.5">
+                                            <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
                                                 <span>相關講義 / PDF 投影片對照</span>
                                             </h3>
                                             <span className="text-[10px] text-gray-400">
@@ -1122,10 +1122,10 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                                     {activeSlide?.imagePath && (
                                         <button
                                             onClick={() => setLightboxImage(activeSlide)}
-                                            className="px-2.5 py-1 rounded-xl bg-gray-800 hover:bg-gray-750 text-gray-300 hover:text-white border border-gray-700 text-xs font-bold flex items-center gap-1 transition-all"
+                                            className="px-2 py-0.5 rounded-lg bg-gray-800 hover:bg-gray-750 text-gray-300 hover:text-white border border-gray-750 text-xs font-semibold flex items-center gap-1 transition-all"
                                             title="全螢幕放大查看高畫質投影片"
                                         >
-                                            <Maximize2 className="w-3.5 h-3.5 text-cyan-400" />
+                                            <Maximize2 className="w-3 h-3 text-cyan-400" />
                                             <span>放大</span>
                                         </button>
                                     )}
@@ -1135,15 +1135,15 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                                 {activeSlide?.imagePath ? (
                                     <div
                                         onClick={() => setLightboxImage(activeSlide)}
-                                        className="w-full relative rounded-2xl overflow-hidden bg-black/90 border border-gray-750 flex items-center justify-center cursor-zoom-in group shadow-inner min-h-[220px] max-h-[380px]"
+                                        className="w-full relative rounded-lg overflow-hidden bg-black/90 border border-gray-750 flex items-center justify-center cursor-zoom-in group shadow-inner min-h-[200px] max-h-[360px]"
                                     >
                                         <img
                                             src={activeSlide.imagePath}
                                             alt={activeSlide.title || "PDF Slide"}
-                                            className="w-full h-full object-contain max-h-[380px] group-hover:scale-105 transition-transform duration-300"
+                                            className="w-full h-full object-contain max-h-[360px] group-hover:scale-105 transition-transform duration-300"
                                         />
                                         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 text-white font-bold text-xs backdrop-blur-[2px]">
-                                            <ZoomIn className="w-5 h-5 text-cyan-400" />
+                                            <ZoomIn className="w-4 h-4 text-cyan-400" />
                                             <span>點擊全螢幕放大檢視細節</span>
                                         </div>
                                     </div>
@@ -1151,7 +1151,7 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                                     /* 若此段落暫無對應圖片，提供即時貼上/上傳插槽 */
                                     <div
                                         onClick={() => fileInputRef.current?.click()}
-                                        className="border-2 border-dashed border-gray-750 hover:border-indigo-500/50 bg-gray-900/60 hover:bg-indigo-950/20 rounded-2xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-all min-h-[200px]"
+                                        className="border-2 border-dashed border-gray-750 hover:border-indigo-500/50 bg-gray-900/60 hover:bg-indigo-950/20 rounded-lg p-5 flex flex-col items-center justify-center text-center cursor-pointer transition-all min-h-[180px]"
                                     >
                                         <input
                                             ref={fileInputRef}
@@ -1166,8 +1166,8 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                                                 }
                                             }}
                                         />
-                                        <UploadCloud className="w-8 h-8 text-indigo-400 mb-2 opacity-70" />
-                                        <h4 className="text-xs font-bold text-gray-300 mb-1">
+                                        <UploadCloud className="w-7 h-7 text-indigo-400 mb-1.5 opacity-70" />
+                                        <h4 className="text-xs font-bold text-gray-300 mb-0.5">
                                             點擊上傳或按 Ctrl + V 貼上對應投影片
                                         </h4>
                                         <p className="text-[11px] text-gray-500 max-w-xs">
@@ -1178,10 +1178,10 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
 
                                 {/* 若此頁投影片關聯 YouTube 影片，顯示影音連動按鈕 */}
                                 {activeSlide?.videoUrl && (
-                                    <div className="p-3 bg-gradient-to-r from-red-950/50 via-gray-900 to-gray-900 border border-red-500/40 rounded-2xl flex items-center justify-between gap-3 shadow-md animate-fade-in">
-                                        <div className="flex items-center gap-2.5 overflow-hidden">
-                                            <div className="w-8 h-8 rounded-xl bg-red-600/20 border border-red-500/30 flex items-center justify-center text-red-400 shrink-0">
-                                                <Youtube className="w-4 h-4" />
+                                    <div className="p-2.5 bg-gray-900 border border-red-500/30 rounded-lg flex items-center justify-between gap-2.5 shadow-sm animate-fade-in">
+                                        <div className="flex items-center gap-2 overflow-hidden">
+                                            <div className="w-7 h-7 rounded bg-red-600/20 border border-red-500/30 flex items-center justify-center text-red-400 shrink-0">
+                                                <Youtube className="w-3.5 h-3.5" />
                                             </div>
                                             <div className="truncate">
                                                 <span className="text-xs font-bold text-white block truncate">
@@ -1194,9 +1194,9 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                                         </div>
                                         <button
                                             onClick={() => setPlayingVideoModal(activeSlide)}
-                                            className="px-3 py-1.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md transition-all shrink-0"
+                                            className="px-2.5 py-1 bg-red-600 hover:bg-red-500 text-white rounded-lg text-xs font-bold flex items-center gap-1 shadow-sm transition-all shrink-0"
                                         >
-                                            <Play className="w-3.5 h-3.5 fill-current" />
+                                            <Play className="w-3 h-3 fill-current" />
                                             <span>觀看影音</span>
                                         </button>
                                     </div>
@@ -1315,12 +1315,12 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                 {/* 彈出式生醫專有名詞解析卡 (Active Term Modal) */}
                 {activeTermModal && (
                     <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-fade-in">
-                        <div className="bg-gray-900 border border-emerald-500/30 rounded-2xl p-4 sm:p-5 max-w-md w-full max-h-[88vh] overflow-y-auto custom-scrollbar shadow-2xl relative space-y-3">
+                        <div className="bg-gray-900 border border-gray-750 rounded-xl p-3.5 sm:p-4 max-w-md w-full max-h-[88vh] overflow-y-auto custom-scrollbar shadow-xl relative space-y-2.5">
                             <button
                                 onClick={() => setActiveTermModal(null)}
-                                className="absolute top-4 right-4 p-1 rounded-full bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white transition-colors"
+                                className="absolute top-3.5 right-3.5 p-1 rounded-md bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white transition-colors"
                             >
-                                <X className="w-4 h-4" />
+                                <X className="w-3.5 h-3.5" />
                             </button>
 
                             <div className="flex items-start justify-between gap-2 pr-7">
@@ -1328,12 +1328,12 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                                     <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-widest block mb-0.5">
                                         專有名詞即時標註
                                     </span>
-                                    <h3 className="text-lg md:text-xl font-black text-white font-mono text-emerald-300">
+                                    <h3 className="text-base md:text-lg font-bold text-white font-mono text-emerald-300">
                                         {activeTermModal.term_en}
                                     </h3>
                                 </div>
                                 {activeTermModal.term_zh && (
-                                    <span className="text-xs font-bold px-2 py-0.5 rounded-lg bg-emerald-950/80 border border-emerald-500/40 text-emerald-200 whitespace-nowrap">
+                                    <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-emerald-950/80 border border-emerald-500/40 text-emerald-200 whitespace-nowrap">
                                         {activeTermModal.term_zh}
                                     </span>
                                 )}
@@ -1341,7 +1341,7 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
 
                             {/* 理工直覺對等概念 */}
                             {activeTermModal.engineeringAnchor && (
-                                <div className="border-l-2 border-cyan-400 bg-cyan-950/30 pl-3 pr-2.5 py-2 rounded-r-lg text-xs text-cyan-200 font-mono flex items-start gap-2 shadow-inner">
+                                <div className="border-l-2 border-cyan-400 bg-cyan-950/30 pl-3 pr-2.5 py-2 rounded-r-lg text-xs text-cyan-200 font-mono flex items-start gap-1.5 shadow-inner">
                                     <Zap className="w-3.5 h-3.5 text-cyan-400 shrink-0 mt-0.5" />
                                     <div>
                                         <strong className="text-cyan-300 block mb-0.5">⚡ 理工直覺對齊：</strong>
@@ -1352,14 +1352,14 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
 
                             {/* 詞根拆解 */}
                             {activeTermModal.etymology && (
-                                <div className="p-2 bg-amber-950/20 rounded-lg border border-amber-500/20 text-[11px] text-amber-300/90 italic">
+                                <div className="p-2 bg-amber-950/20 rounded-md border border-amber-500/20 text-[11px] text-amber-300/90 italic">
                                     🌱 詞根拆解：{activeTermModal.etymology}
                                 </div>
                             )}
 
                             {/* 全英簡明定義 */}
                             {activeTermModal.definition_en && (
-                                <div className="text-xs text-gray-300 leading-relaxed border-t border-gray-800/80 pt-2.5">
+                                <div className="text-xs text-gray-300 leading-relaxed border-t border-gray-800/80 pt-2">
                                     <span className="font-bold text-gray-400 block mb-0.5 text-[11px]">學術定義 (Definition)：</span>
                                     {activeTermModal.definition_en}
                                 </div>
@@ -1368,7 +1368,7 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                             <div className="flex justify-between items-center pt-1 border-t border-gray-800/60">
                                 <button
                                     onClick={() => speakText(activeTermModal.term_en)}
-                                    className="px-3 py-1 rounded-lg bg-gray-800 hover:bg-gray-750 text-indigo-300 text-xs font-bold flex items-center gap-1.5 transition-colors"
+                                    className="px-2.5 py-1 rounded-md bg-gray-800 hover:bg-gray-750 text-indigo-300 text-xs font-semibold flex items-center gap-1.5 transition-colors"
                                 >
                                     <Volume2 className="w-3.5 h-3.5" />
                                     <span>聽發音</span>
@@ -1376,7 +1376,7 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
 
                                 <button
                                     onClick={() => setActiveTermModal(null)}
-                                    className="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition-all"
+                                    className="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs shadow-sm transition-all"
                                 >
                                     了解，繼續閱讀
                                 </button>
@@ -1392,24 +1392,24 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                         onClick={() => setPlayingVideoModal(null)}
                     >
                         <div
-                            className="relative w-full max-w-3xl bg-gray-900 border border-gray-750 rounded-3xl overflow-hidden shadow-2xl p-4 flex flex-col gap-3"
+                            className="relative w-full max-w-3xl bg-gray-900 border border-gray-750 rounded-xl overflow-hidden shadow-2xl p-3 sm:p-4 flex flex-col gap-2.5"
                             onClick={e => e.stopPropagation()}
                         >
                             <div className="flex items-center justify-between pb-2 border-b border-gray-800">
                                 <div className="flex items-center gap-2 overflow-hidden">
-                                    <Youtube className="w-5 h-5 text-red-500 shrink-0" />
-                                    <h4 className="text-sm font-bold text-white truncate">
+                                    <Youtube className="w-4 h-4 text-red-500 shrink-0" />
+                                    <h4 className="text-xs sm:text-sm font-bold text-white truncate">
                                         {playingVideoModal.title || `投影片第 ${playingVideoModal.page || ''} 頁 YouTube 補充影音`}
                                     </h4>
                                 </div>
                                 <button
                                     onClick={() => setPlayingVideoModal(null)}
-                                    className="p-1.5 rounded-xl bg-gray-800 hover:bg-gray-750 text-gray-400 hover:text-white transition-colors shrink-0"
+                                    className="p-1 rounded-lg bg-gray-800 hover:bg-gray-750 text-gray-400 hover:text-white transition-colors shrink-0"
                                 >
-                                    <X className="w-5 h-5" />
+                                    <X className="w-4 h-4" />
                                 </button>
                             </div>
-                            <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-black border border-gray-800">
+                            <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-black border border-gray-800">
                                 <iframe
                                     src={`https://www.youtube-nocookie.com/embed/${playingVideoModal.videoId || (playingVideoModal.videoUrl ? playingVideoModal.videoUrl.match(/(?:youtube\.com\/(?:watch\?.*v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i)?.[1] : '')}?autoplay=1`}
                                     title="YouTube video player"
@@ -1418,7 +1418,7 @@ const ReaderMode = ({ cards = [], topic = 'All' }) => {
                                     className="w-full h-full border-0"
                                 />
                             </div>
-                            <div className="flex items-center justify-between text-xs text-gray-400 pt-1">
+                            <div className="flex items-center justify-between text-[11px] text-gray-400 pt-0.5">
                                 <span>
                                     {playingVideoModal.page ? `對應投影片第 ${playingVideoModal.page} 頁` : '講義補充影片'}
                                 </span>

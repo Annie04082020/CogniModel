@@ -256,22 +256,22 @@ const QuizMode = ({ cards, allCards, topic, onExit }) => {
 
     if (gameState === 'menu') {
         return (
-            <div className="flex flex-col items-center justify-center p-8 space-y-8 text-center w-full max-w-2xl bg-gray-800/50 rounded-3xl border border-gray-700 shadow-2xl backdrop-blur-sm m-auto">
-                <div className="space-y-2">
-                    <h2 className="text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
+            <div className="flex flex-col items-center justify-center p-5 sm:p-6 space-y-6 text-center w-full max-w-2xl bg-gray-800/50 rounded-xl border border-gray-700 shadow-2xl backdrop-blur-sm m-auto">
+                <div className="space-y-1.5">
+                    <h2 className="text-3xl sm:text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
                         Quiz Challenge
                     </h2>
-                    <p className="text-gray-400 text-lg">Test your knowledge</p>
+                    <p className="text-gray-400 text-sm sm:text-base">Test your knowledge</p>
                 </div>
                 {/* Length and Timer Settings remain same */}
-                <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="bg-gray-900/50 p-5 rounded-2xl border border-gray-700 flex flex-col gap-3">
-                        <label className="text-gray-300 text-sm font-bold uppercase tracking-wider">Length</label>
+                <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                    <div className="bg-gray-900/50 p-3.5 sm:p-4 rounded-lg border border-gray-700 flex flex-col gap-2.5">
+                        <label className="text-gray-300 text-xs font-bold uppercase tracking-wider">Length</label>
                         <div className="flex items-center justify-between">
-                            <button onClick={() => setSettings(s => ({ ...s, questionCount: Math.max(1, s.questionCount - 1) }))} className="w-10 h-10 rounded-full bg-gray-700 hover:bg-gray-600 text-white font-bold">-</button>
+                            <button onClick={() => setSettings(s => ({ ...s, questionCount: Math.max(1, s.questionCount - 1) }))} className="w-8 h-8 rounded-full bg-gray-700 hover:bg-gray-600 text-white font-bold text-sm">-</button>
                             <input
                                 type="number"
-                                className="w-20 bg-transparent text-3xl font-mono font-bold text-white text-center focus:outline-none border-b-2 border-transparent focus:border-blue-500 transition-colors"
+                                className="w-16 bg-transparent text-2xl font-mono font-bold text-white text-center focus:outline-none border-b-2 border-transparent focus:border-blue-500 transition-colors"
                                 value={settings.questionCount}
                                 onChange={(e) => {
                                     const val = parseInt(e.target.value);
@@ -285,18 +285,18 @@ const QuizMode = ({ cards, allCards, topic, onExit }) => {
                                     setSettings(s => ({ ...s, questionCount: val }));
                                 }}
                             />
-                            <button onClick={() => setSettings(s => ({ ...s, questionCount: Math.min(cards.length, s.questionCount + 1) }))} className="w-10 h-10 rounded-full bg-gray-700 hover:bg-gray-600 text-white font-bold">+</button>
+                            <button onClick={() => setSettings(s => ({ ...s, questionCount: Math.min(cards.length, s.questionCount + 1) }))} className="w-8 h-8 rounded-full bg-gray-700 hover:bg-gray-600 text-white font-bold text-sm">+</button>
                         </div>
-                        <p className="text-xs text-gray-500">questions (max: {cards.length})</p>
+                        <p className="text-[11px] text-gray-500">questions (max: {cards.length})</p>
                     </div>
 
-                    <div className="bg-gray-900/50 p-5 rounded-2xl border border-gray-700 flex flex-col gap-3">
-                        <label className="text-gray-300 text-sm font-bold uppercase tracking-wider">Timer</label>
+                    <div className="bg-gray-900/50 p-3.5 sm:p-4 rounded-lg border border-gray-700 flex flex-col gap-2.5">
+                        <label className="text-gray-300 text-xs font-bold uppercase tracking-wider">Timer</label>
                         <div className="flex items-center justify-between">
-                            <button onClick={() => setSettings(s => ({ ...s, timeLimit: Math.max(5, s.timeLimit - 5) }))} className="w-10 h-10 rounded-full bg-gray-700 hover:bg-gray-600 text-white font-bold">-</button>
+                            <button onClick={() => setSettings(s => ({ ...s, timeLimit: Math.max(5, s.timeLimit - 5) }))} className="w-8 h-8 rounded-full bg-gray-700 hover:bg-gray-600 text-white font-bold text-sm">-</button>
                             <input
                                 type="number"
-                                className="w-20 bg-transparent text-3xl font-mono font-bold text-white text-center focus:outline-none border-b-2 border-transparent focus:border-blue-500 transition-colors"
+                                className="w-16 bg-transparent text-2xl font-mono font-bold text-white text-center focus:outline-none border-b-2 border-transparent focus:border-blue-500 transition-colors"
                                 value={settings.timeLimit}
                                 onChange={(e) => {
                                     const val = parseInt(e.target.value);
@@ -310,26 +310,26 @@ const QuizMode = ({ cards, allCards, topic, onExit }) => {
                                     setSettings(s => ({ ...s, timeLimit: val }));
                                 }}
                             />
-                            <button onClick={() => setSettings(s => ({ ...s, timeLimit: Math.min(300, s.timeLimit + 5) }))} className="w-10 h-10 rounded-full bg-gray-700 hover:bg-gray-600 text-white font-bold">+</button>
+                            <button onClick={() => setSettings(s => ({ ...s, timeLimit: Math.min(300, s.timeLimit + 5) }))} className="w-8 h-8 rounded-full bg-gray-700 hover:bg-gray-600 text-white font-bold text-sm">+</button>
                         </div>
-                        <p className="text-xs text-gray-500">seconds / q</p>
+                        <p className="text-[11px] text-gray-500">seconds / q</p>
                     </div>
 
-                    <div className="bg-gray-900/50 p-5 rounded-2xl border border-gray-700 flex flex-col gap-3">
-                        <label className="text-gray-300 text-sm font-bold uppercase tracking-wider">Answer Mode</label>
+                    <div className="bg-gray-900/50 p-3.5 sm:p-4 rounded-lg border border-gray-700 flex flex-col gap-2.5">
+                        <label className="text-gray-300 text-xs font-bold uppercase tracking-wider">Answer Mode</label>
                         <div className="flex items-center justify-center h-full">
-                            <div className="bg-gray-800 p-1 rounded-xl flex w-full">
-                                <button onClick={() => setSettings(s => ({ ...s, inputMode: 'choice' }))} className={`flex-1 py-2 rounded-lg font-bold text-sm transition-all ${!settings.inputMode || settings.inputMode === 'choice' ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}>Choices</button>
-                                <button onClick={() => setSettings(s => ({ ...s, inputMode: 'type' }))} className={`flex-1 py-2 rounded-lg font-bold text-sm transition-all ${settings.inputMode === 'type' ? 'bg-purple-600 text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}>Type</button>
+                            <div className="bg-gray-800 p-1 rounded-lg flex w-full">
+                                <button onClick={() => setSettings(s => ({ ...s, inputMode: 'choice' }))} className={`flex-1 py-1.5 rounded-md font-bold text-xs sm:text-sm transition-all ${!settings.inputMode || settings.inputMode === 'choice' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-400 hover:text-white'}`}>Choices</button>
+                                <button onClick={() => setSettings(s => ({ ...s, inputMode: 'type' }))} className={`flex-1 py-1.5 rounded-md font-bold text-xs sm:text-sm transition-all ${settings.inputMode === 'type' ? 'bg-purple-600 text-white shadow-md' : 'text-gray-400 hover:text-white'}`}>Type</button>
                             </div>
                         </div>
-                        <p className="text-xs text-gray-500">{settings.inputMode === 'type' ? 'Type the exact answer' : 'Select from 4 options'}</p>
+                        <p className="text-[11px] text-gray-500">{settings.inputMode === 'type' ? 'Type exact answer' : 'Select from 4 options'}</p>
                     </div>
                 </div>
 
-                <div className="w-full pt-4">
-                    <button onClick={startGame} className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-2xl text-white font-bold text-2xl shadow-lg shadow-blue-500/20 transition-all transform hover:scale-[1.02] active:scale-[0.98]">Start Quiz</button>
-                    <p className="text-xs text-gray-500 mt-4"> Deck size: {cards ? cards.length : 0} cards available</p>
+                <div className="w-full pt-2">
+                    <button onClick={startGame} className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-lg text-white font-bold text-base sm:text-lg shadow-lg shadow-blue-500/20 transition-all transform hover:scale-[1.01] active:scale-[0.99]">Start Quiz</button>
+                    <p className="text-xs text-gray-500 mt-3"> Deck size: {cards ? cards.length : 0} cards available</p>
                 </div>
             </div>
         );
@@ -337,71 +337,71 @@ const QuizMode = ({ cards, allCards, topic, onExit }) => {
 
     if (gameState === 'result') {
         return (
-            <div className="flex flex-col items-center justify-center p-8 space-y-6 text-center animate-fade-in">
-                <h2 className="text-3xl font-bold text-white">Game Over!</h2>
-                <div className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-red-500">{score}</div>
-                <p className="text-gray-400">Final Score</p>
-                <div className="flex gap-4">
-                    <button onClick={() => setGameState('menu')} className="px-6 py-2 bg-gray-700 hover:bg-gray-600 rounded-full text-white font-medium">Menu</button>
-                    <button onClick={startGame} className="px-6 py-2 bg-blue-600 hover:bg-blue-500 rounded-full text-white font-medium">Play Again</button>
+            <div className="flex flex-col items-center justify-center p-6 space-y-4 text-center animate-fade-in bg-gray-900/90 rounded-xl border border-gray-800 max-w-md mx-auto">
+                <h2 className="text-2xl font-bold text-white">Game Over!</h2>
+                <div className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-red-500">{score}</div>
+                <p className="text-gray-400 text-sm">Final Score</p>
+                <div className="flex gap-3">
+                    <button onClick={() => setGameState('menu')} className="px-5 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-white font-medium text-xs sm:text-sm">Menu</button>
+                    <button onClick={startGame} className="px-5 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-white font-medium text-xs sm:text-sm">Play Again</button>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="w-full max-w-6xl h-full flex flex-col p-4">
-            <div className="flex justify-between items-center mb-4 bg-gray-900/50 p-4 rounded-xl border border-gray-700">
-                <div className="flex flex-col"><span className="text-xs text-gray-500 uppercase font-bold">Progress</span><span className="text-xl font-bold text-white">{round} <span className="text-gray-500">/ {settings.questionCount}</span></span></div>
-                <div className="flex flex-col items-center"><span className={`text-4xl font-mono font-black ${timeLeft < 5 ? 'text-red-500 animate-pulse' : 'text-blue-400'}`}>{timeLeft}</span></div>
-                <div className="flex flex-col items-end"><span className="text-xs text-gray-500 uppercase font-bold">Score</span><span className="text-xl font-bold text-yellow-500">{score}</span></div>
+        <div className="w-full max-w-6xl h-full flex flex-col p-3 sm:p-4">
+            <div className="flex justify-between items-center mb-3.5 bg-gray-900/50 p-3 sm:p-3.5 rounded-lg border border-gray-700">
+                <div className="flex flex-col"><span className="text-[11px] text-gray-500 uppercase font-bold">Progress</span><span className="text-base sm:text-lg font-bold text-white">{round} <span className="text-gray-500 text-xs">/ {settings.questionCount}</span></span></div>
+                <div className="flex flex-col items-center"><span className={`text-2xl sm:text-3xl font-mono font-black ${timeLeft < 5 ? 'text-red-500 animate-pulse' : 'text-blue-400'}`}>{timeLeft}</span></div>
+                <div className="flex flex-col items-end"><span className="text-[11px] text-gray-500 uppercase font-bold">Score</span><span className="text-base sm:text-lg font-bold text-yellow-500">{score}</span></div>
             </div>
 
-            <div className="flex-1 flex flex-col lg:flex-row gap-8 items-center justify-center w-full">
-                <div className="flex-1 w-full max-w-2xl aspect-video lg:h-[500px] bg-gray-900 rounded-2xl overflow-hidden shadow-2xl ring-1 ring-gray-700 relative group flex items-center justify-center p-6">
+            <div className="flex-1 flex flex-col lg:flex-row gap-6 items-center justify-center w-full">
+                <div className="flex-1 w-full max-w-2xl aspect-video lg:h-[480px] bg-gray-900 rounded-xl overflow-hidden shadow-2xl ring-1 ring-gray-700 relative group flex items-center justify-center p-4 sm:p-5">
                     {currentQuestion.imagePath ? (
                         <img src={currentQuestion.imagePath} alt="Quiz Question" className="w-full h-full object-contain" />
                     ) : (
-                        <div className="w-full h-full flex flex-col justify-between p-4 md:p-8 bg-gradient-to-br from-gray-900 via-gray-850 to-gray-900 rounded-xl border border-gray-750">
+                        <div className="w-full h-full flex flex-col justify-between p-3.5 md:p-6 bg-gradient-to-br from-gray-900 via-gray-850 to-gray-900 rounded-lg border border-gray-750">
                             <div>
-                                <span className="text-xs uppercase font-extrabold tracking-widest text-indigo-400 block mb-2">
+                                <span className="text-xs uppercase font-extrabold tracking-widest text-indigo-400 block mb-1.5">
                                     {currentQuestion.source || "概念測驗"}
                                 </span>
                                 {currentQuestion.analogy && (
-                                    <div className="text-xs text-amber-300 bg-amber-950/20 p-2.5 rounded-lg border border-amber-500/20 mb-3">
+                                    <div className="text-xs text-amber-300 bg-amber-950/20 p-2 rounded-md border border-amber-500/20 mb-2.5">
                                         💡 思考提示：{currentQuestion.analogy}
                                     </div>
                                 )}
                             </div>
                             <div className="overflow-y-auto custom-scrollbar my-auto">
-                                <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">機制特徵與描述</h4>
-                                <p className="text-gray-100 text-base md:text-xl font-medium leading-relaxed whitespace-pre-wrap">
+                                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">機制特徵與描述</h4>
+                                <p className="text-gray-100 text-sm sm:text-base md:text-lg font-medium leading-relaxed whitespace-pre-wrap">
                                     {currentQuestion.description || "請根據上述線索推導正確答案。"}
                                 </p>
                             </div>
-                            <div className="text-xs text-gray-500 pt-2 border-t border-gray-800">
+                            <div className="text-[11px] text-gray-500 pt-2 border-t border-gray-800">
                                 請在右側選擇對應的核心概念或機制名詞
                             </div>
                         </div>
                     )}
-                    <div className="absolute top-4 right-4 bg-black/50 backdrop-blur px-3 py-1 rounded text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">source: {currentQuestion.source}</div>
+                    <div className="absolute top-3 right-3 bg-black/50 backdrop-blur px-2.5 py-0.5 rounded text-[11px] text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">source: {currentQuestion.source}</div>
                 </div>
 
-                <div className="w-full lg:w-1/3 flex flex-col gap-4">
+                <div className="w-full lg:w-1/3 flex flex-col gap-3">
                     {settings.inputMode === 'type' ? (
-                        <div className="flex flex-col gap-4 w-full">
+                        <div className="flex flex-col gap-3 w-full">
                             <input
                                 ref={inputRef}
                                 type="text"
                                 placeholder="Type your answer..."
-                                className={`w-full p-4 bg-gray-800 border-2 rounded-2xl text-white text-lg focus:outline-none placeholder-gray-500 ${attempts > 0 ? 'border-red-400/50 animate-shake' : 'border-gray-700 focus:border-blue-500'}`}
+                                className={`w-full p-3 bg-gray-800 border-2 rounded-lg text-white text-base focus:outline-none placeholder-gray-500 ${attempts > 0 ? 'border-red-400/50 animate-shake' : 'border-gray-700 focus:border-blue-500'}`}
                                 autoFocus
                                 value={typedAnswer}
                                 onChange={(e) => setTypedAnswer(e.target.value)}
                                 disabled={gameState === 'feedback'}
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter') {
-                                        e.preventDefault(); // Prevent accidental form submissions/reloads
+                                        e.preventDefault();
                                         if (typedAnswer.trim()) {
                                             handleAnswer({ title: typedAnswer.trim(), isTyped: true });
                                         }
@@ -415,30 +415,30 @@ const QuizMode = ({ cards, allCards, topic, onExit }) => {
 
                             {/* Character Clue UI */}
                             {attempts > 0 && (
-                                <div className="p-4 bg-gray-900 rounded-xl border border-gray-700 text-center animate-fade-in">
-                                    <span className="text-xs text-gray-500 uppercase font-bold tracking-widest block mb-2">{attempts === 2 ? 'Final Clue' : 'Hint'}</span>
-                                    <p className="text-3xl font-mono tracking-[0.5em] text-yellow-400 font-bold break-all">
+                                <div className="p-3 bg-gray-900 rounded-lg border border-gray-700 text-center animate-fade-in">
+                                    <span className="text-xs text-gray-500 uppercase font-bold tracking-widest block mb-1.5">{attempts === 2 ? 'Final Clue' : 'Hint'}</span>
+                                    <p className="text-2xl font-mono tracking-[0.4em] text-yellow-400 font-bold break-all">
                                         {currentQuestion.title.split('-')[0].trim().split('').map((char, i) =>
                                             (revealedIndices.includes(i) || char === ' ') ? char : '_'
                                         ).join(' ')}
                                     </p>
-                                    <p className="text-xs text-gray-600 mt-2">({currentQuestion.title.split('-')[0].trim().length} letters)</p>
+                                    <p className="text-[11px] text-gray-600 mt-1.5">({currentQuestion.title.split('-')[0].trim().length} letters)</p>
                                 </div>
                             )}
 
                             {gameState === 'feedback' && (
-                                <div className="mt-4 p-4 bg-gray-800 rounded-xl border border-gray-700">
-                                    <p className="text-xs text-gray-400 uppercase font-bold mb-1">Correct Answer</p>
-                                    <p className="text-xl font-bold text-green-400">{currentQuestion.title}</p>
+                                <div className="mt-2 p-3 bg-gray-800 rounded-lg border border-gray-700">
+                                    <p className="text-[11px] text-gray-400 uppercase font-bold mb-1">Correct Answer</p>
+                                    <p className="text-base font-bold text-green-400">{currentQuestion.title}</p>
                                 </div>
                             )}
                         </div>
                     ) : (
                         options.map((option, idx) => {
-                            let btnClass = "bg-gray-800 hover:bg-gray-700 border-gray-700 text-gray-200";
+                            let btnClass = "bg-gray-800 hover:bg-gray-750 border-gray-700 text-gray-200";
                             if (gameState === 'feedback') {
                                 if (option.title === currentQuestion.title) {
-                                    btnClass = "bg-green-600 border-green-500 text-white ring-4 ring-green-500/20";
+                                    btnClass = "bg-green-600 border-green-500 text-white ring-2 ring-green-500/20";
                                 } else if (option === selectedOption) {
                                     btnClass = "bg-red-600 border-red-500 text-white";
                                 } else {
@@ -446,8 +446,8 @@ const QuizMode = ({ cards, allCards, topic, onExit }) => {
                                 }
                             }
                             return (
-                                <button key={idx} disabled={gameState === 'feedback'} onClick={() => handleAnswer(option)} className={`w-full p-6 rounded-2xl text-left border-2 transition-all duration-200 shadow-lg ${btnClass} ${gameState !== 'feedback' ? 'hover:-translate-y-1 hover:shadow-xl active:translate-y-0' : ''}`}>
-                                    <span className="text-lg font-bold">{option.title}</span>
+                                <button key={idx} disabled={gameState === 'feedback'} onClick={() => handleAnswer(option)} className={`w-full p-3.5 sm:p-4 rounded-lg text-left border transition-all duration-200 shadow-md ${btnClass} ${gameState !== 'feedback' ? 'hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0' : ''}`}>
+                                    <span className="text-xs sm:text-sm font-bold block">{option.title}</span>
                                 </button>
                             );
                         })
@@ -457,7 +457,7 @@ const QuizMode = ({ cards, allCards, topic, onExit }) => {
 
             <AnimatePresence>
                 {gameState === 'feedback' && (
-                    <motion.div initial={{ opacity: 0, scale: 0.8, y: 50 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.8 }} className={`fixed bottom-12 left-1/2 transform -translate-x-1/2 px-8 py-4 rounded-2xl font-black text-2xl shadow-2xl z-50 backdrop-blur-md border border-white/10 ${isCorrect === true ? 'bg-green-500/90 text-white' : isCorrect === 'partial' ? 'bg-blue-500/90 text-white' : 'bg-red-500/90 text-white'}`}>
+                    <motion.div initial={{ opacity: 0, scale: 0.8, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.8 }} className={`fixed bottom-10 left-1/2 transform -translate-x-1/2 px-6 py-2.5 rounded-lg font-bold text-base shadow-xl z-50 backdrop-blur-md border border-white/10 ${isCorrect === true ? 'bg-green-500/90 text-white' : isCorrect === 'partial' ? 'bg-blue-500/90 text-white' : 'bg-red-500/90 text-white'}`}>
                         {isCorrect === true ? 'Correct! 🎉' : isCorrect === 'partial' ? 'Close Call! 😅' : 'Oops! ❌'}
                     </motion.div>
                 )}

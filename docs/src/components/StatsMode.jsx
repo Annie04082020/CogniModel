@@ -42,59 +42,59 @@ const StatsMode = () => {
     const weakTopics = lastSessionDetails.length > 0 ? lastSessionDetails.find(s => !s.isCorrect)?.source : "None Yet";
 
     return (
-        <div className="w-full h-full flex flex-col p-6 overflow-y-auto custom-scrollbar">
-            <h2 className="text-3xl font-bold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-green-500 shrink-0">
+        <div className="w-full h-full flex flex-col p-4 sm:p-5 overflow-y-auto custom-scrollbar">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-green-500 shrink-0">
                 Performance Stats
             </h2>
 
             {/* Key Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 shrink-0">
-                <div className="bg-gray-800 p-6 rounded-2xl border border-gray-700 flex items-center gap-4 shadow-lg">
-                    <div className="p-3 bg-blue-600/20 text-blue-400 rounded-xl">
-                        <TrendingUp size={24} />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 mb-5 shrink-0">
+                <div className="bg-gray-800 p-3.5 sm:p-4 rounded-xl border border-gray-700 flex items-center gap-3.5 shadow-lg">
+                    <div className="p-2.5 bg-blue-600/20 text-blue-400 rounded-lg">
+                        <TrendingUp size={20} />
                     </div>
                     <div>
-                        <p className="text-gray-400 text-sm">Games Played</p>
-                        <p className="text-2xl font-bold text-white">{stats.gamesPlayed}</p>
+                        <p className="text-gray-400 text-xs">Games Played</p>
+                        <p className="text-xl sm:text-2xl font-bold text-white">{stats.gamesPlayed}</p>
                     </div>
                 </div>
 
-                <div className="bg-gray-800 p-6 rounded-2xl border border-gray-700 flex items-center gap-4 shadow-lg">
-                    <div className="p-3 bg-purple-600/20 text-purple-400 rounded-xl">
-                        <BarChart2 size={24} />
+                <div className="bg-gray-800 p-3.5 sm:p-4 rounded-xl border border-gray-700 flex items-center gap-3.5 shadow-lg">
+                    <div className="p-2.5 bg-purple-600/20 text-purple-400 rounded-lg">
+                        <BarChart2 size={20} />
                     </div>
                     <div>
-                        <p className="text-gray-400 text-sm">Average Score</p>
-                        <p className="text-2xl font-bold text-white">{averageScore}</p>
+                        <p className="text-gray-400 text-xs">Average Score</p>
+                        <p className="text-xl sm:text-2xl font-bold text-white">{averageScore}</p>
                     </div>
                 </div>
 
-                <div className="bg-gray-800 p-6 rounded-2xl border border-gray-700 flex items-center gap-4 shadow-lg">
-                    <div className="p-3 bg-red-600/20 text-red-400 rounded-xl">
-                        <AlertCircle size={24} />
+                <div className="bg-gray-800 p-3.5 sm:p-4 rounded-xl border border-gray-700 flex items-center gap-3.5 shadow-lg">
+                    <div className="p-2.5 bg-red-600/20 text-red-400 rounded-lg">
+                        <AlertCircle size={20} />
                     </div>
                     <div>
-                        <p className="text-gray-400 text-sm">Weakest Source</p>
-                        <p className="text-xl font-bold text-white truncate max-w-[150px]" title="Play more to detect">
+                        <p className="text-gray-400 text-xs">Weakest Source</p>
+                        <p className="text-lg sm:text-xl font-bold text-white truncate max-w-[150px]" title="Play more to detect">
                             {weakTopics || "None Yet"}
                         </p>
                     </div>
                 </div>
             </div>
 
-            <div className="flex flex-col lg:flex-row gap-8 flex-1 min-h-0">
+            <div className="flex flex-col lg:flex-row gap-4 sm:gap-5 flex-1 min-h-0">
                 {/* History List */}
-                <div className="lg:w-1/3 bg-gray-800 rounded-2xl border border-gray-700 flex flex-col overflow-hidden max-h-[500px]">
-                    <div className="p-6 border-b border-gray-700 bg-gray-800 shrink-0">
-                        <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                            <Clock size={20} className="text-gray-400" />
+                <div className="lg:w-1/3 bg-gray-800 rounded-xl border border-gray-700 flex flex-col overflow-hidden max-h-[500px]">
+                    <div className="p-3.5 sm:p-4 border-b border-gray-700 bg-gray-800 shrink-0">
+                        <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                            <Clock size={18} className="text-gray-400" />
                             History
                         </h3>
-                        <p className="text-xs text-gray-500 mt-1">Click to view details</p>
+                        <p className="text-xs text-gray-500 mt-0.5">Click to view details</p>
                     </div>
-                    <div className="overflow-y-auto p-4 space-y-3 flex-1 custom-scrollbar">
+                    <div className="overflow-y-auto p-3 space-y-2 flex-1 custom-scrollbar">
                         {stats.history.length === 0 ? (
-                            <p className="text-gray-500 text-center py-4">No games played yet.</p>
+                            <p className="text-gray-500 text-center py-4 text-xs">No games played yet.</p>
                         ) : (
                             [...stats.history].reverse().map((game, reverseIdx) => {
                                 const realIdx = stats.history.length - 1 - reverseIdx;
@@ -103,7 +103,7 @@ const StatsMode = () => {
                                     <button
                                         key={realIdx}
                                         onClick={() => setSelectedGameIdx(realIdx)}
-                                        className={`w-full flex justify-between items-center p-4 rounded-xl transition-all border
+                                        className={`w-full flex justify-between items-center p-3 rounded-lg transition-all border text-xs
                                             ${isSelected
                                                 ? 'bg-blue-600/20 border-blue-500 ring-1 ring-blue-500/50'
                                                 : 'bg-gray-900/50 border-gray-700 hover:bg-gray-700 hover:border-gray-500'}
@@ -113,9 +113,9 @@ const StatsMode = () => {
                                             <p className={`font-bold ${isSelected ? 'text-blue-300' : 'text-white'}`}>
                                                 Score: {game.score}
                                             </p>
-                                            <p className="text-xs text-gray-400">{new Date(game.date).toLocaleDateString()}</p>
+                                            <p className="text-[11px] text-gray-400">{new Date(game.date).toLocaleDateString()}</p>
                                         </div>
-                                        <span className={`text-xs px-2 py-1 rounded-full ${isSelected ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300'}`}>
+                                        <span className={`text-[10px] px-2 py-0.5 rounded-md ${isSelected ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300'}`}>
                                             {game.topic}
                                         </span>
                                     </button>
@@ -126,10 +126,10 @@ const StatsMode = () => {
                 </div>
 
                 {/* Breakdown Table */}
-                <div className="lg:w-2/3 bg-gray-800 rounded-2xl border border-gray-700 flex flex-col overflow-hidden max-h-[500px]">
-                    <div className="p-6 border-b border-gray-700 bg-gray-800 shrink-0 flex justify-between items-center">
-                        <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                            <CheckCircle size={20} className="text-green-400" />
+                <div className="lg:w-2/3 bg-gray-800 rounded-xl border border-gray-700 flex flex-col overflow-hidden max-h-[500px]">
+                    <div className="p-3.5 sm:p-4 border-b border-gray-700 bg-gray-800 shrink-0 flex justify-between items-center">
+                        <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                            <CheckCircle size={18} className="text-green-400" />
                             {selectedGame ? "Game Breakdown" : "Last Session Result"}
                         </h3>
                         {selectedGameIdx !== null && (
@@ -144,24 +144,23 @@ const StatsMode = () => {
 
                     <div className="overflow-y-auto flex-1 custom-scrollbar">
                         {showDetailsWarning ? (
-                            <div className="flex flex-col items-center justify-center h-full text-gray-500 p-8 text-center">
-                                <AlertCircle size={48} className="mb-4 opacity-50" />
+                            <div className="flex flex-col items-center justify-center h-full text-gray-500 p-6 text-center text-xs">
+                                <AlertCircle size={36} className="mb-3 opacity-50" />
                                 <p>Detailed breakdown not available for this legacy game.</p>
-                                <p className="text-sm mt-2">New games will have full details saved.</p>
+                                <p className="text-gray-600 mt-1">New games will have full details saved.</p>
                             </div>
                         ) : displayDetails && displayDetails.length > 0 ? (
-                            <table className="w-full text-left text-sm text-gray-400">
-                                <thead className="bg-gray-900/50 text-gray-200 uppercase font-medium sticky top-0 backdrop-blur-sm z-10">
+                            <table className="w-full text-left text-xs sm:text-sm text-gray-400">
+                                <thead className="bg-gray-900/50 text-gray-200 uppercase font-medium sticky top-0 backdrop-blur-sm z-10 text-[11px]">
                                     <tr>
-                                        <th className="px-6 py-3">Question</th>
-                                        <th className="px-6 py-3 text-center">Result</th>
-                                        <th className="px-6 py-3 text-right">Time</th>
-                                        <th className="px-6 py-3 text-right">Points</th>
+                                        <th className="px-4 py-2.5">Question</th>
+                                        <th className="px-4 py-2.5 text-center">Result</th>
+                                        <th className="px-4 py-2.5 text-right">Time</th>
+                                        <th className="px-4 py-2.5 text-right">Points</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-700">
                                     {displayDetails.map((row, idx) => {
-                                        // Find fastest/slowest correct answers in this set
                                         const correctAnswers = displayDetails.filter(d => d.isCorrect);
                                         const fastestTime = Math.min(...correctAnswers.map(d => d.timeTaken || 999));
                                         const slowestTime = Math.max(...correctAnswers.map(d => d.timeTaken || 0));
@@ -171,33 +170,33 @@ const StatsMode = () => {
 
                                         return (
                                             <tr key={idx} className="hover:bg-gray-700/50 transition-colors">
-                                                <td className="px-6 py-4 font-medium text-white max-w-[200px]">
-                                                    <div className="truncate" title={row.question}>{row.question}</div>
-                                                    <div className="text-xs text-gray-500 truncate">{row.source}</div>
+                                                <td className="px-4 py-3 font-medium text-white max-w-[200px]">
+                                                    <div className="truncate text-xs sm:text-sm" title={row.question}>{row.question}</div>
+                                                    <div className="text-[10px] text-gray-500 truncate">{row.source}</div>
                                                 </td>
-                                                <td className="px-6 py-4 text-center">
+                                                <td className="px-4 py-3 text-center">
                                                     {row.isCorrect === true ? (
-                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-900/50 text-green-400 border border-green-800">
+                                                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-green-900/50 text-green-400 border border-green-800">
                                                             Correct
                                                         </span>
                                                     ) : row.isCorrect === 'partial' ? (
-                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-900/50 text-blue-400 border border-blue-800">
+                                                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-blue-900/50 text-blue-400 border border-blue-800">
                                                             Close Call
                                                         </span>
                                                     ) : (
-                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-900/50 text-red-400 border border-red-800">
+                                                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-red-900/50 text-red-400 border border-red-800">
                                                             Wrong
                                                         </span>
                                                     )}
                                                 </td>
-                                                <td className="px-6 py-4 text-right">
-                                                    <div className="flex items-center justify-end gap-2">
+                                                <td className="px-4 py-3 text-right">
+                                                    <div className="flex items-center justify-end gap-1.5 text-xs">
                                                         {isFastest && <span title="Fastest Answer" className="text-yellow-400">⚡</span>}
                                                         {isSlowest && <span title="Deep Thinker" className="text-blue-400">🧠</span>}
                                                         <span>{row.timeTaken ? `${row.timeTaken}s` : '-'}</span>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4 text-right font-mono text-white">
+                                                <td className="px-4 py-3 text-right font-mono text-white text-xs">
                                                     +{row.points}
                                                 </td>
                                             </tr>
@@ -206,7 +205,7 @@ const StatsMode = () => {
                                 </tbody>
                             </table>
                         ) : (
-                            <div className="flex items-center justify-center h-full text-gray-500">
+                            <div className="flex items-center justify-center h-full text-gray-500 text-xs">
                                 No details available.
                             </div>
                         )}

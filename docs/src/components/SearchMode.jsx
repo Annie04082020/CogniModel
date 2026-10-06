@@ -431,12 +431,12 @@ const SearchMode = () => {
                     </div>
 
                     {/* 主次分頁切換按鈕 */}
-                    <div className="flex bg-gray-900 p-1 rounded-2xl border border-gray-800">
+                    <div className="flex bg-gray-900 p-1 rounded-lg border border-gray-800">
                         <button
                             onClick={() => setSubTab('list')}
-                            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                            className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 ${
                                 subTab === 'list'
-                                    ? 'bg-emerald-600 text-white shadow-md'
+                                    ? 'bg-emerald-600 text-white shadow-sm'
                                     : 'text-gray-400 hover:text-white'
                             }`}
                         >
@@ -445,9 +445,9 @@ const SearchMode = () => {
 
                         <button
                             onClick={() => setSubTab('matchGame')}
-                            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                            className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 ${
                                 subTab === 'matchGame'
-                                    ? 'bg-cyan-600 text-white shadow-md'
+                                    ? 'bg-cyan-600 text-white shadow-sm'
                                     : 'text-gray-400 hover:text-white'
                             }`}
                         >
@@ -456,9 +456,9 @@ const SearchMode = () => {
 
                         <button
                             onClick={() => setSubTab('etymologyGame')}
-                            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                            className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 ${
                                 subTab === 'etymologyGame'
-                                    ? 'bg-amber-600 text-white shadow-md'
+                                    ? 'bg-amber-600 text-white shadow-sm'
                                     : 'text-gray-400 hover:text-white'
                             }`}
                         >
@@ -469,22 +469,22 @@ const SearchMode = () => {
 
                 {/* ================= MODE 1: 術語清單與匯出 (List View) ================= */}
                 {subTab === 'list' && (
-                    <div className="space-y-6 animate-fade-in">
+                    <div className="space-y-4 animate-fade-in">
                         {/* 工具列與搜尋 */}
-                        <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
+                        <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2.5">
                             <div className="relative flex-1">
-                                <Search className="w-4 h-4 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
+                                <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                                 <input
                                     type="text"
                                     placeholder="搜尋英文術語 (Action Potential)、中文 (去極化)、或理工概念 (RC、狀態機)..."
                                     value={query}
                                     onChange={(e) => setQuery(e.target.value)}
-                                    className="w-full bg-gray-900 border border-gray-700/80 rounded-2xl pl-11 pr-10 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 shadow-inner"
+                                    className="w-full bg-gray-900 border border-gray-750 rounded-lg pl-10 pr-10 py-2.5 text-xs sm:text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 shadow-inner"
                                 />
                                 {query && (
                                     <button
                                         onClick={() => setQuery('')}
-                                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-gray-400 hover:text-white bg-gray-800 px-2 py-0.5 rounded-lg"
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 hover:text-white bg-gray-800 px-2 py-0.5 rounded"
                                     >
                                         清除
                                     </button>
@@ -494,10 +494,10 @@ const SearchMode = () => {
                             <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar flex-nowrap w-full md:w-auto shrink-0 py-0.5">
                                 <button
                                     onClick={() => setIsGlanceMode(!isGlanceMode)}
-                                    className={`px-3 py-2 sm:py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border shrink-0 whitespace-nowrap ${
+                                    className={`px-3 py-1.5 sm:py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 border shrink-0 whitespace-nowrap ${
                                         isGlanceMode
-                                            ? 'bg-amber-500 text-gray-950 border-amber-400 shadow-md'
-                                            : 'bg-gray-800 hover:bg-gray-750 text-gray-300 border-gray-700'
+                                            ? 'bg-amber-500 text-gray-950 border-amber-400 shadow-sm'
+                                            : 'bg-gray-850 hover:bg-gray-800 text-gray-300 border-gray-750'
                                     }`}
                                     title="遮蔽中文與類比，專門測試自己看見英文能不能一眼辨識"
                                 >
@@ -507,7 +507,7 @@ const SearchMode = () => {
 
                                 <button
                                     onClick={handleCopyMarkdown}
-                                    className="px-3 py-2 sm:py-2.5 rounded-xl bg-gray-800 hover:bg-gray-750 border border-gray-700 text-xs text-gray-200 font-bold transition-colors flex items-center gap-1.5 shrink-0 whitespace-nowrap"
+                                    className="px-3 py-1.5 sm:py-2 rounded-lg bg-gray-850 hover:bg-gray-800 border border-gray-750 text-xs text-gray-200 font-semibold transition-colors flex items-center gap-1.5 shrink-0 whitespace-nowrap"
                                     title="複製為 Markdown 表格貼至 Notion 或個人筆記"
                                 >
                                     {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-indigo-400" />}
@@ -516,7 +516,7 @@ const SearchMode = () => {
 
                                 <button
                                     onClick={handleDownloadCSV}
-                                    className="px-3 py-2 sm:py-2.5 rounded-xl bg-gray-800 hover:bg-gray-750 border border-gray-700 text-xs text-gray-200 font-bold transition-colors flex items-center gap-1.5 shrink-0 whitespace-nowrap"
+                                    className="px-3 py-1.5 sm:py-2 rounded-lg bg-gray-850 hover:bg-gray-800 border border-gray-750 text-xs text-gray-200 font-semibold transition-colors flex items-center gap-1.5 shrink-0 whitespace-nowrap"
                                     title="匯出為 CSV 試算表"
                                 >
                                     <Download className="w-3.5 h-3.5 text-cyan-400" />
@@ -525,7 +525,7 @@ const SearchMode = () => {
 
                                 <button
                                     onClick={handlePrintWindow}
-                                    className="px-3.5 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-md shadow-emerald-500/20 transition-all flex items-center gap-1.5 shrink-0 whitespace-nowrap"
+                                    className="px-3 py-1.5 sm:py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs shadow-sm transition-all flex items-center gap-1.5 shrink-0 whitespace-nowrap"
                                     title="開啟 A4 列印或存成 PDF 速查 Cheatsheet"
                                 >
                                     <Printer className="w-3.5 h-3.5" />
@@ -545,14 +545,14 @@ const SearchMode = () => {
                         </div>
 
                         {/* 術語卡片清單 */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             {filteredTerms.map((term, idx) => {
                                 const isRevealed = !isGlanceMode || revealedIds[idx];
 
                                 return (
                                     <div
                                         key={idx}
-                                        className="bg-gray-850/90 hover:bg-gray-800/90 border border-gray-750 hover:border-emerald-500/40 rounded-3xl p-5 transition-all shadow-lg flex flex-col justify-between group"
+                                        className="bg-gray-850 hover:bg-gray-800 border border-gray-750 hover:border-gray-700 rounded-xl p-3.5 sm:p-4 transition-all shadow-sm flex flex-col justify-between group"
                                     >
                                         <div>
                                             <div className="flex items-start justify-between gap-3">
@@ -560,19 +560,19 @@ const SearchMode = () => {
                                                     <span className="text-[10px] font-mono font-bold text-gray-500 uppercase tracking-widest block mb-0.5">
                                                         {term.deck}
                                                     </span>
-                                                    <h3 className="text-lg md:text-xl font-black text-white font-mono tracking-tight text-emerald-300">
+                                                    <h3 className="text-base md:text-lg font-bold text-white font-mono tracking-tight text-emerald-300">
                                                         {term.term_en}
                                                     </h3>
                                                 </div>
 
                                                 {isRevealed ? (
-                                                    <span className="text-xs font-bold px-2.5 py-1 rounded-xl bg-emerald-950/60 border border-emerald-500/30 text-emerald-200 whitespace-nowrap">
+                                                    <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-emerald-950/60 border border-emerald-500/30 text-emerald-200 whitespace-nowrap">
                                                         {term.term_zh || "學術名詞"}
                                                     </span>
                                                 ) : (
                                                     <button
                                                         onClick={() => toggleReveal(idx)}
-                                                        className="text-xs font-bold px-2.5 py-1 rounded-xl bg-amber-950/60 border border-amber-500/30 text-amber-300 hover:bg-amber-900/50 transition-colors"
+                                                        className="text-xs font-semibold px-2 py-0.5 rounded-md bg-amber-950/60 border border-amber-500/30 text-amber-300 hover:bg-amber-900/50 transition-colors"
                                                     >
                                                         點擊揭曉中文
                                                     </button>
@@ -580,10 +580,10 @@ const SearchMode = () => {
                                             </div>
 
                                             {term.engineeringAnchor && (
-                                                <div className="mt-3">
+                                                <div className="mt-2.5">
                                                     {isRevealed ? (
-                                                        <div className="text-xs text-cyan-300 bg-cyan-950/40 p-2.5 rounded-xl border border-cyan-500/30 font-mono flex items-start gap-2 shadow-inner">
-                                                            <Zap className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+                                                        <div className="text-xs text-cyan-300 bg-cyan-950/30 p-2 rounded-lg border border-cyan-500/30 font-mono flex items-start gap-1.5 shadow-inner">
+                                                            <Zap className="w-3.5 h-3.5 text-cyan-400 shrink-0 mt-0.5" />
                                                             <div>
                                                                 <strong className="text-cyan-200">理工對等直覺：</strong>
                                                                 <span>{term.engineeringAnchor}</span>
@@ -592,7 +592,7 @@ const SearchMode = () => {
                                                     ) : (
                                                         <div
                                                             onClick={() => toggleReveal(idx)}
-                                                            className="text-xs text-gray-500 bg-gray-900 p-2.5 rounded-xl border border-gray-800 cursor-pointer hover:border-gray-700 transition-colors font-mono"
+                                                            className="text-xs text-gray-500 bg-gray-900 p-2 rounded-lg border border-gray-800 cursor-pointer hover:border-gray-750 transition-colors font-mono"
                                                         >
                                                             🔒 點擊揭曉理工工程直覺類比...
                                                         </div>
@@ -601,13 +601,13 @@ const SearchMode = () => {
                                             )}
 
                                             {term.etymology && isRevealed && (
-                                                <p className="text-xs text-amber-300/90 mt-2.5 bg-amber-950/20 p-2 rounded-xl border border-amber-500/20 italic">
+                                                <p className="text-[11px] text-amber-300/90 mt-2 bg-amber-950/20 p-2 rounded-lg border border-amber-500/20 italic">
                                                     🌱 詞根拆解助記：{term.etymology}
                                                 </p>
                                             )}
 
                                             {term.definition_en && (
-                                                <p className="text-xs text-gray-300 mt-3 leading-relaxed border-t border-gray-800 pt-2.5">
+                                                <p className="text-xs text-gray-300 mt-2.5 leading-relaxed border-t border-gray-800 pt-2">
                                                     {term.definition_en}
                                                 </p>
                                             )}
@@ -621,25 +621,25 @@ const SearchMode = () => {
 
                 {/* ================= MODE 2: 理工生醫連連看 (Match Game) ================= */}
                 {subTab === 'matchGame' && (
-                    <div className="bg-gray-850 p-6 md:p-8 rounded-3xl border border-cyan-500/30 shadow-2xl flex flex-col gap-6 animate-fade-in">
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-gray-750 pb-4">
+                    <div className="bg-gray-850 p-4 sm:p-5 rounded-xl border border-gray-800 shadow-xl flex flex-col gap-4 animate-fade-in">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5 border-b border-gray-750 pb-3">
                             <div>
                                 <div className="flex items-center gap-2">
-                                    <Zap className="w-5 h-5 text-yellow-400" />
-                                    <h2 className="text-xl font-black text-white">⚡ 理工生醫直覺連連看 (Round #{matchRound})</h2>
+                                    <Zap className="w-4 h-4 text-yellow-400" />
+                                    <h2 className="text-base sm:text-lg font-bold text-white">⚡ 理工生醫直覺連連看 (Round #{matchRound})</h2>
                                 </div>
-                                <p className="text-xs text-gray-400 mt-1">
+                                <p className="text-xs text-gray-400 mt-0.5">
                                     點選左側【全英生醫術語】，再點選右側【理工工程對等直覺】，打通兩者心智神經連結！
                                 </p>
                             </div>
 
-                            <div className="flex items-center gap-3">
-                                <span className="text-xs font-mono font-bold text-cyan-300 bg-cyan-950/60 px-3 py-1.5 rounded-xl border border-cyan-500/30 flex items-center gap-1.5">
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs font-mono font-bold text-cyan-300 bg-cyan-950/60 px-2.5 py-1 rounded-md border border-cyan-500/30 flex items-center gap-1.5">
                                     <Flame className="w-3.5 h-3.5 text-amber-400" /> 連續配對：{matchStreak}
                                 </span>
                                 <button
                                     onClick={resetMatchGame}
-                                    className="px-3.5 py-1.5 rounded-xl bg-gray-800 hover:bg-gray-750 text-gray-300 text-xs font-bold transition-all flex items-center gap-1"
+                                    className="px-3 py-1 rounded-lg bg-gray-800 hover:bg-gray-750 text-gray-300 text-xs font-semibold transition-all flex items-center gap-1"
                                 >
                                     <RotateCcw className="w-3.5 h-3.5" /> 換一輪
                                 </button>
@@ -648,25 +648,25 @@ const SearchMode = () => {
 
                         {/* 配對遊戲主盤 */}
                         {matchedPairs.size === currentMatchPool.total ? (
-                            <div className="py-12 flex flex-col items-center justify-center text-center gap-4 bg-emerald-950/20 rounded-2xl border border-emerald-500/30 animate-fade-in">
-                                <Award className="w-16 h-16 text-yellow-400 animate-bounce" />
-                                <h3 className="text-2xl font-black text-emerald-300">🎉 本輪全數配對成功！</h3>
+                            <div className="py-8 flex flex-col items-center justify-center text-center gap-3 bg-emerald-950/20 rounded-xl border border-emerald-500/30 animate-fade-in">
+                                <Award className="w-12 h-12 text-yellow-400 animate-bounce" />
+                                <h3 className="text-xl font-bold text-emerald-300">🎉 本輪全數配對成功！</h3>
                                 <p className="text-xs text-gray-300 max-w-md">
                                     太棒了！您已經能將這些全英文學術名詞，瞬間映射到相應的電氣、控制與資訊系統模型！
                                 </p>
                                 <button
                                     onClick={resetMatchGame}
-                                    className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-bold text-xs shadow-lg shadow-emerald-500/20 transition-all flex items-center gap-1.5"
+                                    className="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition-all flex items-center gap-1.5"
                                 >
                                     <span>挑戰下一輪新術語</span>
-                                    <ArrowRight className="w-4 h-4" />
+                                    <ArrowRight className="w-3.5 h-3.5" />
                                 </button>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {/* 左側：全英生醫術語 */}
-                                <div className="space-y-3">
-                                    <h4 className="text-xs font-extrabold uppercase tracking-wider text-indigo-400 font-mono">
+                                <div className="space-y-2">
+                                    <h4 className="text-[11px] font-bold uppercase tracking-wider text-indigo-400 font-mono">
                                         [A] 全英生醫術語 (BioMed English)
                                     </h4>
                                     {currentMatchPool.leftItems.map(item => {
@@ -679,22 +679,22 @@ const SearchMode = () => {
                                                 key={item.id}
                                                 disabled={isMatched}
                                                 onClick={() => handleMatchSelect('left', item)}
-                                                className={`w-full p-4 rounded-2xl text-left transition-all border flex items-center justify-between ${
+                                                className={`w-full p-3 rounded-lg text-left transition-all border flex items-center justify-between ${
                                                     isMatched
                                                         ? 'bg-emerald-950/30 border-emerald-500/40 text-emerald-400 opacity-60 cursor-default'
                                                         : isWrong
                                                         ? 'bg-rose-950/50 border-rose-500 text-rose-300 animate-shake'
                                                         : isSelected
-                                                        ? 'bg-indigo-600 text-white border-indigo-400 shadow-lg scale-[1.02]'
-                                                        : 'bg-gray-900 border-gray-750 text-white hover:border-indigo-500/60 hover:bg-gray-800'
+                                                        ? 'bg-indigo-600 text-white border-indigo-400 shadow-md'
+                                                        : 'bg-gray-900 border-gray-750 text-white hover:border-gray-650 hover:bg-gray-800'
                                                 }`}
                                             >
                                                 <div>
-                                                    <span className="font-mono font-black text-sm block">
+                                                    <span className="font-mono font-bold text-xs sm:text-sm block">
                                                         {item.term_en}
                                                     </span>
                                                     {isMatched && (
-                                                        <span className="text-[11px] text-emerald-300 font-bold">
+                                                        <span className="text-[11px] text-emerald-300 font-medium">
                                                             ✓ {item.term_zh}
                                                         </span>
                                                     )}
@@ -706,8 +706,8 @@ const SearchMode = () => {
                                 </div>
 
                                 {/* 右側：理工工程直覺對等 */}
-                                <div className="space-y-3">
-                                    <h4 className="text-xs font-extrabold uppercase tracking-wider text-cyan-400 font-mono">
+                                <div className="space-y-2">
+                                    <h4 className="text-[11px] font-bold uppercase tracking-wider text-cyan-400 font-mono">
                                         [B] 理工工程直覺 (Engineering Analogy)
                                     </h4>
                                     {currentMatchPool.rightItems.map(item => {
@@ -720,14 +720,14 @@ const SearchMode = () => {
                                                 key={item.id}
                                                 disabled={isMatched}
                                                 onClick={() => handleMatchSelect('right', item)}
-                                                className={`w-full p-4 rounded-2xl text-left transition-all border flex items-center justify-between ${
+                                                className={`w-full p-3 rounded-lg text-left transition-all border flex items-center justify-between ${
                                                     isMatched
                                                         ? 'bg-emerald-950/30 border-emerald-500/40 text-emerald-400 opacity-60 cursor-default'
                                                         : isWrong
                                                         ? 'bg-rose-950/50 border-rose-500 text-rose-300 animate-shake'
                                                         : isSelected
-                                                        ? 'bg-cyan-600 text-white border-cyan-400 shadow-lg scale-[1.02]'
-                                                        : 'bg-gray-900 border-gray-750 text-gray-200 hover:border-cyan-500/60 hover:bg-gray-800'
+                                                        ? 'bg-cyan-600 text-white border-cyan-400 shadow-md'
+                                                        : 'bg-gray-900 border-gray-750 text-gray-200 hover:border-gray-650 hover:bg-gray-800'
                                                 }`}
                                             >
                                                 <span className="font-mono text-xs font-medium leading-relaxed">
@@ -745,48 +745,48 @@ const SearchMode = () => {
 
                 {/* ================= MODE 3: 詞根解構拼圖小遊戲 (Etymology Slicer) ================= */}
                 {subTab === 'etymologyGame' && (
-                    <div className="bg-gray-850 p-6 md:p-8 rounded-3xl border border-amber-500/30 shadow-2xl flex flex-col gap-6 animate-fade-in">
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-gray-750 pb-4">
+                    <div className="bg-gray-850 p-4 sm:p-5 rounded-xl border border-gray-800 shadow-xl flex flex-col gap-4 animate-fade-in">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5 border-b border-gray-750 pb-3">
                             <div>
                                 <div className="flex items-center gap-2">
-                                    <Puzzle className="w-5 h-5 text-amber-400" />
-                                    <h2 className="text-xl font-black text-white">🌱 希臘/拉丁詞根解構大挑戰</h2>
+                                    <Puzzle className="w-4 h-4 text-amber-400" />
+                                    <h2 className="text-base sm:text-lg font-bold text-white">🌱 希臘/拉丁詞根解構大挑戰</h2>
                                 </div>
-                                <p className="text-xs text-gray-400 mt-1">
+                                <p className="text-xs text-gray-400 mt-0.5">
                                     生醫名詞不是死背硬記，而是像樂高積木一樣由詞根組合而成！根據解構公式，辨識出是哪個全英專有名詞。
                                 </p>
                             </div>
 
-                            <span className="text-xs font-mono font-bold text-amber-300 bg-amber-950/60 px-3 py-1.5 rounded-xl border border-amber-500/30">
+                            <span className="text-xs font-mono font-bold text-amber-300 bg-amber-950/60 px-2.5 py-1 rounded-md border border-amber-500/30">
                                 累計答對：{etymScore} 題
                             </span>
                         </div>
 
                         {currentEtymQuestion ? (
-                            <div className="flex flex-col gap-6">
+                            <div className="flex flex-col gap-4">
                                 {/* 詞根積木展示板 */}
-                                <div className="p-6 bg-gradient-to-r from-amber-950/40 via-gray-900 to-amber-950/40 rounded-2xl border border-amber-500/40 text-center space-y-2">
-                                    <span className="text-xs text-amber-300 font-extrabold uppercase tracking-widest font-mono">
+                                <div className="p-4 bg-gray-900 rounded-lg border border-gray-750 text-center space-y-1.5">
+                                    <span className="text-[11px] text-amber-300 font-bold uppercase tracking-widest font-mono">
                                         拆解積木公式 (Etymology Formula)
                                     </span>
-                                    <p className="text-lg md:text-xl font-black text-white font-mono leading-relaxed">
+                                    <p className="text-base md:text-lg font-bold text-white font-mono leading-relaxed">
                                         {currentEtymQuestion.etymology}
                                     </p>
-                                    <span className="text-xs text-gray-400 block pt-1">
+                                    <span className="text-xs text-gray-400 block pt-0.5">
                                         中文線索：{currentEtymQuestion.term_zh}
                                     </span>
                                 </div>
 
                                 {/* 四選一選項卡片 */}
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                                     {currentEtymQuestion.options.map((opt, i) => {
                                         const isCorrect = opt === currentEtymQuestion.correctTerm;
                                         const isChosen = selectedEtymChoice === opt;
 
-                                        let btnClass = "bg-gray-900 border-gray-750 text-white hover:bg-gray-800 hover:border-amber-500/40";
+                                        let btnClass = "bg-gray-900 border-gray-750 text-white hover:bg-gray-800 hover:border-gray-650";
                                         if (isEtymAnswered) {
                                             if (isCorrect) {
-                                                btnClass = "bg-emerald-950/80 border-emerald-500 text-emerald-300 shadow-md font-bold";
+                                                btnClass = "bg-emerald-950/80 border-emerald-500 text-emerald-300 shadow-sm font-bold";
                                             } else if (isChosen) {
                                                 btnClass = "bg-rose-950/80 border-rose-500 text-rose-300";
                                             } else {
@@ -799,7 +799,7 @@ const SearchMode = () => {
                                                 key={i}
                                                 disabled={isEtymAnswered}
                                                 onClick={() => handleEtymChoice(opt)}
-                                                className={`p-4 rounded-2xl text-left border transition-all flex items-center justify-between font-mono text-sm ${btnClass}`}
+                                                className={`p-3 rounded-lg text-left border transition-all flex items-center justify-between font-mono text-xs sm:text-sm ${btnClass}`}
                                             >
                                                 <span>{opt}</span>
                                                 {isEtymAnswered && isCorrect && <Check className="w-4 h-4 text-emerald-400" />}
@@ -822,10 +822,10 @@ const SearchMode = () => {
 
                                         <button
                                             onClick={nextEtymQuestion}
-                                            className="px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-md transition-all flex items-center gap-1.5"
+                                            className="px-4 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-sm transition-all flex items-center gap-1.5"
                                         >
                                             <span>下一題</span>
-                                            <ArrowRight className="w-4 h-4" />
+                                            <ArrowRight className="w-3.5 h-3.5" />
                                         </button>
                                     </div>
                                 )}

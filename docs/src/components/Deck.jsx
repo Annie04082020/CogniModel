@@ -106,35 +106,35 @@ const Deck = ({ cards }) => {
                 </AnimatePresence>
             </div>
 
-            <div className="flex items-center gap-6 bg-gray-800 p-4 rounded-full shadow-lg border border-gray-700 z-10">
+            <div className="flex items-center gap-4 bg-gray-800/90 backdrop-blur px-4 py-2 rounded-xl shadow-xl border border-gray-750 z-10">
                 <button
                     onClick={prevCard}
-                    className="p-2 hover:bg-gray-700 rounded-full transition-colors text-white"
+                    className="p-1.5 hover:bg-gray-700 rounded-lg transition-colors text-white"
                     title="Previous"
                 >
-                    <ChevronLeft size={24} />
+                    <ChevronLeft size={20} />
                 </button>
 
-                <span className="text-gray-400 font-mono">
+                <span className="text-gray-400 font-mono text-sm">
                     {currentIndex + 1} / {cards.length}
                 </span>
 
                 <button
                     onClick={nextCard}
-                    className="p-2 hover:bg-gray-700 rounded-full transition-colors text-white"
+                    className="p-1.5 hover:bg-gray-700 rounded-lg transition-colors text-white"
                     title="Next"
                 >
-                    <ChevronRight size={24} />
+                    <ChevronRight size={20} />
                 </button>
 
-                <div className="w-px h-6 bg-gray-700 mx-2"></div>
+                <div className="w-px h-5 bg-gray-700 mx-1"></div>
 
                 <button
                     onClick={shuffleDeck}
-                    className="p-2 hover:bg-purple-600 rounded-full transition-colors text-purple-400 hover:text-white"
+                    className="p-1.5 hover:bg-purple-600 rounded-lg transition-colors text-purple-400 hover:text-white"
                     title="Random"
                 >
-                    <Shuffle size={20} />
+                    <Shuffle size={18} />
                 </button>
             </div>
 

@@ -913,10 +913,10 @@ const ImportMode = ({ onDeckUpdate }) => {
             </div>
 
             {/* 匯入來源 Tab 選單 */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 bg-gray-900/80 p-1.5 rounded-2xl border border-gray-800 mb-5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-1.5 bg-gray-900/80 p-1 rounded-xl border border-gray-800 mb-5">
                 <button
                     onClick={() => { setActiveTab('youtube'); setExtractedData(null); }}
-                    className={`py-2.5 px-2 rounded-xl font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-1.5 ${
+                    className={`py-2 px-2.5 rounded-lg font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-1.5 ${
                         activeTab === 'youtube'
                             ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-lg'
                             : 'text-gray-400 hover:text-white'
@@ -926,7 +926,7 @@ const ImportMode = ({ onDeckUpdate }) => {
                 </button>
                 <button
                     onClick={() => { setActiveTab('paper'); setExtractedData(null); }}
-                    className={`py-2.5 px-2 rounded-xl font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-1.5 ${
+                    className={`py-2 px-2.5 rounded-lg font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-1.5 ${
                         activeTab === 'paper'
                             ? 'bg-gradient-to-r from-amber-600 via-orange-600 to-rose-600 text-white shadow-lg'
                             : 'text-gray-400 hover:text-white'
@@ -936,7 +936,7 @@ const ImportMode = ({ onDeckUpdate }) => {
                 </button>
                 <button
                     onClick={() => { setActiveTab('image'); setExtractedData(null); }}
-                    className={`py-2.5 px-2 rounded-xl font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-1.5 ${
+                    className={`py-2 px-2.5 rounded-lg font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-1.5 ${
                         activeTab === 'image'
                             ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg'
                             : 'text-gray-400 hover:text-white'
@@ -946,7 +946,7 @@ const ImportMode = ({ onDeckUpdate }) => {
                 </button>
                 <button
                     onClick={() => { setActiveTab('text'); setExtractedData(null); }}
-                    className={`py-2.5 px-2 rounded-xl font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-1.5 ${
+                    className={`py-2 px-2.5 rounded-lg font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-1.5 ${
                         activeTab === 'text'
                             ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
                             : 'text-gray-400 hover:text-white'
@@ -956,7 +956,7 @@ const ImportMode = ({ onDeckUpdate }) => {
                 </button>
                 <button
                     onClick={() => { setActiveTab('audio'); setExtractedData(null); }}
-                    className={`py-2.5 px-2 rounded-xl font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-1.5 ${
+                    className={`py-2 px-2.5 rounded-lg font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-1.5 ${
                         activeTab === 'audio'
                             ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
                             : 'text-gray-400 hover:text-white'
@@ -966,7 +966,7 @@ const ImportMode = ({ onDeckUpdate }) => {
                 </button>
                 <button
                     onClick={() => { setActiveTab('pdf'); setExtractedData(null); }}
-                    className={`py-2.5 px-2 rounded-xl font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-1.5 ${
+                    className={`py-2 px-2.5 rounded-lg font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-1.5 ${
                         activeTab === 'pdf'
                             ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg'
                             : 'text-gray-400 hover:text-white'
@@ -978,7 +978,7 @@ const ImportMode = ({ onDeckUpdate }) => {
 
             {/* 狀態訊息提示 */}
             {status !== 'ideal' && (
-                <div className={`mb-5 p-4 rounded-xl border flex items-center gap-3 text-sm ${
+                <div className={`mb-5 p-3.5 rounded-lg border flex items-center gap-3 text-sm ${
                     status === 'success'
                         ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-300'
                         : 'bg-rose-950/40 border-rose-500/40 text-rose-300'
@@ -990,7 +990,7 @@ const ImportMode = ({ onDeckUpdate }) => {
 
             {/* ================= Tab 1: YouTube 影片提煉 ================= */}
             {activeTab === 'youtube' && !extractedData && (
-                <div className="flex flex-col gap-4 bg-gray-850 p-6 rounded-3xl border border-gray-800">
+                <div className="flex flex-col gap-3.5 bg-gray-850 p-4 sm:p-5 rounded-xl border border-gray-800">
                     <div>
                         <h3 className="font-bold text-white text-base flex items-center gap-2">
                             <Youtube className="w-5 h-5 text-red-500" /> 貼上 YouTube 影片網址
@@ -1006,20 +1006,20 @@ const ImportMode = ({ onDeckUpdate }) => {
                             value={youtubeUrl}
                             onChange={(e) => setYoutubeUrl(e.target.value)}
                             placeholder="貼上 YouTube 連結，例如: https://www.youtube.com/watch?v=... 或 https://youtu.be/..."
-                            className="p-3.5 bg-gray-900 border border-gray-700/80 rounded-2xl text-gray-100 text-sm focus:outline-none focus:border-red-500 font-mono"
+                            className="p-2.5 sm:p-3 bg-gray-900 border border-gray-700/80 rounded-lg text-gray-100 text-sm focus:outline-none focus:border-red-500 font-mono"
                         />
 
                         {detectedVideoId && (
-                            <div className="p-4 bg-gray-900/90 rounded-2xl border border-gray-750 flex flex-col sm:flex-row items-center gap-4 animate-fade-in">
-                                <div className="relative w-full sm:w-48 aspect-video rounded-xl overflow-hidden bg-black shrink-0 border border-gray-700">
+                            <div className="p-3.5 bg-gray-900/90 rounded-xl border border-gray-750 flex flex-col sm:flex-row items-center gap-4 animate-fade-in">
+                                <div className="relative w-full sm:w-44 aspect-video rounded-lg overflow-hidden bg-black shrink-0 border border-gray-700">
                                     <img
                                         src={`https://img.youtube.com/vi/${detectedVideoId}/hqdefault.jpg`}
                                         alt="YouTube 縮圖"
                                         className="w-full h-full object-cover"
                                     />
                                     <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                                        <div className="w-10 h-10 rounded-full bg-red-600/90 flex items-center justify-center text-white shadow-lg">
-                                            <Video className="w-5 h-5" />
+                                        <div className="w-9 h-9 rounded-full bg-red-600/90 flex items-center justify-center text-white shadow-lg">
+                                            <Video className="w-4 h-4" />
                                         </div>
                                     </div>
                                 </div>
@@ -1043,11 +1043,11 @@ const ImportMode = ({ onDeckUpdate }) => {
                         )}
                     </div>
 
-                    <div className="flex justify-end pt-2">
+                    <div className="flex justify-end pt-1">
                         <button
                             disabled={processing || !detectedVideoId}
                             onClick={handleAnalyzeYouTube}
-                            className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
+                            className={`px-5 py-2 rounded-lg font-bold text-sm transition-all flex items-center justify-center gap-2 ${
                                 !detectedVideoId
                                     ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
                                     : 'bg-gradient-to-r from-red-600 via-rose-600 to-purple-600 hover:from-red-500 hover:to-purple-500 text-white shadow-lg shadow-red-500/20'
@@ -1071,7 +1071,7 @@ const ImportMode = ({ onDeckUpdate }) => {
 
             {/* ================= Tab 2: 文字段落提取 ================= */}
             {activeTab === 'text' && !extractedData && (
-                <div className="flex flex-col gap-4 bg-gray-850 p-6 rounded-3xl border border-gray-800">
+                <div className="flex flex-col gap-3.5 bg-gray-850 p-4 sm:p-5 rounded-xl border border-gray-800">
                     <div>
                         <h3 className="font-bold text-white text-base flex items-center gap-2">
                             <FileText className="w-4 h-4 text-indigo-400" /> 貼上抽象筆記或課文長文
@@ -1086,21 +1086,21 @@ const ImportMode = ({ onDeckUpdate }) => {
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}
                         placeholder="請在此貼上課文段落、講義文字或你的抽象筆記..."
-                        className="w-full p-4 bg-gray-900 border border-gray-700/80 rounded-2xl text-gray-100 text-sm focus:outline-none focus:border-indigo-500 leading-relaxed font-mono custom-scrollbar"
+                        className="w-full p-3 bg-gray-900 border border-gray-700/80 rounded-lg text-gray-100 text-sm focus:outline-none focus:border-indigo-500 leading-relaxed font-mono custom-scrollbar"
                     />
 
-                    <div className="flex flex-col sm:flex-row gap-3 justify-end pt-2">
+                    <div className="flex flex-col sm:flex-row gap-2.5 justify-end pt-1">
                         <button
                             disabled={processing}
                             onClick={() => handleAnalyzeText(false)}
-                            className="px-5 py-2.5 rounded-xl border border-gray-700 hover:bg-gray-800 text-gray-300 font-bold text-xs transition-colors flex items-center justify-center gap-1.5"
+                            className="px-4 py-2 rounded-lg border border-gray-700 hover:bg-gray-800 text-gray-300 font-bold text-xs transition-colors flex items-center justify-center gap-1.5"
                         >
                             <span>離線基礎提取 (免 API)</span>
                         </button>
                         <button
                             disabled={processing}
                             onClick={() => handleAnalyzeText(true)}
-                            className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white font-bold text-sm shadow-lg shadow-purple-500/20 transition-all flex items-center justify-center gap-2"
+                            className="px-5 py-2 rounded-lg bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white font-bold text-sm shadow-lg shadow-purple-500/20 transition-all flex items-center justify-center gap-2"
                         >
                             {processing ? (
                                 <>
@@ -1120,7 +1120,7 @@ const ImportMode = ({ onDeckUpdate }) => {
 
             {/* ================= Tab 3: 錄音檔上傳 ================= */}
             {activeTab === 'audio' && !extractedData && (
-                <div className="flex flex-col gap-4 bg-gray-850 p-6 rounded-3xl border border-gray-800">
+                <div className="flex flex-col gap-3.5 bg-gray-850 p-4 sm:p-5 rounded-xl border border-gray-800">
                     <div>
                         <h3 className="font-bold text-white text-base flex items-center gap-2">
                             <FileAudio className="w-4 h-4 text-purple-400" /> 上傳手機 / 錄音筆音訊檔案
@@ -1133,7 +1133,7 @@ const ImportMode = ({ onDeckUpdate }) => {
                     {!audioFile ? (
                         <div
                             onClick={() => audioInputRef.current?.click()}
-                            className="border-2 border-dashed border-gray-700 hover:border-purple-500/60 rounded-3xl p-10 flex flex-col items-center justify-center cursor-pointer transition-all bg-gray-900/50 hover:bg-gray-900 group"
+                            className="border-2 border-dashed border-gray-700 hover:border-purple-500/60 rounded-xl py-6 px-4 flex flex-col items-center justify-center cursor-pointer transition-all bg-gray-900/50 hover:bg-gray-900 group"
                         >
                             <input
                                 ref={audioInputRef}
@@ -1146,10 +1146,10 @@ const ImportMode = ({ onDeckUpdate }) => {
                                     }
                                 }}
                             />
-                            <div className="w-16 h-16 rounded-2xl bg-purple-950/60 border border-purple-600/30 flex items-center justify-center text-purple-400 mb-4 group-hover:scale-105 transition-transform">
-                                <Mic className="w-8 h-8" />
+                            <div className="w-12 h-12 rounded-lg bg-purple-950/60 border border-purple-600/30 flex items-center justify-center text-purple-400 mb-3 group-hover:scale-105 transition-transform">
+                                <Mic className="w-6 h-6" />
                             </div>
-                            <p className="text-white font-bold text-base mb-1">
+                            <p className="text-white font-bold text-sm mb-1">
                                 點擊此處選擇或拖曳課堂錄音檔
                             </p>
                             <p className="text-xs text-gray-500">
@@ -1157,7 +1157,7 @@ const ImportMode = ({ onDeckUpdate }) => {
                             </p>
                         </div>
                     ) : (
-                        <div className="flex flex-col gap-4">
+                        <div className="flex flex-col gap-3.5">
                             <input
                                 ref={audioInputRef}
                                 type="file"
@@ -1204,7 +1204,7 @@ const ImportMode = ({ onDeckUpdate }) => {
                             processPdfFile(e.dataTransfer.files[0]);
                         }
                     }}
-                    className={`border-2 border-dashed rounded-3xl p-12 flex flex-col items-center justify-center transition-all ${
+                    className={`border-2 border-dashed rounded-xl py-7 px-4 flex flex-col items-center justify-center transition-all ${
                         isDragging
                             ? 'border-blue-500 bg-blue-500/10'
                             : 'border-gray-700 bg-gray-850 hover:border-gray-600'
@@ -1222,21 +1222,21 @@ const ImportMode = ({ onDeckUpdate }) => {
                         }}
                     />
                     <label htmlFor="pdf-upload" className="cursor-pointer flex flex-col items-center">
-                        <div className="w-16 h-16 rounded-2xl bg-blue-950/60 border border-blue-600/30 flex items-center justify-center text-blue-400 mb-4">
-                            <Upload className="w-8 h-8" />
+                        <div className="w-12 h-12 rounded-lg bg-blue-950/60 border border-blue-600/30 flex items-center justify-center text-blue-400 mb-3">
+                            <Upload className="w-6 h-6" />
                         </div>
-                        <h3 className="text-lg font-bold text-white mb-1">上傳講義 / 簡報 PDF</h3>
-                        <p className="text-gray-400 text-xs mb-2">
+                        <h3 className="text-base font-bold text-white mb-1">上傳講義 / 簡報 PDF</h3>
+                        <p className="text-gray-400 text-xs mb-1.5">
                             目標牌組：【{resolveTargetDeckName("預設以 PDF 檔名為準")}】
                         </p>
-                        <p className="text-gray-500 text-[11px] mb-4">拖曳或點選以解析投影片截圖與大綱</p>
-                        <span className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl shadow-md transition-all">
+                        <p className="text-gray-500 text-[11px] mb-3">拖曳或點選以解析投影片截圖與大綱</p>
+                        <span className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-lg shadow-md transition-all">
                             選擇 PDF 檔案
                         </span>
                     </label>
 
                     {processing && progress > 0 && (
-                        <div className="w-full max-w-md mt-6">
+                        <div className="w-full max-w-md mt-5">
                             <div className="flex justify-between text-xs text-gray-400 mb-1">
                                 <span>投影片頁面擷取中...</span>
                                 <span>{progress}%</span>
@@ -1250,14 +1250,14 @@ const ImportMode = ({ onDeckUpdate }) => {
 
                 {/* 偵測到的 PDF 內嵌 YouTube 影音展架 */}
                 {detectedPdfVideos.length > 0 && (
-                    <div className="mt-5 p-5 bg-gradient-to-r from-red-950/40 via-purple-950/30 to-gray-900 border border-red-500/40 rounded-3xl shadow-xl flex flex-col gap-4 animate-fade-in">
-                        <div className="flex items-center justify-between pb-3 border-b border-gray-800">
+                    <div className="mt-4 p-3.5 sm:p-4 bg-gradient-to-r from-red-950/40 via-purple-950/30 to-gray-900 border border-red-500/40 rounded-xl shadow-xl flex flex-col gap-3.5 animate-fade-in">
+                        <div className="flex items-center justify-between pb-2.5 border-b border-gray-800">
                             <div className="flex items-center gap-2.5">
-                                <div className="w-9 h-9 rounded-xl bg-red-600/20 border border-red-500/40 flex items-center justify-center text-red-400">
-                                    <Youtube className="w-5 h-5" />
+                                <div className="w-8 h-8 rounded-lg bg-red-600/20 border border-red-500/40 flex items-center justify-center text-red-400">
+                                    <Youtube className="w-4 h-4" />
                                 </div>
                                 <div>
-                                    <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                                    <h4 className="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
                                         <span>從此 PDF 成功抓取 {detectedPdfVideos.length} 部 YouTube 補充影音！</span>
                                         <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/30">
                                             自動識別
@@ -1270,10 +1270,10 @@ const ImportMode = ({ onDeckUpdate }) => {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
                             {detectedPdfVideos.map((vid, idx) => (
-                                <div key={idx} className="bg-gray-900/90 border border-gray-750 hover:border-red-500/40 rounded-2xl p-3 flex flex-col gap-2.5 transition-all group shadow-md">
-                                    <div className="relative aspect-video rounded-xl overflow-hidden bg-black border border-gray-800">
+                                <div key={idx} className="bg-gray-900/90 border border-gray-750 hover:border-red-500/40 rounded-lg p-2.5 flex flex-col gap-2 transition-all group shadow-md">
+                                    <div className="relative aspect-video rounded-md overflow-hidden bg-black border border-gray-800">
                                         <img
                                             src={`https://img.youtube.com/vi/${vid.videoId}/mqdefault.jpg`}
                                             alt="Video Thumbnail"
@@ -1286,7 +1286,7 @@ const ImportMode = ({ onDeckUpdate }) => {
                                             onClick={() => setPreviewVideoModal(vid)}
                                             className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 text-white font-bold text-xs"
                                         >
-                                            <Play className="w-6 h-6 text-red-500 fill-current" />
+                                            <Play className="w-5 h-5 text-red-500 fill-current" />
                                         </button>
                                     </div>
 
@@ -1302,7 +1302,7 @@ const ImportMode = ({ onDeckUpdate }) => {
                                     <div className="flex items-center gap-2 pt-1 border-t border-gray-800">
                                         <button
                                             onClick={() => setPreviewVideoModal(vid)}
-                                            className="flex-1 py-1.5 bg-gray-800 hover:bg-gray-750 text-gray-200 hover:text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition-all"
+                                            className="flex-1 py-1.5 bg-gray-800 hover:bg-gray-750 text-gray-200 hover:text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition-all"
                                         >
                                             <Play className="w-3 h-3 text-red-400 fill-current" />
                                             <span>直接播放</span>
@@ -1312,7 +1312,7 @@ const ImportMode = ({ onDeckUpdate }) => {
                                                 setYoutubeUrl(vid.url);
                                                 setActiveTab('youtube');
                                             }}
-                                            className="flex-1 py-1.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1 shadow-md transition-all"
+                                            className="flex-1 py-1.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1 shadow-md transition-all"
                                             title="切換至 YouTube AI 解構頁面"
                                         >
                                             <Sparkles className="w-3 h-3 text-yellow-300" />
@@ -1329,13 +1329,13 @@ const ImportMode = ({ onDeckUpdate }) => {
 
             {/* ================= Tab 5: 截圖/黑板圖表認知解構 (支援 Ctrl+V) ================= */}
             {activeTab === 'image' && !extractedData && (
-                <div className="flex flex-col gap-4 bg-gray-850 p-6 rounded-3xl border border-gray-800">
+                <div className="flex flex-col gap-3.5 bg-gray-850 p-4 sm:p-5 rounded-xl border border-gray-800">
                     <div>
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                             <h3 className="font-bold text-white text-base flex items-center gap-2">
                                 <Camera className="w-4 h-4 text-emerald-400" /> 📸 課堂黑板圖表 / 講義截圖認知解構
                             </h3>
-                            <span className="text-xs text-emerald-400 bg-emerald-950/40 px-2.5 py-1 rounded-xl border border-emerald-500/30 flex items-center gap-1 font-mono">
+                            <span className="text-xs text-emerald-400 bg-emerald-950/40 px-2 py-0.5 rounded-lg border border-emerald-500/30 flex items-center gap-1 font-mono">
                                 <Clipboard className="w-3.5 h-3.5" /> 支援 Ctrl + V 剪貼簿直接貼上
                             </span>
                         </div>
@@ -1345,12 +1345,12 @@ const ImportMode = ({ onDeckUpdate }) => {
                     </div>
 
                     {imagePreview ? (
-                        <div className="flex flex-col md:flex-row gap-4 p-4 bg-gray-900 rounded-2xl border border-emerald-500/30">
-                            <div className="md:w-1/2 flex flex-col items-center justify-center bg-gray-950 rounded-xl p-2 border border-gray-800">
+                        <div className="flex flex-col md:flex-row gap-3.5 p-3.5 bg-gray-900 rounded-xl border border-emerald-500/30">
+                            <div className="md:w-1/2 flex flex-col items-center justify-center bg-gray-950 rounded-lg p-2 border border-gray-800">
                                 <img
                                     src={imagePreview}
                                     alt="Pasted/Uploaded"
-                                    className="max-h-64 object-contain rounded-lg shadow-md"
+                                    className="max-h-60 object-contain rounded-md shadow-md"
                                 />
                                 <button
                                     onClick={() => { setImageFile(null); setImagePreview(null); }}
@@ -1370,14 +1370,14 @@ const ImportMode = ({ onDeckUpdate }) => {
                                         value={imagePromptContext}
                                         onChange={(e) => setImagePromptContext(e.target.value)}
                                         placeholder="例如：這是動作電位傳導與離子通道開閉的機制圖，請著重解構電位敏感型鈉/鉀通道與 RC 充放電類比..."
-                                        className="w-full p-3 bg-gray-850 border border-gray-700 rounded-xl text-white text-xs focus:outline-none focus:border-emerald-500 placeholder-gray-500 custom-scrollbar"
+                                        className="w-full p-2.5 bg-gray-850 border border-gray-700 rounded-lg text-white text-xs focus:outline-none focus:border-emerald-500 placeholder-gray-500 custom-scrollbar"
                                     />
                                 </div>
 
                                 <button
                                     disabled={processing}
                                     onClick={handleAnalyzeImage}
-                                    className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-bold text-sm shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2"
+                                    className="w-full py-2.5 rounded-lg bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-bold text-sm shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2"
                                 >
                                     {processing ? (
                                         <>
@@ -1396,7 +1396,7 @@ const ImportMode = ({ onDeckUpdate }) => {
                     ) : (
                         <div
                             onClick={() => imageInputRef.current?.click()}
-                            className="border-2 border-dashed border-gray-700 hover:border-emerald-500/60 bg-gray-900/60 hover:bg-emerald-950/10 rounded-2xl p-10 flex flex-col items-center justify-center cursor-pointer transition-all"
+                            className="border-2 border-dashed border-gray-700 hover:border-emerald-500/60 bg-gray-900/60 hover:bg-emerald-950/10 rounded-xl py-6 px-4 flex flex-col items-center justify-center cursor-pointer transition-all"
                         >
                             <input
                                 ref={imageInputRef}
@@ -1411,14 +1411,14 @@ const ImportMode = ({ onDeckUpdate }) => {
                                     }
                                 }}
                             />
-                            <div className="w-14 h-14 rounded-2xl bg-emerald-950/60 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-3">
-                                <Camera className="w-7 h-7" />
+                            <div className="w-12 h-12 rounded-lg bg-emerald-950/60 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-2.5">
+                                <Camera className="w-6 h-6" />
                             </div>
                             <h4 className="text-white font-bold text-sm mb-1">點擊上傳圖片，或在任何位置直接按下 Ctrl + V 貼上螢幕截圖</h4>
                             <p className="text-gray-400 text-xs text-center max-w-md">
                                 適用於老師黑板上的手繪機制圖、教材架構圖、投影片流程圖或醫學文獻示意圖
                             </p>
-                            <span className="mt-4 px-4 py-1.5 bg-gray-800 hover:bg-gray-750 text-emerald-400 border border-emerald-500/30 text-xs font-bold rounded-xl transition-all">
+                            <span className="mt-3 px-3.5 py-1.5 bg-gray-800 hover:bg-gray-750 text-emerald-400 border border-emerald-500/30 text-xs font-bold rounded-lg transition-all">
                                 選擇圖片檔案
                             </span>
                         </div>
@@ -1428,7 +1428,7 @@ const ImportMode = ({ onDeckUpdate }) => {
 
             {/* ================= Tab 6: 開源論文與文獻自動抓取 (arXiv / Europe PMC / PubMed / DOI) ================= */}
             {activeTab === 'paper' && !extractedData && (
-                <div className="flex flex-col gap-4 bg-gray-850 p-6 rounded-3xl border border-gray-800">
+                <div className="flex flex-col gap-3.5 bg-gray-850 p-4 sm:p-5 rounded-xl border border-gray-800">
                     <div>
                         <h3 className="font-bold text-white text-base flex items-center gap-2">
                             <BookOpenCheck className="w-5 h-5 text-amber-400" /> 貼上開源論文連結、DOI 或 PubMed ID
@@ -1479,12 +1479,12 @@ const ImportMode = ({ onDeckUpdate }) => {
                                 }
                             }}
                             placeholder="貼上論文網址、DOI (例如 10.1038/...)、PMID、arXiv ID 或主題關鍵字..."
-                            className="flex-1 p-3.5 bg-gray-900 border border-gray-700/80 rounded-2xl text-gray-100 text-sm focus:outline-none focus:border-amber-500 font-mono"
+                            className="flex-1 p-2.5 sm:p-3 bg-gray-900 border border-gray-700/80 rounded-lg text-gray-100 text-sm focus:outline-none focus:border-amber-500 font-mono"
                         />
                         <button
                             disabled={fetchingPaper || !paperInput.trim()}
                             onClick={() => handleFetchPaper()}
-                            className="px-5 py-3 rounded-2xl bg-amber-600 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs md:text-sm shadow-md transition-all flex items-center justify-center gap-2 shrink-0"
+                            className="px-4 py-2.5 rounded-lg bg-amber-600 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs md:text-sm shadow-md transition-all flex items-center justify-center gap-2 shrink-0"
                         >
                             {fetchingPaper ? (
                                 <>
@@ -1502,7 +1502,7 @@ const ImportMode = ({ onDeckUpdate }) => {
 
                     {/* 論文擷取成果卡片 (Fetched Paper Card) */}
                     {fetchedPaper && (
-                        <div className="p-5 bg-gray-900/90 rounded-2xl border border-amber-500/40 flex flex-col gap-4 animate-fade-in shadow-xl">
+                        <div className="p-4 bg-gray-900/90 rounded-xl border border-amber-500/40 flex flex-col gap-3.5 animate-fade-in shadow-xl">
                             <div className="flex flex-col sm:flex-row justify-between items-start gap-2 border-b border-gray-800 pb-3">
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2 flex-wrap mb-1.5">
@@ -1520,7 +1520,7 @@ const ImportMode = ({ onDeckUpdate }) => {
                                             </span>
                                         )}
                                     </div>
-                                    <h4 className="text-base md:text-lg font-black text-white font-mono leading-snug">
+                                    <h4 className="text-base font-bold text-white font-mono leading-snug">
                                         {fetchedPaper.title}
                                     </h4>
                                     <p className="text-xs text-gray-400 mt-1">
@@ -1542,7 +1542,7 @@ const ImportMode = ({ onDeckUpdate }) => {
                                 <span className="text-xs font-bold text-amber-300 block mb-1">
                                     全英文學術摘要 (Academic Abstract)：
                                 </span>
-                                <div className="p-3.5 bg-gray-950/60 rounded-xl border border-gray-800 text-xs md:text-sm text-gray-200 leading-relaxed font-sans max-h-56 overflow-y-auto custom-scrollbar select-text">
+                                <div className="p-3 bg-gray-950/60 rounded-lg border border-gray-800 text-xs md:text-sm text-gray-200 leading-relaxed font-sans max-h-56 overflow-y-auto custom-scrollbar select-text">
                                     {fetchedPaper.abstract || "已取得論文元資料，未含獨立摘要文字。"}
                                 </div>
                             </div>
@@ -1557,22 +1557,22 @@ const ImportMode = ({ onDeckUpdate }) => {
                                     value={paperNotes}
                                     onChange={(e) => setPaperNotes(e.target.value)}
                                     placeholder="例如：請著重以電機反饋迴路類比酵素活性調控；特別標註 TET1 與 TDG 的因果關係..."
-                                    className="w-full p-2.5 bg-gray-950/80 border border-gray-800 rounded-xl text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500 font-mono"
+                                    className="w-full p-2.5 bg-gray-950/80 border border-gray-800 rounded-lg text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500 font-mono"
                                 />
                             </div>
 
-                            <div className="flex flex-col sm:flex-row gap-3 justify-end pt-2 border-t border-gray-800">
+                            <div className="flex flex-col sm:flex-row gap-2.5 justify-end pt-2 border-t border-gray-800">
                                 <button
                                     disabled={processing}
                                     onClick={() => handleAnalyzePaper(false)}
-                                    className="px-4 py-2.5 rounded-xl border border-gray-700 hover:bg-gray-800 text-gray-300 font-bold text-xs transition-colors flex items-center justify-center gap-1.5"
+                                    className="px-4 py-2 rounded-lg border border-gray-700 hover:bg-gray-800 text-gray-300 font-bold text-xs transition-colors flex items-center justify-center gap-1.5"
                                 >
                                     <span>離線基礎提取 (免 API)</span>
                                 </button>
                                 <button
                                     disabled={processing}
                                     onClick={() => handleAnalyzePaper(true)}
-                                    className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 via-orange-600 to-rose-600 hover:from-amber-500 hover:to-rose-500 text-white font-bold text-sm shadow-lg shadow-orange-500/20 transition-all flex items-center justify-center gap-2"
+                                    className="px-5 py-2 rounded-lg bg-gradient-to-r from-amber-600 via-orange-600 to-rose-600 hover:from-amber-500 hover:to-rose-500 text-white font-bold text-sm shadow-lg shadow-orange-500/20 transition-all flex items-center justify-center gap-2"
                                 >
                                     {processing ? (
                                         <>
@@ -1594,8 +1594,8 @@ const ImportMode = ({ onDeckUpdate }) => {
 
             {/* ================= 預覽與編輯區塊 (Extracted Preview) ================= */}
             {extractedData && (
-                <div className="mt-6 flex flex-col gap-6 bg-gray-850 p-6 md:p-8 rounded-3xl border border-indigo-500/40 shadow-2xl animate-fade-in">
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-gray-700">
+                <div className="mt-5 flex flex-col gap-5 bg-gray-850 p-4 sm:p-5 rounded-xl border border-indigo-500/40 shadow-2xl animate-fade-in">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 pb-3.5 border-b border-gray-700">
                         <div className="flex-1">
                             <span className="text-xs uppercase font-extrabold tracking-widest text-indigo-400 flex items-center gap-1.5">
                                 {extractedData.videoId && <Youtube className="w-4 h-4 text-red-400" />}
@@ -1607,17 +1607,17 @@ const ImportMode = ({ onDeckUpdate }) => {
                                     type="text"
                                     value={extractedData.deckName}
                                     onChange={(e) => setExtractedData({ ...extractedData, deckName: e.target.value })}
-                                    className="bg-gray-900 border border-indigo-500/60 rounded-xl px-3 py-1 text-sm font-bold text-white focus:outline-none focus:border-indigo-400"
+                                    className="bg-gray-900 border border-indigo-500/60 rounded-lg px-2.5 py-1 text-sm font-bold text-white focus:outline-none focus:border-indigo-400"
                                     title="點擊可直接修改存入的牌組名稱"
                                 />
                                 {storedDecks.some(d => d.name === extractedData.deckName) && (
-                                    <span className="text-[11px] font-bold text-emerald-400 bg-emerald-950/40 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
+                                    <span className="text-[11px] font-bold text-emerald-400 bg-emerald-950/40 px-2 py-0.5 rounded-md border border-emerald-500/30">
                                         ⚡ 將追加至現有分類中
                                     </span>
                                 )}
                             </div>
                             {extractedData.summary && (
-                                <p className="text-xs text-indigo-200 mt-2 italic">
+                                <p className="text-xs text-indigo-200 mt-1.5 italic">
                                     「{extractedData.summary}」
                                 </p>
                             )}
@@ -1626,13 +1626,13 @@ const ImportMode = ({ onDeckUpdate }) => {
                         <div className="flex gap-2 w-full md:w-auto">
                             <button
                                 onClick={() => setExtractedData(null)}
-                                className="flex-1 md:flex-none px-4 py-2 rounded-xl border border-gray-700 hover:bg-gray-800 text-xs font-bold text-gray-300"
+                                className="flex-1 md:flex-none px-3.5 py-1.5 rounded-lg border border-gray-700 hover:bg-gray-800 text-xs font-bold text-gray-300"
                             >
                                 放棄重來
                             </button>
                             <button
                                 onClick={handleCommitToLibrary}
-                                className="flex-1 md:flex-none px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs md:text-sm font-bold shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2"
+                                className="flex-1 md:flex-none px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs md:text-sm font-bold shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2"
                             >
                                 <CheckCircle className="w-4 h-4" /> 確認存入牌組庫
                             </button>
@@ -1642,15 +1642,15 @@ const ImportMode = ({ onDeckUpdate }) => {
                     {/* NTU Smart MHI 全英專有名詞庫預覽 */}
                     {extractedData.glossary && extractedData.glossary.length > 0 && (
                         <div>
-                            <h3 className="text-sm font-bold text-emerald-300 mb-3 flex items-center gap-2">
+                            <h3 className="text-xs sm:text-sm font-bold text-emerald-300 mb-2.5 flex items-center gap-2">
                                 <span>🔤 NTU Smart MHI 全英專有名詞高頻錨定 ({extractedData.glossary.length})</span>
                             </h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
                                 {extractedData.glossary.map((term, gIdx) => (
-                                    <div key={gIdx} className="bg-gray-900/90 p-4 rounded-2xl border border-emerald-500/20 flex flex-col justify-between">
+                                    <div key={gIdx} className="bg-gray-900/90 p-3 sm:p-3.5 rounded-lg border border-emerald-500/20 flex flex-col justify-between">
                                         <div>
                                             <div className="flex justify-between items-start gap-2">
-                                                <h4 className="font-extrabold text-white text-base font-mono text-emerald-300">
+                                                <h4 className="font-extrabold text-white text-sm sm:text-base font-mono text-emerald-300">
                                                     {term.term_en}
                                                 </h4>
                                                 <span className="text-xs px-2 py-0.5 rounded-md bg-emerald-950/60 border border-emerald-500/30 text-emerald-200 font-bold whitespace-nowrap">
@@ -1658,7 +1658,7 @@ const ImportMode = ({ onDeckUpdate }) => {
                                                 </span>
                                             </div>
                                             {term.engineeringAnchor && (
-                                                <div className="mt-2 text-xs text-cyan-300 bg-cyan-950/30 p-2 rounded-xl border border-cyan-500/20 font-mono">
+                                                <div className="mt-2 text-xs text-cyan-300 bg-cyan-950/30 p-2 rounded-lg border border-cyan-500/20 font-mono">
                                                     ⚡ 理工對等：{term.engineeringAnchor}
                                                 </div>
                                             )}
@@ -1668,7 +1668,7 @@ const ImportMode = ({ onDeckUpdate }) => {
                                                 </p>
                                             )}
                                             {term.definition_en && (
-                                                <p className="text-xs text-gray-300 mt-2 leading-relaxed">
+                                                <p className="text-xs text-gray-300 mt-1.5 leading-relaxed">
                                                     {term.definition_en}
                                                 </p>
                                             )}
@@ -1681,12 +1681,12 @@ const ImportMode = ({ onDeckUpdate }) => {
 
                     {/* 卡片清單預覽 */}
                     <div>
-                        <h3 className="text-sm font-bold text-gray-300 mb-3 flex items-center gap-2">
+                        <h3 className="text-xs sm:text-sm font-bold text-gray-300 mb-2.5 flex items-center gap-2">
                             <span>🗂️ 理工心智模型推演卡 ({extractedData.cards?.length || 0})</span>
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             {extractedData.cards?.map((card, idx) => (
-                                <div key={idx} className="bg-gray-900/90 p-4 rounded-2xl border border-gray-750 flex flex-col justify-between">
+                                <div key={idx} className="bg-gray-900/90 p-3.5 rounded-lg border border-gray-750 flex flex-col justify-between">
                                     <div>
                                         <div className="flex justify-between items-start">
                                             <span className="text-xs font-bold text-indigo-400">
@@ -1703,13 +1703,13 @@ const ImportMode = ({ onDeckUpdate }) => {
                                                 <Trash2 className="w-3.5 h-3.5" />
                                             </button>
                                         </div>
-                                        <h4 className="font-bold text-white text-base mt-1">{card.title}</h4>
+                                        <h4 className="font-bold text-white text-sm sm:text-base mt-1">{card.title}</h4>
                                         {(card.engineeringAnalogy || card.analogy) && (
                                             <p className="text-xs text-cyan-300 mt-1 bg-cyan-950/20 p-2 rounded-lg border border-cyan-500/20 font-mono">
                                                 ⚡ 理工工程類比：{card.engineeringAnalogy || card.analogy}
                                             </p>
                                         )}
-                                        <p className="text-xs text-gray-300 mt-2 leading-relaxed whitespace-pre-wrap">
+                                        <p className="text-xs text-gray-300 mt-1.5 leading-relaxed whitespace-pre-wrap">
                                             {card.description}
                                         </p>
                                     </div>
@@ -1719,48 +1719,48 @@ const ImportMode = ({ onDeckUpdate }) => {
                     </div>
 
                     {/* 配套深層推演指標摘要 */}
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 pt-2">
-                        <div className="bg-emerald-950/30 p-3.5 rounded-2xl border border-emerald-500/20">
-                            <span className="text-xs font-bold text-emerald-400 block mb-1">🔤 英文專有名詞</span>
-                            <span className="text-xl font-black text-white">{extractedData.glossary?.length || 0}</span>
-                            <p className="text-[10px] text-gray-400 mt-0.5">全英考試眼熟度</p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5 pt-1">
+                        <div className="bg-emerald-950/30 p-3 rounded-lg border border-emerald-500/20">
+                            <span className="text-xs font-bold text-emerald-400 block mb-0.5">🔤 英文專有名詞</span>
+                            <span className="text-lg font-black text-white">{extractedData.glossary?.length || 0}</span>
+                            <p className="text-[10px] text-gray-400">全英考試眼熟度</p>
                         </div>
-                        <div className="bg-indigo-950/30 p-3.5 rounded-2xl border border-indigo-500/20">
-                            <span className="text-xs font-bold text-indigo-400 block mb-1">⛓️ 因果骨牌鏈</span>
-                            <span className="text-xl font-black text-white">{extractedData.mechanismChains?.length || 0}</span>
-                            <p className="text-[10px] text-gray-400 mt-0.5">步進干擾模擬</p>
+                        <div className="bg-indigo-950/30 p-3 rounded-lg border border-indigo-500/20">
+                            <span className="text-xs font-bold text-indigo-400 block mb-0.5">⛓️ 因果骨牌鏈</span>
+                            <span className="text-lg font-black text-white">{extractedData.mechanismChains?.length || 0}</span>
+                            <p className="text-[10px] text-gray-400">步進干擾模擬</p>
                         </div>
-                        <div className="bg-purple-950/30 p-3.5 rounded-2xl border border-purple-500/20">
-                            <span className="text-xs font-bold text-purple-400 block mb-1">🏛️ 蘇格拉底探究</span>
-                            <span className="text-xl font-black text-white">{extractedData.socraticQuestions?.length || 0}</span>
-                            <p className="text-[10px] text-gray-400 mt-0.5">思維鷹架指引</p>
+                        <div className="bg-purple-950/30 p-3 rounded-lg border border-purple-500/20">
+                            <span className="text-xs font-bold text-purple-400 block mb-0.5">🏛️ 蘇格拉底探究</span>
+                            <span className="text-lg font-black text-white">{extractedData.socraticQuestions?.length || 0}</span>
+                            <p className="text-[10px] text-gray-400">思維鷹架指引</p>
                         </div>
-                        <div className="bg-pink-950/30 p-3.5 rounded-2xl border border-pink-500/20">
-                            <span className="text-xs font-bold text-pink-400 block mb-1">🛡️ 思維盲點校準</span>
-                            <span className="text-xl font-black text-white">{extractedData.mythBusters?.length || 0}</span>
-                            <p className="text-[10px] text-gray-400 mt-0.5">直覺誤區剖析</p>
+                        <div className="bg-pink-950/30 p-3 rounded-lg border border-pink-500/20">
+                            <span className="text-xs font-bold text-pink-400 block mb-0.5">🛡️ 思維盲點校準</span>
+                            <span className="text-lg font-black text-white">{extractedData.mythBusters?.length || 0}</span>
+                            <p className="text-[10px] text-gray-400">直覺誤區剖析</p>
                         </div>
-                        <div className="bg-cyan-950/30 p-3.5 rounded-2xl border border-cyan-500/20">
-                            <span className="text-xs font-bold text-cyan-400 block mb-1">🧩 因果邏輯連鎖</span>
-                            <span className="text-xl font-black text-white">{extractedData.logicPairs?.length || 0}</span>
-                            <p className="text-[10px] text-gray-400 mt-0.5">條件配對推導</p>
+                        <div className="bg-cyan-950/30 p-3 rounded-lg border border-cyan-500/20">
+                            <span className="text-xs font-bold text-cyan-400 block mb-0.5">🧩 因果邏輯連鎖</span>
+                            <span className="text-lg font-black text-white">{extractedData.logicPairs?.length || 0}</span>
+                            <p className="text-[10px] text-gray-400">條件配對推導</p>
                         </div>
                     </div>
                 </div>
             )}
 
             {/* ================= 模組與知識庫管理中心 (Module Management & Consolidation Hub) ================= */}
-            <div className="mt-12 pt-8 border-t border-gray-800">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <div className="mt-10 pt-6 border-t border-gray-800">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3.5 mb-5">
                     <div>
                         <div className="flex items-center gap-2.5">
-                            <div className="w-8 h-8 rounded-xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400">
-                                <Database className="w-4 h-4" />
+                            <div className="w-7 h-7 rounded-lg bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400">
+                                <Database className="w-3.5 h-3.5" />
                             </div>
                             <div>
-                                <h3 className="text-base md:text-lg font-black text-white flex items-center gap-2">
+                                <h3 className="text-base font-bold text-white flex items-center gap-2">
                                     <span>模組知識庫管理中心</span>
-                                    <span className="text-xs px-2.5 py-0.5 rounded-full bg-indigo-950/60 border border-indigo-500/30 text-indigo-300 font-mono">
+                                    <span className="text-xs px-2 py-0.5 rounded-md bg-indigo-950/60 border border-indigo-500/30 text-indigo-300 font-mono">
                                         {storedDecks.length} 個模組單元
                                     </span>
                                 </h3>
@@ -1771,11 +1771,11 @@ const ImportMode = ({ onDeckUpdate }) => {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2.5 flex-wrap w-full sm:w-auto">
+                    <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
                         {deletedDecksCount > 0 && (
                             <button
                                 onClick={handleRestoreDefaultDecks}
-                                className="px-3 py-2 rounded-xl bg-gray-800 hover:bg-gray-750 border border-gray-700 text-xs font-bold text-gray-300 flex items-center gap-1.5 transition-all"
+                                className="px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-750 border border-gray-700 text-xs font-bold text-gray-300 flex items-center gap-1.5 transition-all"
                                 title="還原被刪除的內建預設模組"
                             >
                                 <RefreshCw className="w-3.5 h-3.5 text-cyan-400" />
@@ -1785,22 +1785,22 @@ const ImportMode = ({ onDeckUpdate }) => {
                         <button
                             onClick={() => openMergeModal()}
                             disabled={storedDecks.length < 2}
-                            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shadow-lg transition-all ${
+                            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-lg transition-all ${
                                 storedDecks.length >= 2
                                     ? 'bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white shadow-cyan-500/20 hover:scale-[1.02]'
                                     : 'bg-gray-800 text-gray-500 border border-gray-700 cursor-not-allowed'
                             }`}
                             title={storedDecks.length < 2 ? "需要至少 2 個模組才能進行合併" : "勾選多個模組進行深層整合"}
                         >
-                            <GitMerge className="w-4 h-4 text-cyan-300" />
+                            <GitMerge className="w-3.5 h-3.5 text-cyan-300" />
                             <span>合併模組內容</span>
                         </button>
                     </div>
                 </div>
 
                 {storedDecks.length === 0 ? (
-                    <div className="p-8 text-center bg-gray-850/60 rounded-2xl border border-gray-800">
-                        <Database className="w-10 h-10 text-gray-600 mx-auto mb-2 opacity-50" />
+                    <div className="p-6 text-center bg-gray-850/60 rounded-xl border border-gray-800">
+                        <Database className="w-8 h-8 text-gray-600 mx-auto mb-2 opacity-50" />
                         <p className="text-sm font-bold text-gray-400">目前題庫中暫無任何模組</p>
                         <p className="text-xs text-gray-500 mt-1">
                             可點擊上方上傳 YouTube 影片、貼上講義文本、錄音或 PDF，或點擊「還原預設模組」重新載入。
@@ -1808,23 +1808,23 @@ const ImportMode = ({ onDeckUpdate }) => {
                         {deletedDecksCount > 0 && (
                             <button
                                 onClick={handleRestoreDefaultDecks}
-                                className="mt-4 px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all"
+                                className="mt-3 px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all"
                             >
                                 立即還原預設牌組
                             </button>
                         )}
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                         {storedDecks.map((deck) => (
                             <div
                                 key={deck.name}
-                                className="bg-gray-850/90 hover:bg-gray-800 p-4 rounded-2xl border border-gray-750 hover:border-indigo-500/50 flex flex-col justify-between group transition-all shadow-md"
+                                className="bg-gray-850/90 hover:bg-gray-800 p-3.5 rounded-xl border border-gray-750 hover:border-indigo-500/50 flex flex-col justify-between group transition-all shadow-md"
                             >
                                 <div>
-                                    <div className="flex items-start justify-between gap-2 mb-2">
+                                    <div className="flex items-start justify-between gap-2 mb-1.5">
                                         <div className="flex items-center gap-1.5 flex-wrap">
-                                            <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md border ${
+                                            <span className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded border ${
                                                 deck.isCustom
                                                     ? 'bg-purple-950/70 text-purple-300 border-purple-500/30'
                                                     : 'bg-emerald-950/70 text-emerald-300 border-emerald-500/30'
@@ -1841,15 +1841,15 @@ const ImportMode = ({ onDeckUpdate }) => {
                                     <h4 className="font-extrabold text-white text-sm leading-snug line-clamp-2" title={deck.name}>
                                         {deck.name}
                                     </h4>
-                                    <p className="text-xs text-gray-400 mt-1.5">
+                                    <p className="text-xs text-gray-400 mt-1">
                                         共 <span className="font-mono text-gray-200 font-bold">{deck.count}</span> 張卡片與心智推演
                                     </p>
                                 </div>
 
-                                <div className="mt-4 pt-3 border-t border-gray-750 flex items-center justify-between gap-2">
+                                <div className="mt-3 pt-2.5 border-t border-gray-750 flex items-center justify-between gap-2">
                                     <button
                                         onClick={() => openMergeModal(deck.name)}
-                                        className="text-xs font-bold text-cyan-400 hover:text-cyan-300 hover:bg-cyan-950/40 px-2.5 py-1 rounded-lg border border-cyan-500/20 flex items-center gap-1 transition-all"
+                                        className="text-xs font-bold text-cyan-400 hover:text-cyan-300 hover:bg-cyan-950/40 px-2 py-1 rounded-md border border-cyan-500/20 flex items-center gap-1 transition-all"
                                         title="以此模組為基礎與其他模組合併"
                                     >
                                         <GitMerge className="w-3.5 h-3.5" />
@@ -1858,7 +1858,7 @@ const ImportMode = ({ onDeckUpdate }) => {
 
                                     <button
                                         onClick={() => handleDeleteDeck(deck.name)}
-                                        className="text-xs font-bold text-gray-500 hover:text-red-400 hover:bg-red-950/30 p-1.5 rounded-lg transition-all"
+                                        className="text-xs font-bold text-gray-500 hover:text-red-400 hover:bg-red-950/30 p-1 rounded-md transition-all"
                                         title={`刪除「${deck.name}」模組`}
                                     >
                                         <Trash2 className="w-4 h-4" />
@@ -1873,15 +1873,15 @@ const ImportMode = ({ onDeckUpdate }) => {
             {/* ================= 合併模組彈跳視窗 (Merge Modules Modal) ================= */}
             {isMergeModalOpen && (
                 <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fade-in">
-                    <div className="bg-gray-900 border border-indigo-500/40 rounded-3xl p-6 md:p-8 max-w-xl w-full shadow-2xl flex flex-col gap-5 max-h-[90vh] overflow-y-auto custom-scrollbar">
+                    <div className="bg-gray-900 border border-indigo-500/40 rounded-xl p-4 sm:p-5 max-w-xl w-full shadow-2xl flex flex-col gap-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
                         {/* 彈窗頂部 */}
-                        <div className="flex justify-between items-start pb-4 border-b border-gray-800">
+                        <div className="flex justify-between items-start pb-3 border-b border-gray-800">
                             <div>
-                                <h3 className="text-lg md:text-xl font-black text-white flex items-center gap-2">
-                                    <GitMerge className="w-5 h-5 text-cyan-400" />
+                                <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                                    <GitMerge className="w-4 h-4 text-cyan-400" />
                                     <span>合併模組內容 (Consolidate Modules)</span>
                                 </h3>
-                                <p className="text-xs text-gray-400 mt-1">
+                                <p className="text-xs text-gray-400 mt-0.5">
                                     將所選模組的卡片、全英專有名詞庫與因果推演模型深度融合為單一整合模組
                                 </p>
                             </div>
@@ -1889,13 +1889,13 @@ const ImportMode = ({ onDeckUpdate }) => {
                                 onClick={() => setIsMergeModalOpen(false)}
                                 className="text-gray-400 hover:text-white p-1 rounded-lg hover:bg-gray-800"
                             >
-                                <X className="w-5 h-5" />
+                                <X className="w-4 h-4" />
                             </button>
                         </div>
 
                         {/* 步驟一：選擇模組 */}
                         <div>
-                            <div className="flex justify-between items-center mb-2">
+                            <div className="flex justify-between items-center mb-1.5">
                                 <label className="text-xs font-extrabold uppercase tracking-wider text-indigo-400">
                                     1. 勾選要合併的模組（已勾選 {selectedDecksToMerge.length} 個）
                                 </label>
@@ -1925,31 +1925,31 @@ const ImportMode = ({ onDeckUpdate }) => {
                                 </div>
                             </div>
 
-                            <div className="space-y-2 max-h-52 overflow-y-auto custom-scrollbar p-2 bg-gray-950/70 rounded-2xl border border-gray-800">
+                            <div className="space-y-1.5 max-h-52 overflow-y-auto custom-scrollbar p-1.5 bg-gray-950/70 rounded-lg border border-gray-800">
                                 {storedDecks.map((deck) => {
                                     const isChecked = selectedDecksToMerge.includes(deck.name);
                                     return (
                                         <div
                                             key={deck.name}
                                             onClick={() => toggleDeckSelectionForMerge(deck.name)}
-                                            className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
+                                            className={`p-2.5 rounded-lg border flex items-center justify-between cursor-pointer transition-all ${
                                                 isChecked
                                                     ? 'bg-indigo-950/40 border-indigo-500/60 text-white'
                                                     : 'bg-gray-900/60 border-gray-800 text-gray-300 hover:border-gray-700'
                                             }`}
                                         >
-                                            <div className="flex items-center gap-3 truncate">
+                                            <div className="flex items-center gap-2.5 truncate">
                                                 <div className="shrink-0 text-indigo-400">
                                                     {isChecked ? <CheckSquare className="w-4 h-4 text-cyan-400" /> : <Square className="w-4 h-4 text-gray-500" />}
                                                 </div>
                                                 <div className="truncate">
-                                                    <span className="text-sm font-bold truncate block">{deck.name}</span>
+                                                    <span className="text-xs sm:text-sm font-bold truncate block">{deck.name}</span>
                                                     <span className="text-[11px] text-gray-400">
                                                         {deck.count} 張卡片 {deck.glossaryCount > 0 ? `· ${deck.glossaryCount} 詞彙` : ''}
                                                     </span>
                                                 </div>
                                             </div>
-                                            <span className="text-[10px] px-2 py-0.5 rounded bg-gray-800 text-gray-400 shrink-0 font-mono">
+                                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-800 text-gray-400 shrink-0 font-mono">
                                                 {deck.isCustom ? '自訂' : '預設'}
                                             </span>
                                         </div>
@@ -1960,7 +1960,7 @@ const ImportMode = ({ onDeckUpdate }) => {
 
                         {/* 步驟二：指定合併後模組名稱 */}
                         <div>
-                            <label className="text-xs font-extrabold uppercase tracking-wider text-indigo-400 block mb-1.5">
+                            <label className="text-xs font-extrabold uppercase tracking-wider text-indigo-400 block mb-1">
                                 2. 合併後新模組名稱
                             </label>
                             <input
@@ -1968,9 +1968,9 @@ const ImportMode = ({ onDeckUpdate }) => {
                                 value={mergedTargetName}
                                 onChange={(e) => setMergedTargetName(e.target.value)}
                                 placeholder="例如：NTU MHI 期中整合複習模組"
-                                className="w-full bg-gray-950 border border-gray-700 focus:border-cyan-400 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none transition-colors"
+                                className="w-full bg-gray-950 border border-gray-700 focus:border-cyan-400 rounded-lg px-3 py-2 text-xs sm:text-sm text-white focus:outline-none transition-colors"
                             />
-                            <div className="flex gap-1.5 mt-2 flex-wrap">
+                            <div className="flex gap-1.5 mt-1.5 flex-wrap">
                                 <span className="text-[11px] text-gray-400">快速填入：</span>
                                 {selectedDecksToMerge.map(deckName => (
                                     <button
@@ -1987,13 +1987,13 @@ const ImportMode = ({ onDeckUpdate }) => {
                         </div>
 
                         {/* 步驟三：選項 */}
-                        <div className="p-3 bg-gray-950/60 rounded-xl border border-gray-800">
-                            <label className="flex items-center gap-2.5 cursor-pointer text-xs text-gray-300 select-none">
+                        <div className="p-2.5 bg-gray-950/60 rounded-lg border border-gray-800">
+                            <label className="flex items-center gap-2 cursor-pointer text-xs text-gray-300 select-none">
                                 <input
                                     type="checkbox"
                                     checked={deleteOriginalsAfterMerge}
                                     onChange={(e) => setDeleteOriginalsAfterMerge(e.target.checked)}
-                                    className="w-4 h-4 rounded text-cyan-500 bg-gray-900 border-gray-700 focus:ring-0 focus:ring-offset-0"
+                                    className="w-3.5 h-3.5 rounded text-cyan-500 bg-gray-900 border-gray-700 focus:ring-0 focus:ring-offset-0"
                                 />
                                 <span>
                                     合併後刪除/隱藏原本被合併的個別模組 <span className="text-gray-400 font-normal">（推薦勾選，保持模組清單簡潔）</span>
@@ -2002,11 +2002,11 @@ const ImportMode = ({ onDeckUpdate }) => {
                         </div>
 
                         {/* 底部按鈕 */}
-                        <div className="flex gap-3 justify-end pt-3 border-t border-gray-800">
+                        <div className="flex gap-2.5 justify-end pt-2.5 border-t border-gray-800">
                             <button
                                 type="button"
                                 onClick={() => setIsMergeModalOpen(false)}
-                                className="px-5 py-2.5 rounded-xl border border-gray-700 hover:bg-gray-800 text-xs font-bold text-gray-300 transition-colors"
+                                className="px-4 py-2 rounded-lg border border-gray-700 hover:bg-gray-800 text-xs font-bold text-gray-300 transition-colors"
                             >
                                 取消
                             </button>
@@ -2014,7 +2014,7 @@ const ImportMode = ({ onDeckUpdate }) => {
                                 type="button"
                                 onClick={handleExecuteMerge}
                                 disabled={selectedDecksToMerge.length < 2 || !mergedTargetName.trim() || mergeProcessing}
-                                className={`px-6 py-2.5 rounded-xl text-xs md:text-sm font-bold flex items-center gap-2 shadow-lg transition-all ${
+                                className={`px-4 py-2 rounded-lg text-xs md:text-sm font-bold flex items-center gap-2 shadow-lg transition-all ${
                                     selectedDecksToMerge.length >= 2 && mergedTargetName.trim() && !mergeProcessing
                                         ? 'bg-gradient-to-r from-cyan-600 via-indigo-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white shadow-cyan-500/20 hover:scale-[1.02]'
                                         : 'bg-gray-800 text-gray-500 border border-gray-700 cursor-not-allowed'
@@ -2044,24 +2044,24 @@ const ImportMode = ({ onDeckUpdate }) => {
                     onClick={() => setPreviewVideoModal(null)}
                 >
                     <div
-                        className="relative w-full max-w-3xl bg-gray-900 border border-gray-700/80 rounded-3xl overflow-hidden shadow-2xl p-4 flex flex-col gap-3"
+                        className="relative w-full max-w-3xl bg-gray-900 border border-gray-700/80 rounded-xl overflow-hidden shadow-2xl p-3.5 sm:p-4 flex flex-col gap-3"
                         onClick={e => e.stopPropagation()}
                     >
                         <div className="flex items-center justify-between pb-2 border-b border-gray-800">
                             <div className="flex items-center gap-2 overflow-hidden">
-                                <Youtube className="w-5 h-5 text-red-500 shrink-0" />
-                                <h4 className="text-sm font-bold text-white truncate">
+                                <Youtube className="w-4 h-4 text-red-500 shrink-0" />
+                                <h4 className="text-xs sm:text-sm font-bold text-white truncate">
                                     {previewVideoModal.sourceTitle || `投影片第 ${previewVideoModal.page} 頁提及的 YouTube 影音`}
                                 </h4>
                             </div>
                             <button
                                 onClick={() => setPreviewVideoModal(null)}
-                                className="p-1.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white transition-colors shrink-0"
+                                className="p-1 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white transition-colors shrink-0"
                             >
-                                <X className="w-5 h-5" />
+                                <X className="w-4 h-4" />
                             </button>
                         </div>
-                        <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-black border border-gray-800">
+                        <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-black border border-gray-800">
                             <iframe
                                 src={`https://www.youtube-nocookie.com/embed/${previewVideoModal.videoId}?autoplay=1`}
                                 title="YouTube video player"
@@ -2080,7 +2080,7 @@ const ImportMode = ({ onDeckUpdate }) => {
                                     setActiveTab('youtube');
                                     setPreviewVideoModal(null);
                                 }}
-                                className="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-md transition-all"
+                                className="w-full sm:w-auto px-3.5 py-1.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 shadow-md transition-all"
                             >
                                 <Sparkles className="w-3.5 h-3.5 text-yellow-300" />
                                 <span>一鍵帶入 YouTube AI 解構與出題</span>
