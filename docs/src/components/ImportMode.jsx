@@ -795,7 +795,7 @@ const ImportMode = ({ onDeckUpdate }) => {
 
                 <button
                     onClick={() => setShowKeyInput(!showKeyInput)}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gray-800 hover:bg-gray-750 border border-gray-700 text-xs text-gray-300 transition-colors"
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-gray-800 hover:bg-gray-750 border border-gray-700 text-xs text-gray-300 transition-colors"
                 >
                     <Key className="w-3.5 h-3.5 text-yellow-400" />
                     <span>{apiKey ? "Gemini Key 已設定" : "設定 Gemini API Key"}</span>
@@ -804,7 +804,7 @@ const ImportMode = ({ onDeckUpdate }) => {
 
             {/* API Key 輸入彈窗/展開條 */}
             {showKeyInput && (
-                <div className="mb-5 p-4 bg-gray-850 rounded-2xl border border-yellow-500/30 flex flex-col gap-3 animate-fade-in">
+                <div className="mb-4 p-3.5 bg-gray-850 rounded-lg border border-yellow-500/30 flex flex-col gap-2.5 animate-fade-in">
                     <div className="flex justify-between items-center">
                         <span className="text-xs font-bold text-yellow-300 flex items-center gap-1.5">
                             <Key className="w-4 h-4" /> Google Gemini API Key
@@ -824,11 +824,11 @@ const ImportMode = ({ onDeckUpdate }) => {
                             placeholder="貼上您的 Gemini API Key (例如：AIzaSy...)"
                             value={apiKey}
                             onChange={(e) => setApiKey(e.target.value)}
-                            className="flex-1 bg-gray-900 border border-gray-700 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-yellow-500"
+                            className="flex-1 bg-gray-900 border border-gray-700 rounded-md px-3 py-1.5 text-xs sm:text-sm text-white focus:outline-none focus:border-yellow-500"
                         />
                         <button
                             onClick={handleSaveApiKey}
-                            className="px-5 py-2 bg-yellow-500 hover:bg-yellow-400 text-gray-950 font-bold text-xs rounded-xl transition-all"
+                            className="px-4 py-1.5 bg-yellow-500 hover:bg-yellow-400 text-gray-950 font-bold text-xs rounded-md transition-all"
                         >
                             保存
                         </button>
@@ -840,8 +840,8 @@ const ImportMode = ({ onDeckUpdate }) => {
             )}
 
             {/* ================= 智慧分類選擇面板 (Deck Category Selector) ================= */}
-            <div className="mb-5 p-4 bg-gradient-to-r from-gray-850 via-gray-900 to-gray-850 rounded-2xl border border-indigo-500/30 shadow-lg">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-3">
+            <div className="mb-4 p-3.5 bg-gradient-to-r from-gray-850 via-gray-900 to-gray-850 rounded-lg border border-indigo-500/30 shadow-md">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5 mb-2.5">
                     <div className="flex items-center gap-2">
                         <Tag className="w-4 h-4 text-indigo-400" />
                         <span className="text-xs uppercase font-extrabold tracking-wider text-indigo-300">
@@ -850,10 +850,10 @@ const ImportMode = ({ onDeckUpdate }) => {
                     </div>
 
                     {storedDecks.length > 0 && (
-                        <div className="flex items-center bg-gray-800 p-0.5 rounded-xl border border-gray-700 text-xs">
+                        <div className="flex items-center bg-gray-800 p-0.5 rounded-md border border-gray-700 text-xs">
                             <button
                                 onClick={() => setCategoryMode('existing')}
-                                className={`px-3 py-1 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
+                                className={`px-2.5 py-1 rounded-md font-bold transition-all flex items-center gap-1.5 ${
                                     categoryMode === 'existing'
                                         ? 'bg-indigo-600 text-white shadow'
                                         : 'text-gray-400 hover:text-white'
@@ -879,11 +879,11 @@ const ImportMode = ({ onDeckUpdate }) => {
 
                 {/* 模式 A：追加至現有分類 */}
                 {categoryMode === 'existing' && storedDecks.length > 0 ? (
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
                         <select
                             value={selectedExistingDeck}
                             onChange={(e) => setSelectedExistingDeck(e.target.value)}
-                            className="bg-gray-800 border border-indigo-500/50 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-400 flex-1 font-bold"
+                            className="bg-gray-800 border border-indigo-500/50 rounded-md px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-indigo-400 flex-1 font-bold"
                         >
                             {storedDecks.map((deck) => (
                                 <option key={deck.name} value={deck.name}>
@@ -891,21 +891,21 @@ const ImportMode = ({ onDeckUpdate }) => {
                                 </option>
                             ))}
                         </select>
-                        <span className="text-xs text-indigo-300/80 bg-indigo-950/40 px-3 py-2 rounded-xl border border-indigo-500/20 whitespace-nowrap">
+                        <span className="text-xs text-indigo-300/80 bg-indigo-950/40 px-2.5 py-1.5 rounded-md border border-indigo-500/20 whitespace-nowrap">
                             ⚡ 上傳後將自動與該牌組既有題庫合併
                         </span>
                     </div>
                 ) : (
                     /* 模式 B：新建分類 */
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
                         <input
                             type="text"
                             placeholder="輸入新的牌組或課程名稱（例如：神經生理學期中考、生物化學第二章...）"
                             value={newDeckName}
                             onChange={(e) => setNewDeckName(e.target.value)}
-                            className="flex-1 bg-gray-800 border border-purple-500/50 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-purple-400 placeholder-gray-500"
+                            className="flex-1 bg-gray-800 border border-purple-500/50 rounded-md px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-purple-400 placeholder-gray-500"
                         />
-                        <span className="text-xs text-purple-300/80 bg-purple-950/40 px-3 py-2 rounded-xl border border-purple-500/20 whitespace-nowrap">
+                        <span className="text-xs text-purple-300/80 bg-purple-950/40 px-2.5 py-1.5 rounded-md border border-purple-500/20 whitespace-nowrap">
                             ✨ 若留空將由 AI 自動根據內容命名
                         </span>
                     </div>
@@ -913,7 +913,7 @@ const ImportMode = ({ onDeckUpdate }) => {
             </div>
 
             {/* 匯入來源 Tab 選單 */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-1.5 bg-gray-900/80 p-1 rounded-xl border border-gray-800 mb-5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-1 bg-gray-900/80 p-1 rounded-lg border border-gray-800 mb-4">
                 <button
                     onClick={() => { setActiveTab('youtube'); setExtractedData(null); }}
                     className={`py-2 px-2.5 rounded-lg font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-1.5 ${
@@ -990,7 +990,7 @@ const ImportMode = ({ onDeckUpdate }) => {
 
             {/* ================= Tab 1: YouTube 影片提煉 ================= */}
             {activeTab === 'youtube' && !extractedData && (
-                <div className="flex flex-col gap-3.5 bg-gray-850 p-4 sm:p-5 rounded-xl border border-gray-800">
+                <div className="flex flex-col gap-3 bg-gray-850 p-3.5 sm:p-4 rounded-lg border border-gray-800">
                     <div>
                         <h3 className="font-bold text-white text-base flex items-center gap-2">
                             <Youtube className="w-5 h-5 text-red-500" /> 貼上 YouTube 影片網址
@@ -1000,17 +1000,17 @@ const ImportMode = ({ onDeckUpdate }) => {
                         </p>
                     </div>
 
-                    <div className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-2.5">
                         <input
                             type="text"
                             value={youtubeUrl}
                             onChange={(e) => setYoutubeUrl(e.target.value)}
                             placeholder="貼上 YouTube 連結，例如: https://www.youtube.com/watch?v=... 或 https://youtu.be/..."
-                            className="p-2.5 sm:p-3 bg-gray-900 border border-gray-700/80 rounded-lg text-gray-100 text-sm focus:outline-none focus:border-red-500 font-mono"
+                            className="p-2 sm:p-2.5 bg-gray-900 border border-gray-700/80 rounded-md text-gray-100 text-xs sm:text-sm focus:outline-none focus:border-red-500 font-mono"
                         />
 
                         {detectedVideoId && (
-                            <div className="p-3.5 bg-gray-900/90 rounded-xl border border-gray-750 flex flex-col sm:flex-row items-center gap-4 animate-fade-in">
+                            <div className="p-3 bg-gray-900/90 rounded-lg border border-gray-750 flex flex-col sm:flex-row items-center gap-3.5 animate-fade-in">
                                 <div className="relative w-full sm:w-44 aspect-video rounded-lg overflow-hidden bg-black shrink-0 border border-gray-700">
                                     <img
                                         src={`https://img.youtube.com/vi/${detectedVideoId}/hqdefault.jpg`}
@@ -1071,7 +1071,7 @@ const ImportMode = ({ onDeckUpdate }) => {
 
             {/* ================= Tab 2: 文字段落提取 ================= */}
             {activeTab === 'text' && !extractedData && (
-                <div className="flex flex-col gap-3.5 bg-gray-850 p-4 sm:p-5 rounded-xl border border-gray-800">
+                <div className="flex flex-col gap-3.5 bg-gray-850 p-3.5 sm:p-4 rounded-lg border border-gray-800">
                     <div>
                         <h3 className="font-bold text-white text-base flex items-center gap-2">
                             <FileText className="w-4 h-4 text-indigo-400" /> 貼上抽象筆記或課文長文
@@ -1120,7 +1120,7 @@ const ImportMode = ({ onDeckUpdate }) => {
 
             {/* ================= Tab 3: 錄音檔上傳 ================= */}
             {activeTab === 'audio' && !extractedData && (
-                <div className="flex flex-col gap-3.5 bg-gray-850 p-4 sm:p-5 rounded-xl border border-gray-800">
+                <div className="flex flex-col gap-3.5 bg-gray-850 p-3.5 sm:p-4 rounded-lg border border-gray-800">
                     <div>
                         <h3 className="font-bold text-white text-base flex items-center gap-2">
                             <FileAudio className="w-4 h-4 text-purple-400" /> 上傳手機 / 錄音筆音訊檔案
@@ -1133,7 +1133,7 @@ const ImportMode = ({ onDeckUpdate }) => {
                     {!audioFile ? (
                         <div
                             onClick={() => audioInputRef.current?.click()}
-                            className="border-2 border-dashed border-gray-700 hover:border-purple-500/60 rounded-xl py-6 px-4 flex flex-col items-center justify-center cursor-pointer transition-all bg-gray-900/50 hover:bg-gray-900 group"
+                            className="border-2 border-dashed border-gray-700 hover:border-purple-500/60 rounded-lg py-5 px-3.5 flex flex-col items-center justify-center cursor-pointer transition-all bg-gray-900/50 hover:bg-gray-900 group"
                         >
                             <input
                                 ref={audioInputRef}
@@ -1204,7 +1204,7 @@ const ImportMode = ({ onDeckUpdate }) => {
                             processPdfFile(e.dataTransfer.files[0]);
                         }
                     }}
-                    className={`border-2 border-dashed rounded-xl py-7 px-4 flex flex-col items-center justify-center transition-all ${
+                    className={`border-2 border-dashed rounded-lg py-5 px-3.5 flex flex-col items-center justify-center transition-all ${
                         isDragging
                             ? 'border-blue-500 bg-blue-500/10'
                             : 'border-gray-700 bg-gray-850 hover:border-gray-600'
@@ -1250,7 +1250,7 @@ const ImportMode = ({ onDeckUpdate }) => {
 
                 {/* 偵測到的 PDF 內嵌 YouTube 影音展架 */}
                 {detectedPdfVideos.length > 0 && (
-                    <div className="mt-4 p-3.5 sm:p-4 bg-gradient-to-r from-red-950/40 via-purple-950/30 to-gray-900 border border-red-500/40 rounded-xl shadow-xl flex flex-col gap-3.5 animate-fade-in">
+                    <div className="mt-4 p-3.5 sm:p-4 bg-gradient-to-r from-red-950/40 via-purple-950/30 to-gray-900 border border-red-500/40 rounded-lg shadow-xl flex flex-col gap-3.5 animate-fade-in">
                         <div className="flex items-center justify-between pb-2.5 border-b border-gray-800">
                             <div className="flex items-center gap-2.5">
                                 <div className="w-8 h-8 rounded-lg bg-red-600/20 border border-red-500/40 flex items-center justify-center text-red-400">
@@ -1329,7 +1329,7 @@ const ImportMode = ({ onDeckUpdate }) => {
 
             {/* ================= Tab 5: 截圖/黑板圖表認知解構 (支援 Ctrl+V) ================= */}
             {activeTab === 'image' && !extractedData && (
-                <div className="flex flex-col gap-3.5 bg-gray-850 p-4 sm:p-5 rounded-xl border border-gray-800">
+                <div className="flex flex-col gap-3.5 bg-gray-850 p-3.5 sm:p-4 rounded-lg border border-gray-800">
                     <div>
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                             <h3 className="font-bold text-white text-base flex items-center gap-2">
@@ -1345,7 +1345,7 @@ const ImportMode = ({ onDeckUpdate }) => {
                     </div>
 
                     {imagePreview ? (
-                        <div className="flex flex-col md:flex-row gap-3.5 p-3.5 bg-gray-900 rounded-xl border border-emerald-500/30">
+                        <div className="flex flex-col md:flex-row gap-3.5 p-3.5 bg-gray-900 rounded-lg border border-emerald-500/30">
                             <div className="md:w-1/2 flex flex-col items-center justify-center bg-gray-950 rounded-lg p-2 border border-gray-800">
                                 <img
                                     src={imagePreview}
@@ -1396,7 +1396,7 @@ const ImportMode = ({ onDeckUpdate }) => {
                     ) : (
                         <div
                             onClick={() => imageInputRef.current?.click()}
-                            className="border-2 border-dashed border-gray-700 hover:border-emerald-500/60 bg-gray-900/60 hover:bg-emerald-950/10 rounded-xl py-6 px-4 flex flex-col items-center justify-center cursor-pointer transition-all"
+                            className="border-2 border-dashed border-gray-700 hover:border-emerald-500/60 bg-gray-900/60 hover:bg-emerald-950/10 rounded-lg py-5 px-3.5 flex flex-col items-center justify-center cursor-pointer transition-all"
                         >
                             <input
                                 ref={imageInputRef}
@@ -1428,7 +1428,7 @@ const ImportMode = ({ onDeckUpdate }) => {
 
             {/* ================= Tab 6: 開源論文與文獻自動抓取 (arXiv / Europe PMC / PubMed / DOI) ================= */}
             {activeTab === 'paper' && !extractedData && (
-                <div className="flex flex-col gap-3.5 bg-gray-850 p-4 sm:p-5 rounded-xl border border-gray-800">
+                <div className="flex flex-col gap-3.5 bg-gray-850 p-3.5 sm:p-4 rounded-lg border border-gray-800">
                     <div>
                         <h3 className="font-bold text-white text-base flex items-center gap-2">
                             <BookOpenCheck className="w-5 h-5 text-amber-400" /> 貼上開源論文連結、DOI 或 PubMed ID
@@ -1502,7 +1502,7 @@ const ImportMode = ({ onDeckUpdate }) => {
 
                     {/* 論文擷取成果卡片 (Fetched Paper Card) */}
                     {fetchedPaper && (
-                        <div className="p-4 bg-gray-900/90 rounded-xl border border-amber-500/40 flex flex-col gap-3.5 animate-fade-in shadow-xl">
+                        <div className="p-3.5 bg-gray-900/90 rounded-lg border border-amber-500/40 flex flex-col gap-3.5 animate-fade-in shadow-xl">
                             <div className="flex flex-col sm:flex-row justify-between items-start gap-2 border-b border-gray-800 pb-3">
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2 flex-wrap mb-1.5">
@@ -1594,7 +1594,7 @@ const ImportMode = ({ onDeckUpdate }) => {
 
             {/* ================= 預覽與編輯區塊 (Extracted Preview) ================= */}
             {extractedData && (
-                <div className="mt-5 flex flex-col gap-5 bg-gray-850 p-4 sm:p-5 rounded-xl border border-indigo-500/40 shadow-2xl animate-fade-in">
+                <div className="mt-5 flex flex-col gap-5 bg-gray-850 p-3.5 sm:p-4 rounded-lg border border-indigo-500/40 shadow-2xl animate-fade-in">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 pb-3.5 border-b border-gray-700">
                         <div className="flex-1">
                             <span className="text-xs uppercase font-extrabold tracking-widest text-indigo-400 flex items-center gap-1.5">
@@ -1799,7 +1799,7 @@ const ImportMode = ({ onDeckUpdate }) => {
                 </div>
 
                 {storedDecks.length === 0 ? (
-                    <div className="p-6 text-center bg-gray-850/60 rounded-xl border border-gray-800">
+                    <div className="p-4 sm:p-5 text-center bg-gray-850/60 rounded-lg border border-gray-800">
                         <Database className="w-8 h-8 text-gray-600 mx-auto mb-2 opacity-50" />
                         <p className="text-sm font-bold text-gray-400">目前題庫中暫無任何模組</p>
                         <p className="text-xs text-gray-500 mt-1">
@@ -1819,7 +1819,7 @@ const ImportMode = ({ onDeckUpdate }) => {
                         {storedDecks.map((deck) => (
                             <div
                                 key={deck.name}
-                                className="bg-gray-850/90 hover:bg-gray-800 p-3.5 rounded-xl border border-gray-750 hover:border-indigo-500/50 flex flex-col justify-between group transition-all shadow-md"
+                                className="bg-gray-850/90 hover:bg-gray-800 p-3 rounded-lg border border-gray-750 hover:border-indigo-500/50 flex flex-col justify-between group transition-all shadow-md"
                             >
                                 <div>
                                     <div className="flex items-start justify-between gap-2 mb-1.5">
@@ -1872,8 +1872,8 @@ const ImportMode = ({ onDeckUpdate }) => {
 
             {/* ================= 合併模組彈跳視窗 (Merge Modules Modal) ================= */}
             {isMergeModalOpen && (
-                <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fade-in">
-                    <div className="bg-gray-900 border border-indigo-500/40 rounded-xl p-4 sm:p-5 max-w-xl w-full shadow-2xl flex flex-col gap-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-4 animate-fade-in">
+                    <div className="bg-gray-900 border border-indigo-500/40 rounded-lg p-3.5 sm:p-4 max-w-xl w-full shadow-2xl flex flex-col gap-3.5 max-h-[90vh] overflow-y-auto custom-scrollbar">
                         {/* 彈窗頂部 */}
                         <div className="flex justify-between items-start pb-3 border-b border-gray-800">
                             <div>
@@ -2044,7 +2044,7 @@ const ImportMode = ({ onDeckUpdate }) => {
                     onClick={() => setPreviewVideoModal(null)}
                 >
                     <div
-                        className="relative w-full max-w-3xl bg-gray-900 border border-gray-700/80 rounded-xl overflow-hidden shadow-2xl p-3.5 sm:p-4 flex flex-col gap-3"
+                        className="relative w-full max-w-3xl bg-gray-900 border border-gray-700/80 rounded-lg overflow-hidden shadow-2xl p-3 sm:p-3.5 flex flex-col gap-3"
                         onClick={e => e.stopPropagation()}
                     >
                         <div className="flex items-center justify-between pb-2 border-b border-gray-800">

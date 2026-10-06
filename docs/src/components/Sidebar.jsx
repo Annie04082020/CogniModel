@@ -56,7 +56,7 @@ const Sidebar = ({ topics, currentTopic, onSelectTopic, currentMode, onSelectMod
                     {/* Mobile Close Button */}
                     <button
                         onClick={() => setIsOpen(false)}
-                        className="md:hidden text-gray-400 hover:text-white p-1 rounded-lg bg-gray-800 hover:bg-gray-750 transition-colors"
+                        className="md:hidden text-gray-400 hover:text-white p-1 rounded-md bg-gray-800 hover:bg-gray-750 transition-colors"
                         title="關閉選單"
                     >
                         <X size={18} />
@@ -85,7 +85,7 @@ const Sidebar = ({ topics, currentTopic, onSelectTopic, currentMode, onSelectMod
                                             setIsOpen(false);
                                         }}
                                         className={`
-                                            w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} px-2.5 py-2 rounded-lg transition-all
+                                            w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} px-2.5 py-1.5 rounded-md transition-all
                                             ${isActive
                                                 ? 'bg-gradient-to-r from-indigo-600/30 to-purple-600/30 text-indigo-300 border border-indigo-500/30 shadow-md font-bold'
                                                 : 'text-gray-400 hover:bg-gray-800 hover:text-white'}
@@ -186,7 +186,7 @@ const Sidebar = ({ topics, currentTopic, onSelectTopic, currentMode, onSelectMod
                             setIsOpen(false);
                         }}
                         className={`
-                            w-full p-2.5 rounded-lg flex items-center ${isCollapsed ? 'justify-center' : 'gap-2.5'} transition-all 
+                            w-full p-2 rounded-md flex items-center ${isCollapsed ? 'justify-center' : 'gap-2.5'} transition-all 
                             ${currentMode === 'import'
                                 ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg'
                                 : 'hover:bg-gray-800 text-gray-300'}

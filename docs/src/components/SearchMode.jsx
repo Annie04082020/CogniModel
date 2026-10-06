@@ -413,25 +413,25 @@ const SearchMode = () => {
     };
 
     return (
-        <div className="h-full w-full flex flex-col items-center p-4 md:p-8 overflow-y-auto custom-scrollbar">
-            <div className="w-full max-w-5xl space-y-6 animate-fade-in pb-20">
+        <div className="h-full w-full flex flex-col items-center p-2.5 md:p-5 overflow-y-auto custom-scrollbar">
+            <div className="w-full max-w-5xl space-y-4 animate-fade-in pb-16">
 
                 {/* 頂部標題 */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-gray-800 pb-5">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-3 border-b border-gray-800 pb-3">
                     <div>
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/60 border border-emerald-500/30 text-emerald-300 text-xs font-bold mb-2">
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-emerald-950/60 border border-emerald-500/30 text-emerald-300 text-xs font-bold mb-1.5">
                             <Cpu className="w-3.5 h-3.5" /> NTU Smart MHI 全英語跨域特化
                         </div>
-                        <h1 className="text-2xl md:text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400">
+                        <h1 className="text-xl md:text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400">
                             雙語術語工作台 & 熟悉單字小遊戲
                         </h1>
-                        <p className="text-gray-400 text-xs md:text-sm mt-1">
+                        <p className="text-gray-400 text-xs mt-0.5">
                             以電機、資工、機械工程直覺解構生醫全英術語。刷存在感的是看不懂的專有名詞，而非做選擇題。
                         </p>
                     </div>
 
                     {/* 主次分頁切換按鈕 */}
-                    <div className="flex bg-gray-900 p-1 rounded-lg border border-gray-800">
+                    <div className="flex bg-gray-900 p-1 rounded-md border border-gray-800">
                         <button
                             onClick={() => setSubTab('list')}
                             className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 ${
@@ -552,7 +552,7 @@ const SearchMode = () => {
                                 return (
                                     <div
                                         key={idx}
-                                        className="bg-gray-850 hover:bg-gray-800 border border-gray-750 hover:border-gray-700 rounded-xl p-3.5 sm:p-4 transition-all shadow-sm flex flex-col justify-between group"
+                                        className="bg-gray-850 hover:bg-gray-800 border border-gray-750 hover:border-gray-700 rounded-lg p-3 sm:p-3.5 transition-all shadow-sm flex flex-col justify-between group"
                                     >
                                         <div>
                                             <div className="flex items-start justify-between gap-3">
@@ -621,8 +621,8 @@ const SearchMode = () => {
 
                 {/* ================= MODE 2: 理工生醫連連看 (Match Game) ================= */}
                 {subTab === 'matchGame' && (
-                    <div className="bg-gray-850 p-4 sm:p-5 rounded-xl border border-gray-800 shadow-xl flex flex-col gap-4 animate-fade-in">
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5 border-b border-gray-750 pb-3">
+                    <div className="bg-gray-850 p-3.5 sm:p-4 rounded-lg border border-gray-800 shadow-xl flex flex-col gap-3.5 animate-fade-in">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-gray-750 pb-2.5">
                             <div>
                                 <div className="flex items-center gap-2">
                                     <Zap className="w-4 h-4 text-yellow-400" />
@@ -639,7 +639,7 @@ const SearchMode = () => {
                                 </span>
                                 <button
                                     onClick={resetMatchGame}
-                                    className="px-3 py-1 rounded-lg bg-gray-800 hover:bg-gray-750 text-gray-300 text-xs font-semibold transition-all flex items-center gap-1"
+                                    className="px-2.5 py-1 rounded-md bg-gray-800 hover:bg-gray-750 text-gray-300 text-xs font-semibold transition-all flex items-center gap-1"
                                 >
                                     <RotateCcw className="w-3.5 h-3.5" /> 換一輪
                                 </button>
@@ -648,15 +648,15 @@ const SearchMode = () => {
 
                         {/* 配對遊戲主盤 */}
                         {matchedPairs.size === currentMatchPool.total ? (
-                            <div className="py-8 flex flex-col items-center justify-center text-center gap-3 bg-emerald-950/20 rounded-xl border border-emerald-500/30 animate-fade-in">
-                                <Award className="w-12 h-12 text-yellow-400 animate-bounce" />
-                                <h3 className="text-xl font-bold text-emerald-300">🎉 本輪全數配對成功！</h3>
+                            <div className="py-6 flex flex-col items-center justify-center text-center gap-2.5 bg-emerald-950/20 rounded-lg border border-emerald-500/30 animate-fade-in">
+                                <Award className="w-10 h-10 text-yellow-400 animate-bounce" />
+                                <h3 className="text-lg font-bold text-emerald-300">🎉 本輪全數配對成功！</h3>
                                 <p className="text-xs text-gray-300 max-w-md">
                                     太棒了！您已經能將這些全英文學術名詞，瞬間映射到相應的電氣、控制與資訊系統模型！
                                 </p>
                                 <button
                                     onClick={resetMatchGame}
-                                    className="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition-all flex items-center gap-1.5"
+                                    className="px-4 py-1.5 rounded-md bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition-all flex items-center gap-1.5"
                                 >
                                     <span>挑戰下一輪新術語</span>
                                     <ArrowRight className="w-3.5 h-3.5" />
@@ -745,7 +745,7 @@ const SearchMode = () => {
 
                 {/* ================= MODE 3: 詞根解構拼圖小遊戲 (Etymology Slicer) ================= */}
                 {subTab === 'etymologyGame' && (
-                    <div className="bg-gray-850 p-4 sm:p-5 rounded-xl border border-gray-800 shadow-xl flex flex-col gap-4 animate-fade-in">
+                    <div className="bg-gray-850 p-3.5 sm:p-4 rounded-lg border border-gray-800 shadow-xl flex flex-col gap-3.5 animate-fade-in">
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5 border-b border-gray-750 pb-3">
                             <div>
                                 <div className="flex items-center gap-2">

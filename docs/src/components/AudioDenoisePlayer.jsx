@@ -159,24 +159,24 @@ const AudioDenoisePlayer = ({ file, onConfirmDenoised, isAnalyzing }) => {
     };
 
     return (
-        <div className="bg-gray-900/95 p-4 sm:p-5 rounded-xl border border-purple-500/30 shadow-2xl flex flex-col gap-4 animate-fade-in">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-gray-800">
-                <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-lg bg-purple-500/20 text-purple-300 flex items-center justify-center border border-purple-500/30">
+        <div className="bg-gray-900/95 p-3.5 sm:p-4 rounded-lg border border-purple-500/30 shadow-2xl flex flex-col gap-3.5 animate-fade-in">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5 pb-2.5 border-b border-gray-800">
+                <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-md bg-purple-500/20 text-purple-300 flex items-center justify-center border border-purple-500/30">
                         <Headphones className="w-4 h-4" />
                     </div>
                     <div>
-                        <h4 className="text-white font-bold text-sm flex items-center gap-2">
+                        <h4 className="text-white font-bold text-xs sm:text-sm flex items-center gap-2">
                             <span>錄音降噪與人聲增強監聽室</span>
                         </h4>
-                        <p className="text-xs text-gray-400">
+                        <p className="text-[11px] text-gray-400">
                             檔案：{file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
                         </p>
                     </div>
                 </div>
 
                 {/* 降噪模式切換紐 */}
-                <div className="flex items-center gap-1.5 bg-gray-800/90 p-1 rounded-lg border border-gray-700/60">
+                <div className="flex items-center gap-1 bg-gray-800/90 p-1 rounded-md border border-gray-700/60">
                     <button
                         onClick={toggleDenoise}
                         className={`px-3 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 ${
@@ -230,7 +230,7 @@ const AudioDenoisePlayer = ({ file, onConfirmDenoised, isAnalyzing }) => {
                 </div>
 
                 {/* 聲學指示器提示 */}
-                <div className="flex justify-between items-center text-xs text-gray-400 bg-gray-850 px-3 py-1.5 rounded-lg border border-gray-800">
+                <div className="flex justify-between items-center text-xs text-gray-400 bg-gray-850 px-3 py-1.5 rounded-md border border-gray-800">
                     <span className="flex items-center gap-1.5">
                         <span className={`w-2 h-2 rounded-full ${isDenoiseActive ? 'bg-emerald-400 animate-pulse' : 'bg-gray-500'}`}></span>
                         {isDenoiseActive ? "已啟用：高通濾波 (切除空調轟鳴) + 2.2kHz 人聲共振增強" : "播放中：原始無濾波原音"}
@@ -269,7 +269,7 @@ const AudioDenoisePlayer = ({ file, onConfirmDenoised, isAnalyzing }) => {
                 <button
                     disabled={isRendering || isAnalyzing}
                     onClick={handleConfirmAndProcess}
-                    className="w-full sm:w-auto px-5 py-2 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs sm:text-sm shadow-md transition-all flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98]"
+                    className="w-full sm:w-auto px-4 py-1.5 rounded-md bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs sm:text-sm shadow-md transition-all flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99]"
                 >
                     {isRendering || isAnalyzing ? (
                         <>

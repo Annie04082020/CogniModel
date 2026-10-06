@@ -173,9 +173,9 @@ const UnderstandMode = ({ cards, topic, onExit, onOpenImport }) => {
     const currentBlindspot = mythBusters[currentBlindspotIdx];
 
     return (
-        <div className="w-full max-w-5xl h-full flex flex-col p-2.5 sm:p-4 md:p-6 overflow-y-auto custom-scrollbar">
+        <div className="w-full max-w-5xl h-full flex flex-col p-2 sm:p-3 md:p-4 overflow-y-auto custom-scrollbar">
             {/* 頂部心智推演標題列 */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2.5 sm:gap-3 mb-3.5 sm:mb-4 bg-gray-900/80 p-3 sm:p-3.5 rounded-xl border border-gray-800">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 sm:gap-2.5 mb-3 bg-gray-900/80 p-2.5 sm:p-3 rounded-lg border border-gray-800">
                 <div>
                     <div className="flex items-center gap-2 flex-wrap">
                         <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-purple-500/15 text-purple-300 border border-purple-500/20">
@@ -191,7 +191,7 @@ const UnderstandMode = ({ cards, topic, onExit, onOpenImport }) => {
                 </div>
 
                 {/* 模式切換按鈕 (行動端支援順暢橫向滑動) */}
-                <div className="flex items-center bg-gray-850 p-1 rounded-lg border border-gray-800 overflow-x-auto no-scrollbar flex-nowrap w-full md:w-auto shrink-0">
+                <div className="flex items-center bg-gray-850 p-1 rounded-md border border-gray-800 overflow-x-auto no-scrollbar flex-nowrap w-full md:w-auto shrink-0">
                     {mechanismChains.length > 0 && (
                         <button
                             onClick={() => { setSubMode('chain'); setIsPerturbationApplied(false); }}
@@ -240,8 +240,8 @@ const UnderstandMode = ({ cards, topic, onExit, onOpenImport }) => {
 
             {/* ================= 模式 1：因果骨牌鏈與干擾模擬 (Mechanism Flow) ================= */}
             {subMode === 'chain' && currentChain && (
-                <div className="flex-1 flex flex-col gap-4 animate-fade-in">
-                    <div className="bg-gray-850 p-4 sm:p-5 rounded-xl border border-gray-800 shadow-lg flex flex-col gap-4">
+                <div className="flex-1 flex flex-col gap-3.5 animate-fade-in">
+                    <div className="bg-gray-850 p-3.5 sm:p-4 rounded-lg border border-gray-800 shadow-lg flex flex-col gap-3.5">
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pb-3 border-b border-gray-800">
                             <div>
                                 <span className="text-[11px] uppercase font-bold tracking-wider text-blue-400 flex items-center gap-1.5">
@@ -306,7 +306,7 @@ const UnderstandMode = ({ cards, topic, onExit, onOpenImport }) => {
 
                         {/* 干擾變數推演區域 (Perturbation Challenge) */}
                         {currentChain.perturbation && (
-                            <div className="mt-1 p-3.5 sm:p-4 bg-gray-900 rounded-xl border border-gray-800 flex flex-col gap-3">
+                            <div className="mt-1 p-3 sm:p-3.5 bg-gray-900 rounded-lg border border-gray-800 flex flex-col gap-2.5">
                                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                                     <div className="flex items-center gap-2 text-purple-300">
                                         <AlertTriangle className="w-4 h-4 text-yellow-400" />
@@ -317,7 +317,7 @@ const UnderstandMode = ({ cards, topic, onExit, onOpenImport }) => {
 
                                     <button
                                         onClick={() => setIsPerturbationApplied(!isPerturbationApplied)}
-                                        className={`px-3.5 py-1.5 rounded-lg font-bold text-xs transition-all flex items-center gap-1.5 shadow-sm ${
+                                        className={`px-3 py-1.5 rounded-md font-bold text-xs transition-all flex items-center gap-1.5 shadow-sm ${
                                             isPerturbationApplied
                                                 ? 'bg-rose-600 hover:bg-rose-500 text-white'
                                                 : 'bg-amber-500 hover:bg-amber-400 text-gray-950'
@@ -328,7 +328,7 @@ const UnderstandMode = ({ cards, topic, onExit, onOpenImport }) => {
                                     </button>
                                 </div>
 
-                                <div className="bg-gray-850 p-3 rounded-lg border border-gray-800 text-xs sm:text-sm leading-relaxed text-gray-200">
+                                <div className="bg-gray-850 p-2.5 rounded-md border border-gray-800 text-xs sm:text-sm leading-relaxed text-gray-200">
                                     <span className="text-[11px] font-bold text-amber-400 block mb-0.5">外在干擾情境：</span>
                                     {currentChain.perturbation.condition}
                                 </div>
@@ -339,7 +339,7 @@ const UnderstandMode = ({ cards, topic, onExit, onOpenImport }) => {
                                             initial={{ opacity: 0, height: 0 }}
                                             animate={{ opacity: 1, height: 'auto' }}
                                             exit={{ opacity: 0, height: 0 }}
-                                            className="p-3 bg-rose-950/25 rounded-lg border border-rose-500/40 text-rose-200 text-xs sm:text-sm leading-relaxed flex flex-col gap-2"
+                                            className="p-2.5 bg-rose-950/25 rounded-md border border-rose-500/40 text-rose-200 text-xs sm:text-sm leading-relaxed flex flex-col gap-2"
                                         >
                                             <div className="font-bold text-rose-300 flex items-center gap-1.5 text-xs sm:text-sm">
                                                 <XCircle className="w-3.5 h-3.5 text-rose-400" />
@@ -359,13 +359,13 @@ const UnderstandMode = ({ cards, topic, onExit, onOpenImport }) => {
 
             {/* ================= 模式 2：蘇格拉底深度探究 (Socratic Inquiry) ================= */}
             {subMode === 'socratic' && currentSocratic && (
-                <div className="flex-1 flex flex-col items-center justify-center max-w-2xl mx-auto w-full gap-4 animate-fade-in">
+                <div className="flex-1 flex flex-col items-center justify-center max-w-2xl mx-auto w-full gap-3.5 animate-fade-in">
                     <div className="w-full flex justify-between items-center text-xs text-gray-400">
                         <span>蘇格拉底探究 {currentSocraticIdx + 1} / {socraticQuestions.length}</span>
                         <span>思維階梯</span>
                     </div>
 
-                    <div className="w-full bg-gray-850 p-4 sm:p-5 md:p-6 rounded-xl border border-gray-800 shadow-xl relative overflow-hidden flex flex-col gap-4">
+                    <div className="w-full bg-gray-850 p-3.5 sm:p-4.5 rounded-lg border border-gray-800 shadow-xl relative overflow-hidden flex flex-col gap-3.5">
                         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 to-indigo-500"></div>
 
                         <div>
@@ -462,7 +462,7 @@ const UnderstandMode = ({ cards, topic, onExit, onOpenImport }) => {
                         <span>打破直覺陷阱</span>
                     </div>
 
-                    <div className="w-full bg-gray-850 p-4 sm:p-5 md:p-6 rounded-xl border border-gray-800 shadow-xl relative overflow-hidden flex flex-col gap-4">
+                    <div className="w-full bg-gray-850 p-3.5 sm:p-4.5 rounded-lg border border-gray-800 shadow-xl relative overflow-hidden flex flex-col gap-3.5">
                         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-yellow-500 to-amber-500"></div>
                         <span className="text-[11px] uppercase font-bold tracking-wider text-amber-400 block mb-0.5">
                             {currentBlindspot.concept || "概念推演校準"}
@@ -471,11 +471,11 @@ const UnderstandMode = ({ cards, topic, onExit, onOpenImport }) => {
                             「{currentBlindspot.statement}」
                         </h3>
 
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-2 gap-2.5">
                             <button
                                 disabled={showBlindspotAnalysis}
                                 onClick={() => handleBlindspotAnswer(true)}
-                                className={`py-2.5 sm:py-3 px-4 rounded-lg font-bold text-xs sm:text-sm border transition-all flex items-center justify-center gap-2 ${
+                                className={`py-2 sm:py-2.5 px-3 rounded-md font-bold text-xs sm:text-sm border transition-all flex items-center justify-center gap-1.5 ${
                                     showBlindspotAnalysis
                                         ? currentBlindspot.isCorrect === true
                                             ? 'bg-emerald-600 border-emerald-400 text-white'
@@ -491,7 +491,7 @@ const UnderstandMode = ({ cards, topic, onExit, onOpenImport }) => {
                             <button
                                 disabled={showBlindspotAnalysis}
                                 onClick={() => handleBlindspotAnswer(false)}
-                                className={`py-2.5 sm:py-3 px-4 rounded-lg font-bold text-xs sm:text-sm border transition-all flex items-center justify-center gap-2 ${
+                                className={`py-2 sm:py-2.5 px-3 rounded-md font-bold text-xs sm:text-sm border transition-all flex items-center justify-center gap-1.5 ${
                                     showBlindspotAnalysis
                                         ? currentBlindspot.isCorrect === false
                                             ? 'bg-emerald-600 border-emerald-400 text-white'
@@ -509,7 +509,7 @@ const UnderstandMode = ({ cards, topic, onExit, onOpenImport }) => {
                             <motion.div
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="p-3.5 sm:p-4 bg-gray-900 rounded-lg border border-gray-750 text-xs sm:text-sm flex flex-col gap-2.5"
+                                className="p-3 sm:p-3.5 bg-gray-900 rounded-md border border-gray-750 text-xs sm:text-sm flex flex-col gap-2"
                             >
                                 <span className="font-bold text-indigo-300 text-xs uppercase tracking-wider">
                                     💡 深度心智邏輯剖析
@@ -519,7 +519,7 @@ const UnderstandMode = ({ cards, topic, onExit, onOpenImport }) => {
                                 </p>
                                 <button
                                     onClick={nextBlindspot}
-                                    className="self-end px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg text-xs flex items-center gap-1.5 transition-all"
+                                    className="self-end px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-md text-xs flex items-center gap-1.5 transition-all"
                                 >
                                     下一項盲點校準 ➔
                                 </button>
@@ -531,8 +531,8 @@ const UnderstandMode = ({ cards, topic, onExit, onOpenImport }) => {
 
             {/* ================= 模式 4：基礎因果連連看 (Logic Match) ================= */}
             {subMode === 'match' && logicPairs.length > 0 && (
-                <div className="flex-1 flex flex-col gap-4 animate-fade-in">
-                    <div className="bg-gray-850 p-3 sm:p-3.5 rounded-xl border border-gray-800 flex justify-between items-center">
+                <div className="flex-1 flex flex-col gap-3.5 animate-fade-in">
+                    <div className="bg-gray-850 p-2.5 sm:p-3 rounded-lg border border-gray-800 flex justify-between items-center">
                         <div className="flex items-center gap-2.5">
                             <Lightbulb className="w-4 h-4 text-indigo-400 shrink-0" />
                             <p className="text-xs sm:text-sm text-gray-300">

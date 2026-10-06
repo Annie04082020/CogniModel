@@ -42,16 +42,16 @@ const StatsMode = () => {
     const weakTopics = lastSessionDetails.length > 0 ? lastSessionDetails.find(s => !s.isCorrect)?.source : "None Yet";
 
     return (
-        <div className="w-full h-full flex flex-col p-4 sm:p-5 overflow-y-auto custom-scrollbar">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-green-500 shrink-0">
+        <div className="w-full h-full flex flex-col p-3 sm:p-4 overflow-y-auto custom-scrollbar">
+            <h2 className="text-xl sm:text-2xl font-bold mb-3.5 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-green-500 shrink-0">
                 Performance Stats
             </h2>
 
             {/* Key Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 mb-5 shrink-0">
-                <div className="bg-gray-800 p-3.5 sm:p-4 rounded-xl border border-gray-700 flex items-center gap-3.5 shadow-lg">
-                    <div className="p-2.5 bg-blue-600/20 text-blue-400 rounded-lg">
-                        <TrendingUp size={20} />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 shrink-0">
+                <div className="bg-gray-800 p-3 sm:p-3.5 rounded-lg border border-gray-700 flex items-center gap-3 shadow-md">
+                    <div className="p-2 bg-blue-600/20 text-blue-400 rounded-md">
+                        <TrendingUp size={18} />
                     </div>
                     <div>
                         <p className="text-gray-400 text-xs">Games Played</p>
@@ -59,9 +59,9 @@ const StatsMode = () => {
                     </div>
                 </div>
 
-                <div className="bg-gray-800 p-3.5 sm:p-4 rounded-xl border border-gray-700 flex items-center gap-3.5 shadow-lg">
-                    <div className="p-2.5 bg-purple-600/20 text-purple-400 rounded-lg">
-                        <BarChart2 size={20} />
+                <div className="bg-gray-800 p-3 sm:p-3.5 rounded-lg border border-gray-700 flex items-center gap-3 shadow-md">
+                    <div className="p-2 bg-purple-600/20 text-purple-400 rounded-md">
+                        <BarChart2 size={18} />
                     </div>
                     <div>
                         <p className="text-gray-400 text-xs">Average Score</p>
@@ -69,30 +69,30 @@ const StatsMode = () => {
                     </div>
                 </div>
 
-                <div className="bg-gray-800 p-3.5 sm:p-4 rounded-xl border border-gray-700 flex items-center gap-3.5 shadow-lg">
-                    <div className="p-2.5 bg-red-600/20 text-red-400 rounded-lg">
-                        <AlertCircle size={20} />
+                <div className="bg-gray-800 p-3 sm:p-3.5 rounded-lg border border-gray-700 flex items-center gap-3 shadow-md">
+                    <div className="p-2 bg-red-600/20 text-red-400 rounded-md">
+                        <AlertCircle size={18} />
                     </div>
                     <div>
                         <p className="text-gray-400 text-xs">Weakest Source</p>
-                        <p className="text-lg sm:text-xl font-bold text-white truncate max-w-[150px]" title="Play more to detect">
+                        <p className="text-base sm:text-lg font-bold text-white truncate max-w-[150px]" title="Play more to detect">
                             {weakTopics || "None Yet"}
                         </p>
                     </div>
                 </div>
             </div>
 
-            <div className="flex flex-col lg:flex-row gap-4 sm:gap-5 flex-1 min-h-0">
+            <div className="flex flex-col lg:flex-row gap-3.5 flex-1 min-h-0">
                 {/* History List */}
-                <div className="lg:w-1/3 bg-gray-800 rounded-xl border border-gray-700 flex flex-col overflow-hidden max-h-[500px]">
-                    <div className="p-3.5 sm:p-4 border-b border-gray-700 bg-gray-800 shrink-0">
-                        <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-                            <Clock size={18} className="text-gray-400" />
+                <div className="lg:w-1/3 bg-gray-800 rounded-lg border border-gray-700 flex flex-col overflow-hidden max-h-[500px]">
+                    <div className="p-3 sm:p-3.5 border-b border-gray-700 bg-gray-800 shrink-0">
+                        <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+                            <Clock size={16} className="text-gray-400" />
                             History
                         </h3>
                         <p className="text-xs text-gray-500 mt-0.5">Click to view details</p>
                     </div>
-                    <div className="overflow-y-auto p-3 space-y-2 flex-1 custom-scrollbar">
+                    <div className="overflow-y-auto p-2.5 space-y-1.5 flex-1 custom-scrollbar">
                         {stats.history.length === 0 ? (
                             <p className="text-gray-500 text-center py-4 text-xs">No games played yet.</p>
                         ) : (
@@ -103,7 +103,7 @@ const StatsMode = () => {
                                     <button
                                         key={realIdx}
                                         onClick={() => setSelectedGameIdx(realIdx)}
-                                        className={`w-full flex justify-between items-center p-3 rounded-lg transition-all border text-xs
+                                        className={`w-full flex justify-between items-center p-2.5 rounded-md transition-all border text-xs
                                             ${isSelected
                                                 ? 'bg-blue-600/20 border-blue-500 ring-1 ring-blue-500/50'
                                                 : 'bg-gray-900/50 border-gray-700 hover:bg-gray-700 hover:border-gray-500'}
@@ -126,10 +126,10 @@ const StatsMode = () => {
                 </div>
 
                 {/* Breakdown Table */}
-                <div className="lg:w-2/3 bg-gray-800 rounded-xl border border-gray-700 flex flex-col overflow-hidden max-h-[500px]">
-                    <div className="p-3.5 sm:p-4 border-b border-gray-700 bg-gray-800 shrink-0 flex justify-between items-center">
-                        <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-                            <CheckCircle size={18} className="text-green-400" />
+                <div className="lg:w-2/3 bg-gray-800 rounded-lg border border-gray-700 flex flex-col overflow-hidden max-h-[500px]">
+                    <div className="p-3 sm:p-3.5 border-b border-gray-700 bg-gray-800 shrink-0 flex justify-between items-center">
+                        <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+                            <CheckCircle size={16} className="text-green-400" />
                             {selectedGame ? "Game Breakdown" : "Last Session Result"}
                         </h3>
                         {selectedGameIdx !== null && (

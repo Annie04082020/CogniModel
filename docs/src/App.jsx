@@ -107,7 +107,7 @@ function App() {
                     </p>
                     <button
                         onClick={() => setCurrentMode('import')}
-                        className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl text-white font-bold hover:scale-105 transition-all shadow-lg shadow-indigo-500/20"
+                        className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg text-white font-bold hover:scale-105 transition-all shadow-lg shadow-indigo-500/20 text-xs sm:text-sm"
                     >
                         前往知識匯入中心
                     </button>
@@ -119,7 +119,7 @@ function App() {
     const renderContent = () => {
         if (currentMode === 'understand') {
             return (
-                <div className="flex-grow flex items-center justify-center p-4 relative w-full h-full overflow-hidden">
+                <div className="flex-grow flex items-center justify-center p-2 sm:p-3 relative w-full h-full overflow-hidden">
                     <UnderstandMode
                         key={currentTopic}
                         cards={filteredCards}
@@ -131,7 +131,7 @@ function App() {
         }
         if (currentMode === 'reader') {
             return (
-                <div className="flex-grow flex items-center justify-center p-2 relative w-full h-full overflow-hidden">
+                <div className="flex-grow flex items-center justify-center p-1.5 sm:p-2 relative w-full h-full overflow-hidden">
                     <ReaderMode
                         key={currentTopic}
                         cards={filteredCards}
@@ -142,7 +142,7 @@ function App() {
         }
         if (currentMode === 'review') {
             return (
-                <div className="flex-grow flex items-center justify-center p-4 relative w-full h-full overflow-hidden">
+                <div className="flex-grow flex items-center justify-center p-2 sm:p-3 relative w-full h-full overflow-hidden">
                     {filteredCards.length > 0 ? (
                         <Deck key={currentTopic} cards={filteredCards} />
                     ) : (
@@ -205,7 +205,7 @@ function App() {
                     <div className="flex items-center gap-2.5">
                         <button
                             onClick={() => setIsSidebarOpen(true)}
-                            className="p-1.5 rounded-lg bg-gray-800 hover:bg-gray-750 text-gray-200 hover:text-white transition-colors border border-gray-750 active:scale-95"
+                            className="p-1.5 rounded-md bg-gray-800 hover:bg-gray-750 text-gray-200 hover:text-white transition-colors border border-gray-750 active:scale-95"
                             aria-label="打開選單"
                         >
                             <Menu size={18} />
@@ -222,7 +222,7 @@ function App() {
 
                     <button
                         onClick={() => setIsSidebarOpen(true)}
-                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-gray-800/90 border border-gray-750 text-xs text-gray-300 hover:text-white max-w-[140px] truncate shadow-sm active:scale-95"
+                        className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-gray-800/90 border border-gray-750 text-xs text-gray-300 hover:text-white max-w-[140px] truncate shadow-sm active:scale-95"
                         title="切換牌組或主題"
                     >
                         <Layers className="w-3 h-3 text-indigo-400 shrink-0" />

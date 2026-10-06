@@ -256,12 +256,12 @@ const QuizMode = ({ cards, allCards, topic, onExit }) => {
 
     if (gameState === 'menu') {
         return (
-            <div className="flex flex-col items-center justify-center p-5 sm:p-6 space-y-6 text-center w-full max-w-2xl bg-gray-800/50 rounded-xl border border-gray-700 shadow-2xl backdrop-blur-sm m-auto">
-                <div className="space-y-1.5">
-                    <h2 className="text-3xl sm:text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
+            <div className="flex flex-col items-center justify-center p-4 sm:p-5 space-y-4 text-center w-full max-w-2xl bg-gray-800/50 rounded-lg border border-gray-700 shadow-xl backdrop-blur-sm m-auto">
+                <div className="space-y-1">
+                    <h2 className="text-2xl sm:text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
                         Quiz Challenge
                     </h2>
-                    <p className="text-gray-400 text-sm sm:text-base">Test your knowledge</p>
+                    <p className="text-gray-400 text-xs sm:text-sm">Test your knowledge</p>
                 </div>
                 {/* Length and Timer Settings remain same */}
                 <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-3.5">
@@ -337,13 +337,13 @@ const QuizMode = ({ cards, allCards, topic, onExit }) => {
 
     if (gameState === 'result') {
         return (
-            <div className="flex flex-col items-center justify-center p-6 space-y-4 text-center animate-fade-in bg-gray-900/90 rounded-xl border border-gray-800 max-w-md mx-auto">
-                <h2 className="text-2xl font-bold text-white">Game Over!</h2>
-                <div className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-red-500">{score}</div>
-                <p className="text-gray-400 text-sm">Final Score</p>
-                <div className="flex gap-3">
-                    <button onClick={() => setGameState('menu')} className="px-5 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-white font-medium text-xs sm:text-sm">Menu</button>
-                    <button onClick={startGame} className="px-5 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-white font-medium text-xs sm:text-sm">Play Again</button>
+            <div className="flex flex-col items-center justify-center p-4 sm:p-5 space-y-3 text-center animate-fade-in bg-gray-900/90 rounded-lg border border-gray-800 max-w-md mx-auto">
+                <h2 className="text-xl font-bold text-white">Game Over!</h2>
+                <div className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-red-500">{score}</div>
+                <p className="text-gray-400 text-xs">Final Score</p>
+                <div className="flex gap-2.5">
+                    <button onClick={() => setGameState('menu')} className="px-4 py-1.5 bg-gray-700 hover:bg-gray-600 rounded-md text-white font-medium text-xs sm:text-sm">Menu</button>
+                    <button onClick={startGame} className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 rounded-md text-white font-medium text-xs sm:text-sm">Play Again</button>
                 </div>
             </div>
         );
@@ -357,12 +357,12 @@ const QuizMode = ({ cards, allCards, topic, onExit }) => {
                 <div className="flex flex-col items-end"><span className="text-[11px] text-gray-500 uppercase font-bold">Score</span><span className="text-base sm:text-lg font-bold text-yellow-500">{score}</span></div>
             </div>
 
-            <div className="flex-1 flex flex-col lg:flex-row gap-6 items-center justify-center w-full">
-                <div className="flex-1 w-full max-w-2xl aspect-video lg:h-[480px] bg-gray-900 rounded-xl overflow-hidden shadow-2xl ring-1 ring-gray-700 relative group flex items-center justify-center p-4 sm:p-5">
+            <div className="flex-1 flex flex-col lg:flex-row gap-4 sm:gap-5 items-center justify-center w-full">
+                <div className="flex-1 w-full max-w-2xl aspect-video lg:h-[480px] bg-gray-900 rounded-lg overflow-hidden shadow-xl ring-1 ring-gray-700 relative group flex items-center justify-center p-3 sm:p-3.5">
                     {currentQuestion.imagePath ? (
                         <img src={currentQuestion.imagePath} alt="Quiz Question" className="w-full h-full object-contain" />
                     ) : (
-                        <div className="w-full h-full flex flex-col justify-between p-3.5 md:p-6 bg-gradient-to-br from-gray-900 via-gray-850 to-gray-900 rounded-lg border border-gray-750">
+                        <div className="w-full h-full flex flex-col justify-between p-3 md:p-4 bg-gradient-to-br from-gray-900 via-gray-850 to-gray-900 rounded-md border border-gray-750">
                             <div>
                                 <span className="text-xs uppercase font-extrabold tracking-widest text-indigo-400 block mb-1.5">
                                     {currentQuestion.source || "概念測驗"}
@@ -446,7 +446,7 @@ const QuizMode = ({ cards, allCards, topic, onExit }) => {
                                 }
                             }
                             return (
-                                <button key={idx} disabled={gameState === 'feedback'} onClick={() => handleAnswer(option)} className={`w-full p-3.5 sm:p-4 rounded-lg text-left border transition-all duration-200 shadow-md ${btnClass} ${gameState !== 'feedback' ? 'hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0' : ''}`}>
+                                <button key={idx} disabled={gameState === 'feedback'} onClick={() => handleAnswer(option)} className={`w-full p-2.5 sm:p-3 rounded-md text-left border transition-all duration-200 shadow-sm ${btnClass} ${gameState !== 'feedback' ? 'hover:-translate-y-0.5 hover:shadow-md active:translate-y-0' : ''}`}>
                                     <span className="text-xs sm:text-sm font-bold block">{option.title}</span>
                                 </button>
                             );

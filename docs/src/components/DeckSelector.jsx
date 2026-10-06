@@ -7,10 +7,10 @@ const DeckSelector = ({ topics, currentTopic, onSelectTopic }) => {
                 <button
                     onClick={() => onSelectTopic("All")}
                     className={`
-                        px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all duration-300
+                        px-3 py-1 rounded-md whitespace-nowrap text-xs font-semibold transition-all duration-200
                         ${currentTopic === "All"
-                            ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30 ring-2 ring-blue-400/50"
-                            : "bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-gray-200"}
+                            ? "bg-blue-600 text-white shadow-md shadow-blue-500/20 ring-1 ring-blue-400/50"
+                            : "bg-gray-800 text-gray-400 hover:bg-gray-750 hover:text-gray-200"}
                     `}
                 >
                     All Cards
@@ -20,10 +20,10 @@ const DeckSelector = ({ topics, currentTopic, onSelectTopic }) => {
                         key={topic}
                         onClick={() => onSelectTopic(topic)}
                         className={`
-                            px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all duration-300
+                            px-3 py-1 rounded-md whitespace-nowrap text-xs font-semibold transition-all duration-200
                             ${currentTopic === topic
-                                ? "bg-purple-600 text-white shadow-lg shadow-purple-500/30 ring-2 ring-purple-400/50"
-                                : "bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-gray-200"}
+                                ? "bg-purple-600 text-white shadow-md shadow-purple-500/20 ring-1 ring-purple-400/50"
+                                : "bg-gray-800 text-gray-400 hover:bg-gray-750 hover:text-gray-200"}
                         `}
                     >
                         {topic}
